@@ -22,6 +22,10 @@ class CompanionViewModel(
     val discoveredMacs: StateFlow<List<DiscoveredMac>> = repository.discoveredMacs
     val isDiscovering: StateFlow<Boolean> = repository.isDiscovering
     val keepScreenAwake: StateFlow<Boolean> = repository.keepScreenAwake
+    val hasSeenOnboarding: StateFlow<Boolean> = repository.hasSeenOnboarding
+
+    private val _showTutorialDialog = MutableStateFlow(!repository.hasSeenOnboarding.value)
+    val showTutorialDialog: StateFlow<Boolean> = _showTutorialDialog.asStateFlow()
 
     private val _selectedClip = MutableStateFlow<CompanionClipSummary?>(null)
     val selectedClip: StateFlow<CompanionClipSummary?> = _selectedClip.asStateFlow()
@@ -31,6 +35,15 @@ class CompanionViewModel(
 
     private val _manualPort = MutableStateFlow(repository.getLastConnectedPort().toString())
     val manualPort: StateFlow<String> = _manualPort.asStateFlow()
+
+    fun openTutorial() {
+        _showTutorialDialog.value = true
+    }
+
+    fun dismissTutorial() {
+        _showTutorialDialog.value = false
+        repository.setHasSeenOnboarding(true)
+    }
 
     init {
         repository.startDiscovery()

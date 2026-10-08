@@ -32,6 +32,7 @@ class CompanionRepository(
         private const val KEY_LAST_HOST = "last_host"
         private const val KEY_LAST_PORT = "last_port"
         private const val KEY_KEEP_AWAKE = "keep_awake"
+        private const val KEY_HAS_SEEN_ONBOARDING = "has_seen_onboarding"
     }
 
     private val prefs: SharedPreferences =
@@ -75,6 +76,9 @@ class CompanionRepository(
     private val _keepScreenAwake = MutableStateFlow(prefs.getBoolean(KEY_KEEP_AWAKE, false))
     val keepScreenAwake: StateFlow<Boolean> = _keepScreenAwake.asStateFlow()
 
+    private val _hasSeenOnboarding = MutableStateFlow(prefs.getBoolean(KEY_HAS_SEEN_ONBOARDING, false))
+    val hasSeenOnboarding: StateFlow<Boolean> = _hasSeenOnboarding.asStateFlow()
+
     init {
         scope.launch {
             wsClient.events.collect { event ->
@@ -89,6 +93,11 @@ class CompanionRepository(
     fun setKeepScreenAwake(enabled: Boolean) {
         _keepScreenAwake.value = enabled
         prefs.edit().putBoolean(KEY_KEEP_AWAKE, enabled).apply()
+    }
+
+    fun setHasSeenOnboarding(seen: Boolean) {
+        _hasSeenOnboarding.value = seen
+        prefs.edit().putBoolean(KEY_HAS_SEEN_ONBOARDING, seen).apply()
     }
 
     fun startDiscovery() {

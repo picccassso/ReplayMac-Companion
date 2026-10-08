@@ -14,6 +14,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.replaymac.companion.data.model.ConnectionState
+import com.replaymac.companion.ui.components.OnboardingDialog
 import com.replaymac.companion.ui.screens.ClipDetailsBottomSheet
 import com.replaymac.companion.ui.screens.ConnectionScreen
 import com.replaymac.companion.ui.screens.HomeScreen
@@ -65,6 +66,7 @@ fun CompanionAppContent(viewModel: CompanionViewModel) {
     val selectedClip by viewModel.selectedClip.collectAsState()
     val manualHost by viewModel.manualHost.collectAsState()
     val manualPort by viewModel.manualPort.collectAsState()
+    val showTutorialDialog by viewModel.showTutorialDialog.collectAsState()
 
     BackHandler(enabled = connectionState is ConnectionState.Connected && selectedClip == null) {
         viewModel.disconnect()
@@ -84,7 +86,8 @@ fun CompanionAppContent(viewModel: CompanionViewModel) {
             onToggleSession = { viewModel.toggleSession() },
             onToggleMicrophone = { viewModel.toggleMicrophone() },
             onToggleSystemAudio = { viewModel.toggleSystemAudio() },
-            onClipSelected = { clip -> viewModel.selectClip(clip) }
+            onClipSelected = { clip -> viewModel.selectClip(clip) },
+            onOpenTutorial = { viewModel.openTutorial() }
         )
     } else {
         ConnectionScreen(
@@ -99,7 +102,14 @@ fun CompanionAppContent(viewModel: CompanionViewModel) {
             onConnectAdbUsb = { viewModel.connectAdbUsb() },
             onRefreshDiscovery = { viewModel.refreshDiscovery() },
             onCancelConnection = { viewModel.disconnect() },
-            onDismissError = { viewModel.dismissError() }
+            onDismissError = { viewModel.dismissError() },
+            onOpenTutorial = { viewModel.openTutorial() }
+        )
+    }
+
+    if (showTutorialDialog) {
+        OnboardingDialog(
+            onDismiss = { viewModel.dismissTutorial() }
         )
     }
 

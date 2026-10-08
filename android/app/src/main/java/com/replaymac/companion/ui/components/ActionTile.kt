@@ -6,13 +6,15 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -31,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.replaymac.companion.ui.theme.AppColors
 
@@ -51,7 +54,7 @@ fun ActionTile(
 
     val backgroundColor by animateColorAsState(
         targetValue = when {
-            !isEnabled -> AppColors.SurfaceGlass.copy(alpha = 0.5f)
+            !isEnabled -> AppColors.SurfaceGlass.copy(alpha = 0.45f)
             isActiveDanger -> AppColors.Danger
             isProminent -> AppColors.Accent
             else -> AppColors.SurfaceGlass
@@ -62,6 +65,7 @@ fun ActionTile(
     val contentColor by animateColorAsState(
         targetValue = when {
             isActiveDanger || isProminent -> Color.White
+            !isEnabled -> AppColors.TextTertiary
             else -> AppColors.TextPrimary
         },
         label = "tileContentColor"
@@ -69,9 +73,9 @@ fun ActionTile(
 
     val resolvedIconTint by animateColorAsState(
         targetValue = when {
-            iconTint != null -> iconTint
             isActiveDanger || isProminent -> Color.White
             !isEnabled -> AppColors.TextTertiary
+            iconTint != null -> iconTint
             else -> AppColors.Accent
         },
         label = "tileIconTint"
@@ -80,21 +84,22 @@ fun ActionTile(
     val subtitleColor by animateColorAsState(
         targetValue = when {
             isActiveDanger || isProminent -> Color.White.copy(alpha = 0.85f)
+            !isEnabled -> AppColors.TextTertiary.copy(alpha = 0.7f)
             else -> AppColors.TextSecondary
         },
         label = "tileSubtitleColor"
     )
 
     val borderColor = when {
-        isActiveDanger -> AppColors.Danger.copy(alpha = 0.5f)
-        isProminent -> AppColors.AccentVariant.copy(alpha = 0.6f)
+        isActiveDanger -> AppColors.Danger.copy(alpha = 0.6f)
+        isProminent -> AppColors.AccentVariant.copy(alpha = 0.7f)
         else -> AppColors.GlassBorder
     }
 
     Surface(
         modifier = modifier
-            .height(104.dp)
-            .clip(RoundedCornerShape(16.dp))
+            .height(56.dp)
+            .clip(RoundedCornerShape(14.dp))
             .alpha(if (isEnabled) 1.0f else 0.45f)
             .then(
                 if (isEnabled && !isLoading) {
@@ -111,53 +116,63 @@ fun ActionTile(
                     Modifier
                 }
             ),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(14.dp),
         color = backgroundColor,
         border = BorderStroke(1.dp, borderColor)
     ) {
-        Column(
+        Row(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(14.dp),
-            verticalArrangement = Arrangement.SpaceBetween,
-            horizontalAlignment = Alignment.Start
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            // Icon
+            Box(
+                modifier = Modifier.size(24.dp),
+                contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
                     tint = resolvedIconTint,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(20.dp)
                 )
-
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(18.dp),
-                        color = contentColor,
-                        strokeWidth = 2.dp
-                    )
-                }
             }
 
-            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Spacer(modifier = Modifier.width(10.dp))
+
+            // Action Title + Status Subtitle
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.Center
+            ) {
                 Text(
                     text = title,
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontWeight = FontWeight.SemiBold,
                         color = contentColor
                     ),
-                    maxLines = 1
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = subtitle,
                     style = MaterialTheme.typography.labelSmall.copy(
                         color = subtitleColor
                     ),
-                    maxLines = 1
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            // Spinner if loading
+            if (isLoading) {
+                Spacer(modifier = Modifier.width(6.dp))
+                CircularProgressIndicator(
+                    modifier = Modifier.size(16.dp),
+                    color = contentColor,
+                    strokeWidth = 2.dp
                 )
             }
         }
