@@ -1,0 +1,42 @@
+# User specified instructions & agent files
+AGENTS.md
+CLAUDE.md
+.AGENTS.md
+.CLAUDE.md
+
+# macOS
+.DS_Store
+*.DS_Store
+.AppleDouble
+.LSOverride
+
+# Gradle
+.gradle/
+android/.gradle/
+build/
+android/build/
+app/build/
+android/app/build/
+
+# Android Studio / IntelliJ
+.idea/
+android/.idea/
+*.iml
+android/*.iml
+.navigation/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Local configuration
+local.properties
+android/local.properties
+
+# Keystore / signing files
+*.jks
+*.keystore
+release-key.properties
+signing.properties
+
+# Android Profiler
+*.hprof
