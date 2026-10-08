@@ -30,7 +30,8 @@ class CompanionWebSocketClient(
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO),
     private val okHttpClient: OkHttpClient = OkHttpClient.Builder()
         .pingInterval(15, TimeUnit.SECONDS)
-        .connectTimeout(10, TimeUnit.SECONDS)
+        // Short, so trying a remembered Mac's old address on a new network fails fast.
+        .connectTimeout(5, TimeUnit.SECONDS)
         .readTimeout(0, TimeUnit.MILLISECONDS) // Indefinite for WebSocket
         .build()
 ) {
@@ -83,6 +84,12 @@ class CompanionWebSocketClient(
             // overwrite fresh state with an old snapshot.
             private fun isCurrent() = socketGeneration == generation
 
+            /** True once the Mac has approved this socket, so a later failure is a lost connection. */
+            private fun wasConnected(): Boolean {
+                val state = _connectionState.value
+                return state is ConnectionState.Connected && state.host == host && state.port == port
+            }
+
             override fun onOpen(webSocket: WebSocket, response: Response) {
                 if (!isCurrent()) return
                 Log.d(TAG, "WebSocket opened with $host:$port")
@@ -106,7 +113,13 @@ class CompanionWebSocketClient(
                 Log.d(TAG, "WebSocket closed: $code / $reason")
                 stopPingLoop()
                 if (_connectionState.value !is ConnectionState.Failed) {
-                    _connectionState.value = ConnectionState.Disconnected
+                    // The Mac closing an approved socket (quit, server switched off)
+                    // is a lost connection, which the repository reconnects from.
+                    _connectionState.value = if (wasConnected()) {
+                        ConnectionState.Failed("ReplayMac closed the connection.", host, port, wasConnected = true)
+                    } else {
+                        ConnectionState.Disconnected
+                    }
                 }
             }
 
@@ -115,7 +128,13 @@ class CompanionWebSocketClient(
                 Log.e(TAG, "WebSocket failure: ${t.message}", t)
                 stopPingLoop()
                 if (_connectionState.value !is ConnectionState.Failed) {
-                    _connectionState.value = ConnectionState.Failed(t.message ?: "Connection failed", host, port)
+                    val lost = wasConnected()
+                    _connectionState.value = ConnectionState.Failed(
+                        error = ConnectionErrors.describe(t, lost),
+                        host = host,
+                        port = port,
+                        wasConnected = lost
+                    )
                 }
             }
         })
@@ -197,7 +216,8 @@ class CompanionWebSocketClient(
                             serverName = event.auth.serverName,
                             serverVersion = event.auth.serverVersion,
                             host = host,
-                            port = port
+                            port = port,
+                            serverId = event.auth.serverId
                         )
                     }
                     "pending" -> {
@@ -211,7 +231,8 @@ class CompanionWebSocketClient(
                         _connectionState.value = ConnectionState.Failed(
                             error = "Pairing denied by ${event.auth.serverName}",
                             host = host,
-                            port = port
+                            port = port,
+                            pairingDenied = true
                         )
                     }
                 }

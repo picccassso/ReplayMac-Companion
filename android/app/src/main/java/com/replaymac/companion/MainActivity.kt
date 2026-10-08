@@ -65,9 +65,14 @@ class MainActivity : ComponentActivity() {
 
     override fun onStart() {
         super.onStart()
-        // Android may hold back socket traffic while the app is in the
-        // background, so catch up on anything that changed on the Mac.
+        // Catch up on anything that changed on the Mac while away, or find the
+        // remembered Mac again if the connection is gone.
         viewModel.onAppForegrounded()
+    }
+
+    override fun onStop() {
+        viewModel.onAppBackgrounded()
+        super.onStop()
     }
 }
 

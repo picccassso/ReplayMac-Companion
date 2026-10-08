@@ -15,13 +15,24 @@ sealed interface ConnectionState {
     data object Disconnected : ConnectionState
     data class Connecting(val host: String, val port: Int) : ConnectionState
     data class PendingApproval(val serverName: String, val host: String, val port: Int) : ConnectionState
+    /** Finding a remembered Mac again, on whichever network or cable it is reachable. */
+    data class Reconnecting(val serverName: String) : ConnectionState
     data class Connected(
         val serverName: String,
         val serverVersion: String,
         val host: String,
-        val port: Int
+        val port: Int,
+        val serverId: String? = null
     ) : ConnectionState
-    data class Failed(val error: String, val host: String? = null, val port: Int? = null) : ConnectionState
+    /** [wasConnected] separates a dropped connection from one that never opened. */
+    data class Failed(
+        val error: String,
+        val host: String? = null,
+        val port: Int? = null,
+        val wasConnected: Boolean = false,
+        /** The Mac refused or revoked this phone, so it must not be retried automatically. */
+        val pairingDenied: Boolean = false
+    ) : ConnectionState
 }
 
 data class DiscoveredMac(
@@ -29,5 +40,7 @@ data class DiscoveredMac(
     val name: String,
     val host: String,
     val port: Int,
+    /** ReplayMac's stable identity from its Bonjour TXT record, when it advertises one. */
+    val serverId: String? = null,
     val lastSeenTimestamp: Long = System.currentTimeMillis()
 )

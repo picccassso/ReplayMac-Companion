@@ -214,4 +214,18 @@ class CompanionStateParserTest {
         val malformedEvent = CompanionProtocolParser.parse("NOT_JSON")
         assertTrue(malformedEvent is CompanionServerEvent.Error)
     }
+
+    @Test
+    fun authResponseCarriesTheMacsStableIdWhenSent() {
+        val withId = CompanionProtocolParser.parse(
+            """{"type":"auth_response","status":"approved","serverName":"Mac","serverVersion":"1.7.3","serverId":"5F1C"}"""
+        )
+        assertEquals("5F1C", (withId as CompanionServerEvent.Auth).auth.serverId)
+
+        // ReplayMac builds before the identity change send no id.
+        val withoutId = CompanionProtocolParser.parse(
+            """{"type":"auth_response","status":"approved","serverName":"Mac","serverVersion":"1.7.3"}"""
+        )
+        assertEquals(null, (withoutId as CompanionServerEvent.Auth).auth.serverId)
+    }
 }

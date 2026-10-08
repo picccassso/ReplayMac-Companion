@@ -24,6 +24,8 @@ class NsdDiscoveryManager(
         private const val TAG = "NsdDiscoveryManager"
         const val SERVICE_TYPE = "_replaymac._tcp"
         private const val RESOLVE_TIMEOUT_MS = 5000L
+        /** TXT record key carrying ReplayMac's stable server identity. */
+        const val TXT_SERVER_ID = "id"
     }
 
     private val nsdManager: NsdManager? by lazy {
@@ -217,7 +219,8 @@ class NsdDiscoveryManager(
                         id = "$host:$port",
                         name = name,
                         host = host,
-                        port = port
+                        port = port,
+                        serverId = serverIdOf(serviceInfo)
                     )
                     discoveredMap[name] = mac
                     updateState()
@@ -240,6 +243,12 @@ class NsdDiscoveryManager(
             processNextResolve()
         }
     }
+
+    private fun serverIdOf(serviceInfo: NsdServiceInfo): String? =
+        serviceInfo.attributes[TXT_SERVER_ID]
+            ?.toString(Charsets.UTF_8)
+            ?.trim()
+            ?.takeIf { it.isNotEmpty() }
 
     private fun updateState() {
         _discoveredMacs.update { discoveredMap.values.toList() }

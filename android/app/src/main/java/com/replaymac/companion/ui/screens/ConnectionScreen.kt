@@ -104,8 +104,11 @@ fun ConnectionScreen(
             is ConnectionState.Connecting -> CenteredStatus {
                 ConnectingProgressView(host = connectionState.host, port = connectionState.port, onCancel = onCancelConnection)
             }
+            is ConnectionState.Reconnecting -> CenteredStatus {
+                ReconnectingView(serverName = connectionState.serverName, onCancel = onCancelConnection)
+            }
             else -> {
-                val error = (connectionState as? ConnectionState.Failed)?.error
+                val failure = connectionState as? ConnectionState.Failed
                 val sections = ConnectionSections(
                     discoveredMacs = discoveredMacs,
                     isDiscovering = isDiscovering,
@@ -132,8 +135,14 @@ fun ConnectionScreen(
                             onOpenTutorial = onOpenTutorial
                         )
                     }
-                    if (error != null) {
-                        item { ErrorBanner(error = error, onDismiss = onDismissError) }
+                    if (failure != null) {
+                        item {
+                            ErrorBanner(
+                                title = if (failure.wasConnected) "Connection lost" else "Couldn't connect",
+                                error = failure.error,
+                                onDismiss = onDismissError
+                            )
+                        }
                     }
                     if (isLandscape) {
                         item {
@@ -258,7 +267,7 @@ private fun ConnectionHeader(
 }
 
 @Composable
-private fun ErrorBanner(error: String, onDismiss: () -> Unit) {
+private fun ErrorBanner(title: String, error: String, onDismiss: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -269,7 +278,7 @@ private fun ErrorBanner(error: String, onDismiss: () -> Unit) {
     ) {
         Icon(Icons.Rounded.ErrorOutline, contentDescription = null, tint = AppColors.Danger, modifier = Modifier.size(20.dp))
         Column(Modifier.weight(1f)) {
-            Text("Couldn't connect", style = MaterialTheme.typography.labelLarge, color = AppColors.TextPrimary)
+            Text(title, style = MaterialTheme.typography.labelLarge, color = AppColors.TextPrimary)
             Text(error, style = MaterialTheme.typography.bodySmall, color = AppColors.TextSecondary)
         }
         Box(
@@ -498,6 +507,19 @@ fun PendingApprovalView(serverName: String, onCancel: () -> Unit, modifier: Modi
 fun ConnectingProgressView(host: String, port: Int, onCancel: () -> Unit, modifier: Modifier = Modifier) {
     Box(modifier) {
         StatusPanel(title = "Connecting", message = "$host:$port", onCancel = onCancel) {
+            CircularProgressIndicator(modifier = Modifier.size(32.dp), color = AppColors.TextSecondary, strokeWidth = 2.5.dp)
+        }
+    }
+}
+
+@Composable
+fun ReconnectingView(serverName: String, onCancel: () -> Unit, modifier: Modifier = Modifier) {
+    Box(modifier) {
+        StatusPanel(
+            title = "Reconnecting",
+            message = "Looking for “$serverName” on this network and over USB.",
+            onCancel = onCancel
+        ) {
             CircularProgressIndicator(modifier = Modifier.size(32.dp), color = AppColors.TextSecondary, strokeWidth = 2.5.dp)
         }
     }

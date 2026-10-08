@@ -66,9 +66,13 @@ class CompanionViewModel(
         repository.clearError()
     }
 
-    /** Called when the app comes back on screen; state may have changed while it was away. */
+    /** Called when the app comes on screen: refreshes the Mac's state, or reconnects to it. */
     fun onAppForegrounded() {
-        repository.resync()
+        repository.onAppForegrounded()
+    }
+
+    fun onAppBackgrounded() {
+        repository.onAppBackgrounded()
     }
 
     fun refreshDiscovery() {
