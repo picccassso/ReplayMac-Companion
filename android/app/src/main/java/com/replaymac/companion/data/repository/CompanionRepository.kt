@@ -136,6 +136,11 @@ class CompanionRepository(
         wsClient.clearError()
     }
 
+    /** Re-reads the Mac's state, e.g. when the app returns to the foreground. */
+    fun resync() {
+        wsClient.resync()
+    }
+
     fun saveReplay() {
         wsClient.sendAction(CompanionActions.SAVE_REPLAY)
     }

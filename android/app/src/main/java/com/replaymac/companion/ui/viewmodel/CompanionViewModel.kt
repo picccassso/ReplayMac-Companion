@@ -66,6 +66,11 @@ class CompanionViewModel(
         repository.clearError()
     }
 
+    /** Called when the app comes back on screen; state may have changed while it was away. */
+    fun onAppForegrounded() {
+        repository.resync()
+    }
+
     fun refreshDiscovery() {
         repository.clearError()
         repository.restartDiscovery()

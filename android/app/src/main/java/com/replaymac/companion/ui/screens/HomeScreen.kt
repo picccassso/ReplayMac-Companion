@@ -2,16 +2,21 @@ package com.replaymac.companion.ui.screens
 
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,43 +27,49 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.HelpOutline
-import androidx.compose.material.icons.automirrored.filled.VolumeOff
-import androidx.compose.material.icons.automirrored.filled.VolumeUp
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.FiberManualRecord
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Lightbulb
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.MicOff
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.PowerSettingsNew
-import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material.icons.automirrored.rounded.HelpOutline
+import androidx.compose.material.icons.automirrored.rounded.VolumeOff
+import androidx.compose.material.icons.automirrored.rounded.VolumeUp
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.FiberManualRecord
+import androidx.compose.material.icons.rounded.History
+import androidx.compose.material.icons.rounded.Lightbulb
+import androidx.compose.material.icons.rounded.Mic
+import androidx.compose.material.icons.rounded.MicOff
+import androidx.compose.material.icons.rounded.Pause
+import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.PowerSettingsNew
+import androidx.compose.material.icons.rounded.Stop
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.replaymac.companion.data.model.CompanionClipSummary
 import com.replaymac.companion.data.model.CompanionStateSnapshot
 import com.replaymac.companion.data.model.ConnectionState
 import com.replaymac.companion.ui.components.ActionTile
 import com.replaymac.companion.ui.components.DualProgressMeters
+import com.replaymac.companion.ui.components.GlassBackground
+import com.replaymac.companion.ui.components.GlassButtonGroup
 import com.replaymac.companion.ui.components.GlassCard
+import com.replaymac.companion.ui.components.GroupIconButton
 import com.replaymac.companion.ui.components.RecentClipItem
+import com.replaymac.companion.ui.components.RowSeparator
+import com.replaymac.companion.ui.components.SectionHeader
 import com.replaymac.companion.ui.components.StatusDot
-import com.replaymac.companion.ui.components.formatDurationSeconds
+import com.replaymac.companion.ui.components.glass
+import com.replaymac.companion.ui.components.glassPressable
+import com.replaymac.companion.ui.components.safeContentPadding
 import com.replaymac.companion.ui.theme.AppColors
+import com.replaymac.companion.ui.theme.AppRadii
 
 @Composable
 fun HomeScreen(
@@ -78,109 +89,55 @@ fun HomeScreen(
     onOpenTutorial: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    val configuration = LocalConfiguration.current
-    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-    val isLive = snapshot.isRecording || snapshot.isSessionRecording
+    val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
     val serverName = (connectionState as? ConnectionState.Connected)?.serverName ?: "ReplayMac"
+    val onControl: (HomeControl) -> Unit = { control ->
+        when (control) {
+            HomeControl.SaveReplay -> onSaveReplay()
+            HomeControl.SaveExtendedReplay -> onSaveExtendedReplay()
+            HomeControl.ReplayBuffer -> onToggleBuffer()
+            HomeControl.Session -> onToggleSession()
+            HomeControl.Microphone -> onToggleMicrophone()
+            HomeControl.SystemAudio -> onToggleSystemAudio()
+        }
+    }
 
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(AppColors.BackgroundPrimary)
-    ) {
+    GlassBackground(modifier = modifier) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(
-                start = if (isLandscape) 20.dp else 16.dp,
-                end = if (isLandscape) 20.dp else 16.dp,
-                top = if (isLandscape) 12.dp else 16.dp,
+            contentPadding = safeContentPadding(
+                horizontal = if (isLandscape) 24.dp else 16.dp,
+                top = 8.dp,
                 bottom = 24.dp
             ),
-            verticalArrangement = Arrangement.spacedBy(if (isLandscape) 12.dp else 16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            if (isLandscape) {
-                // Landscape Top Bar & Status (Slim Desktop-matching bar)
-                item {
-                    LandscapeTopStatusBar(
-                        serverName = serverName,
-                        snapshot = snapshot,
-                        isLive = isLive,
-                        keepScreenAwake = keepScreenAwake,
-                        onToggleKeepScreenAwake = onToggleKeepScreenAwake,
-                        onToggleBuffer = onToggleBuffer,
-                        onOpenTutorial = onOpenTutorial,
-                        onDisconnect = onDisconnect
-                    )
-                }
+            item {
+                HomeTopBar(
+                    serverName = serverName,
+                    keepScreenAwake = keepScreenAwake,
+                    onToggleKeepScreenAwake = onToggleKeepScreenAwake,
+                    onOpenTutorial = onOpenTutorial,
+                    onDisconnect = onDisconnect
+                )
+            }
 
-                // Landscape Dual Progress Meters (when buffer active)
-                if (snapshot.isRecording) {
-                    item {
-                        GlassCard(modifier = Modifier.fillMaxWidth()) {
-                            Box(modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)) {
-                                DualProgressMeters(
-                                    bufferedSeconds = snapshot.bufferedSeconds,
-                                    bufferDurationSeconds = snapshot.bufferDurationSeconds,
-                                    bufferMemoryFormatted = snapshot.bufferMemoryFormatted,
-                                    longBufferEnabled = snapshot.longBufferEnabled,
-                                    extendedBufferElapsedSeconds = snapshot.extendedBufferElapsedSeconds,
-                                    longBufferDurationSeconds = snapshot.longBufferDurationSeconds
-                                )
-                            }
-                        }
+            item {
+                if (isLandscape) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        StatusCard(snapshot, onToggleBuffer, Modifier.weight(1f))
+                        ControlGrid(snapshot, columns = 3, onControl = onControl, modifier = Modifier.weight(1.5f))
                     }
-                }
-
-                // Landscape 3-Column x 2-Row Tile Grid (Desktop Parity!)
-                item {
-                    LandscapeThreeColumnGrid(
-                        snapshot = snapshot,
-                        onSaveReplay = onSaveReplay,
-                        onSaveExtendedReplay = onSaveExtendedReplay,
-                        onToggleBuffer = onToggleBuffer,
-                        onToggleSession = onToggleSession,
-                        onToggleMicrophone = onToggleMicrophone,
-                        onToggleSystemAudio = onToggleSystemAudio
-                    )
-                }
-            } else {
-                // Portrait Top App Bar
-                item {
-                    PortraitTopAppBar(
-                        serverName = serverName,
-                        keepScreenAwake = keepScreenAwake,
-                        onToggleKeepScreenAwake = onToggleKeepScreenAwake,
-                        onOpenTutorial = onOpenTutorial,
-                        onDisconnect = onDisconnect
-                    )
-                }
-
-                // Portrait Status Card
-                item {
-                    PortraitStatusCard(
-                        snapshot = snapshot,
-                        isLive = isLive,
-                        onToggleBuffer = onToggleBuffer
-                    )
-                }
-
-                // Portrait 2-Column x 3-Row Grid (Compact Horizontal Pills)
-                item {
-                    PortraitSixButtonGrid(
-                        snapshot = snapshot,
-                        onSaveReplay = onSaveReplay,
-                        onSaveExtendedReplay = onSaveExtendedReplay,
-                        onToggleBuffer = onToggleBuffer,
-                        onToggleSession = onToggleSession,
-                        onToggleMicrophone = onToggleMicrophone,
-                        onToggleSystemAudio = onToggleSystemAudio
-                    )
+                } else {
+                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        StatusCard(snapshot, onToggleBuffer)
+                        ControlGrid(snapshot, columns = 2, onControl = onControl)
+                    }
                 }
             }
 
-            // Recent Clips ("This Session") Section (works seamlessly in both portrait & landscape)
             item {
-                RecentClipsSection(
+                SessionClipsSection(
                     recentClips = snapshot.recentClips,
                     thumbnails = thumbnails,
                     onClipSelected = onClipSelected
@@ -190,10 +147,10 @@ fun HomeScreen(
     }
 }
 
-// ==================== Portrait Components ====================
+// ==================== Top bar ====================
 
 @Composable
-private fun PortraitTopAppBar(
+private fun HomeTopBar(
     serverName: String,
     keepScreenAwake: Boolean,
     onToggleKeepScreenAwake: () -> Unit,
@@ -202,650 +159,218 @@ private fun PortraitTopAppBar(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Connected Server Badge
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(8.dp)
-                    .background(AppColors.Success, CircleShape)
-            )
+        Column(modifier = Modifier.weight(1f).padding(start = 4.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(
                 text = serverName,
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    color = AppColors.TextPrimary
-                ),
+                style = MaterialTheme.typography.headlineMedium,
+                color = AppColors.TextPrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Box(Modifier.size(6.dp).background(AppColors.Success, CircleShape))
+                Text("Connected", style = MaterialTheme.typography.labelMedium, color = AppColors.TextSecondary)
+            }
         }
 
-        // Actions: Deck Mode, Help, Disconnect
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            DeckModeButton(
-                keepScreenAwake = keepScreenAwake,
-                onToggle = onToggleKeepScreenAwake
+        GlassButtonGroup {
+            GroupIconButton(
+                icon = Icons.Rounded.Lightbulb,
+                contentDescription = if (keepScreenAwake) "Deck mode on, screen stays awake" else "Deck mode off",
+                onClick = onToggleKeepScreenAwake,
+                selected = keepScreenAwake,
+                tint = AppColors.TextSecondary
             )
-
-            IconButton(
+            GroupIconButton(
+                icon = Icons.AutoMirrored.Rounded.HelpOutline,
+                contentDescription = "Quick guide",
                 onClick = onOpenTutorial,
-                modifier = Modifier
-                    .size(32.dp)
-                    .background(AppColors.SurfaceGlassSubtle, CircleShape)
-                    .border(1.dp, AppColors.GlassBorder, CircleShape)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.HelpOutline,
-                    contentDescription = "Help & Tutorial",
-                    tint = AppColors.TextSecondary,
-                    modifier = Modifier.size(17.dp)
-                )
-            }
-
-            IconButton(
+                tint = AppColors.TextSecondary
+            )
+            GroupIconButton(
+                icon = Icons.Rounded.PowerSettingsNew,
+                contentDescription = "Disconnect",
                 onClick = onDisconnect,
-                modifier = Modifier
-                    .size(32.dp)
-                    .background(AppColors.SurfaceGlassSubtle, CircleShape)
-                    .border(1.dp, AppColors.GlassBorder, CircleShape)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.PowerSettingsNew,
-                    contentDescription = "Disconnect",
-                    tint = AppColors.TextSecondary,
-                    modifier = Modifier.size(17.dp)
-                )
-            }
+                tint = AppColors.Danger
+            )
         }
     }
 }
 
+// ==================== Status ====================
+
 @Composable
-private fun PortraitStatusCard(
+private fun StatusCard(
     snapshot: CompanionStateSnapshot,
-    isLive: Boolean,
-    onToggleBuffer: () -> Unit
+    onToggleBuffer: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val headline = when {
-        snapshot.isSessionRecording -> "Session recording"
-        snapshot.isRecording -> "Replay buffer running"
-        else -> "Not recording"
-    }
-
-    val elapsedSeconds = if (snapshot.isSessionRecording) {
-        snapshot.sessionElapsedSeconds
-    } else {
-        snapshot.recordingElapsedSeconds
-    }
-
-    val subheadline = if (isLive) {
-        val parts = mutableListOf<String>()
-        parts.add(formatDurationSeconds(elapsedSeconds))
-        snapshot.capturedDisplayName?.let { parts.add(it) }
-        parts.joinToString(" · ")
-    } else {
-        "Start replay buffer to keep last ${snapshot.bufferDurationSeconds}s ready to save."
-    }
-
-    GlassCard(modifier = Modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Row(
-                    modifier = Modifier.weight(1f),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    StatusDot(isLive = isLive)
-
-                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        Text(
-                            text = headline,
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.SemiBold,
-                                color = AppColors.TextPrimary
-                            )
-                        )
-                        Text(
-                            text = subheadline,
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                color = AppColors.TextSecondary
-                            ),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
+    GlassCard(modifier = modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(18.dp).animateContentSize()) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                StatusDot(isLive = snapshot.isRecording || snapshot.isSessionRecording)
+                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(
+                        text = HomeControlLabels.headline(snapshot),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = AppColors.TextPrimary
+                    )
+                    Text(
+                        text = HomeControlLabels.subheadline(snapshot),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = AppColors.TextSecondary,
+                        maxLines = 3
+                    )
                 }
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                BufferPillButton(
-                    isRunning = snapshot.isRecording,
-                    onClick = onToggleBuffer
-                )
+                BufferToggleButton(isRunning = snapshot.isRecording, onClick = onToggleBuffer)
             }
 
             AnimatedVisibility(
                 visible = snapshot.isRecording,
-                enter = fadeIn(),
-                exit = fadeOut()
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically()
             ) {
-                DualProgressMeters(
-                    bufferedSeconds = snapshot.bufferedSeconds,
-                    bufferDurationSeconds = snapshot.bufferDurationSeconds,
-                    bufferMemoryFormatted = snapshot.bufferMemoryFormatted,
-                    longBufferEnabled = snapshot.longBufferEnabled,
-                    extendedBufferElapsedSeconds = snapshot.extendedBufferElapsedSeconds,
-                    longBufferDurationSeconds = snapshot.longBufferDurationSeconds
-                )
+                Column {
+                    Spacer(Modifier.height(18.dp))
+                    DualProgressMeters(
+                        bufferedSeconds = snapshot.bufferedSeconds,
+                        bufferDurationSeconds = snapshot.bufferDurationSeconds,
+                        bufferMemoryFormatted = snapshot.bufferMemoryFormatted,
+                        longBufferEnabled = snapshot.longBufferEnabled,
+                        extendedBufferElapsedSeconds = snapshot.extendedBufferElapsedSeconds,
+                        longBufferDurationSeconds = snapshot.longBufferDurationSeconds
+                    )
+                }
             }
         }
     }
 }
 
+/**
+ * The desktop status card's buffer button: a red play circle that grows into
+ * a "Stop Buffer" pill while the buffer runs.
+ */
 @Composable
-private fun PortraitSixButtonGrid(
-    snapshot: CompanionStateSnapshot,
-    onSaveReplay: () -> Unit,
-    onSaveExtendedReplay: () -> Unit,
-    onToggleBuffer: () -> Unit,
-    onToggleSession: () -> Unit,
-    onToggleMicrophone: () -> Unit,
-    onToggleSystemAudio: () -> Unit
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+private fun BufferToggleButton(isRunning: Boolean, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .height(40.dp)
+            .glassPressable(onClick = onClick, shape = CircleShape)
+            .background(AppColors.Danger.copy(alpha = 0.16f), CircleShape)
+            .padding(horizontal = 11.dp)
+            .semantics { contentDescription = if (isRunning) "Stop replay buffer" else "Start replay buffer" },
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        // Row 1: Save Quick Replay & Save Extended Replay
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            val isSaving = snapshot.isSaveInProgress
-            ActionTile(
-                title = "Save Last ${snapshot.bufferDurationSeconds}s",
-                subtitle = when {
-                    isSaving -> "Saving clip..."
-                    snapshot.isSaveSuccess -> "Saved!"
-                    snapshot.isSaveFailed -> "Failed"
-                    !snapshot.isRecording -> "Buffer idle"
-                    snapshot.bufferedSeconds < 1.0 -> "Buffering..."
-                    else -> "Ready to save"
-                },
-                icon = Icons.Default.Download,
-                onClick = onSaveReplay,
-                isProminent = snapshot.canSaveQuickReplay,
-                isEnabled = snapshot.canSaveQuickReplay,
-                isLoading = isSaving,
-                modifier = Modifier.weight(1f)
-            )
-
-            val extSeconds = snapshot.longBufferDurationSeconds
-            val extTitle = if (extSeconds % 60 == 0) "Save Last ${extSeconds / 60}m" else "Save Last ${extSeconds}s"
-            ActionTile(
-                title = extTitle,
-                subtitle = when {
-                    snapshot.isSaveInProgress -> "Saving..."
-                    !snapshot.isRecording -> "Buffer idle"
-                    !snapshot.longBufferEnabled -> "Disabled"
-                    else -> "Extended replay"
-                },
-                icon = Icons.Default.History,
-                onClick = onSaveExtendedReplay,
-                isEnabled = snapshot.canSaveExtendedReplay,
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        // Row 2: Replay Buffer & Session Recording
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            ActionTile(
-                title = if (snapshot.isRecording) "Stop Buffer" else "Start Buffer",
-                subtitle = if (snapshot.isRecording) "Running" else "Stopped",
-                icon = if (snapshot.isRecording) Icons.Default.Stop else Icons.Default.PlayArrow,
-                onClick = onToggleBuffer,
-                modifier = Modifier.weight(1f)
-            )
-
-            ActionTile(
-                title = if (snapshot.isSessionRecording) "Stop Session" else "Record Session",
-                subtitle = if (snapshot.isSessionRecording) "Recording live" else "Session capture",
-                icon = Icons.Default.FiberManualRecord,
-                onClick = onToggleSession,
-                isActiveDanger = snapshot.isSessionRecording,
-                isEnabled = !snapshot.isSaveInProgress,
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        // Row 3: Microphone & System Audio
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            val micMuted = snapshot.isMicrophoneMuted
-            val micEnabled = snapshot.isMicrophoneEnabled
-            ActionTile(
-                title = "Microphone",
-                subtitle = when {
-                    !micEnabled -> "Disabled"
-                    micMuted -> "Muted"
-                    else -> "Active"
-                },
-                icon = if (micMuted || !micEnabled) Icons.Default.MicOff else Icons.Default.Mic,
-                onClick = onToggleMicrophone,
-                isEnabled = micEnabled,
-                iconTint = when {
-                    !micEnabled -> AppColors.TextTertiary
-                    micMuted -> AppColors.Warning
-                    else -> AppColors.Accent
-                },
-                modifier = Modifier.weight(1f)
-            )
-
-            val sysMuted = snapshot.isSystemAudioMuted
-            val sysEnabled = snapshot.isSystemAudioEnabled
-            ActionTile(
-                title = "System Audio",
-                subtitle = when {
-                    !sysEnabled -> "Disabled"
-                    sysMuted -> "Muted"
-                    else -> "Active"
-                },
-                icon = if (sysMuted || !sysEnabled) Icons.AutoMirrored.Filled.VolumeOff else Icons.AutoMirrored.Filled.VolumeUp,
-                onClick = onToggleSystemAudio,
-                isEnabled = sysEnabled,
-                iconTint = when {
-                    !sysEnabled -> AppColors.TextTertiary
-                    sysMuted -> AppColors.Warning
-                    else -> AppColors.Accent
-                },
-                modifier = Modifier.weight(1f)
-            )
-        }
-    }
-}
-
-// ==================== Landscape Components (Desktop Parity) ====================
-
-@Composable
-private fun LandscapeTopStatusBar(
-    serverName: String,
-    snapshot: CompanionStateSnapshot,
-    isLive: Boolean,
-    keepScreenAwake: Boolean,
-    onToggleKeepScreenAwake: () -> Unit,
-    onToggleBuffer: () -> Unit,
-    onOpenTutorial: () -> Unit,
-    onDisconnect: () -> Unit
-) {
-    GlassCard(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            // Left: Status indicator + Server Name + Live Duration
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                StatusDot(isLive = isLive)
-
-                Text(
-                    text = serverName,
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = AppColors.TextPrimary
-                    )
-                )
-
-                Text(
-                    text = "•",
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        color = AppColors.TextTertiary
-                    )
-                )
-
-                val statusText = when {
-                    snapshot.isSessionRecording -> "Session: ${formatDurationSeconds(snapshot.sessionElapsedSeconds)}"
-                    snapshot.isRecording -> "Buffer: ${formatDurationSeconds(snapshot.recordingElapsedSeconds)}"
-                    else -> "Not recording"
-                }
-
-                Text(
-                    text = statusText,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        color = if (isLive) AppColors.AccentVariant else AppColors.TextSecondary,
-                        fontWeight = FontWeight.Medium
-                    )
-                )
-
-                snapshot.capturedDisplayName?.let { display ->
-                    Text(
-                        text = "($display)",
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            color = AppColors.TextTertiary
-                        ),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
-
-            // Right: Buffer quick toggle + Deck button + Help + Disconnect
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                BufferPillButton(
-                    isRunning = snapshot.isRecording,
-                    onClick = onToggleBuffer
-                )
-
-                DeckModeButton(
-                    keepScreenAwake = keepScreenAwake,
-                    onToggle = onToggleKeepScreenAwake
-                )
-
-                IconButton(
-                    onClick = onOpenTutorial,
-                    modifier = Modifier
-                        .size(30.dp)
-                        .background(AppColors.SurfaceGlassSubtle, CircleShape)
-                        .border(1.dp, AppColors.GlassBorder, CircleShape)
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.HelpOutline,
-                        contentDescription = "Help & Tutorial",
-                        tint = AppColors.TextSecondary,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-
-                IconButton(
-                    onClick = onDisconnect,
-                    modifier = Modifier
-                        .size(30.dp)
-                        .background(AppColors.SurfaceGlassSubtle, CircleShape)
-                        .border(1.dp, AppColors.GlassBorder, CircleShape)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.PowerSettingsNew,
-                        contentDescription = "Disconnect",
-                        tint = AppColors.TextSecondary,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun LandscapeThreeColumnGrid(
-    snapshot: CompanionStateSnapshot,
-    onSaveReplay: () -> Unit,
-    onSaveExtendedReplay: () -> Unit,
-    onToggleBuffer: () -> Unit,
-    onToggleSession: () -> Unit,
-    onToggleMicrophone: () -> Unit,
-    onToggleSystemAudio: () -> Unit
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        // Row 1: [Save Last 30s] [Start Buffer] [Record Session] (Matches Desktop Layout!)
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            val isSaving = snapshot.isSaveInProgress
-            ActionTile(
-                title = "Save Last ${snapshot.bufferDurationSeconds}s",
-                subtitle = when {
-                    isSaving -> "Saving clip..."
-                    snapshot.isSaveSuccess -> "Saved!"
-                    snapshot.isSaveFailed -> "Failed"
-                    !snapshot.isRecording -> "Buffer idle"
-                    snapshot.bufferedSeconds < 1.0 -> "Buffering..."
-                    else -> "Ready to save"
-                },
-                icon = Icons.Default.Download,
-                onClick = onSaveReplay,
-                isProminent = snapshot.canSaveQuickReplay,
-                isEnabled = snapshot.canSaveQuickReplay,
-                isLoading = isSaving,
-                modifier = Modifier.weight(1f)
-            )
-
-            ActionTile(
-                title = if (snapshot.isRecording) "Stop Buffer" else "Start Buffer",
-                subtitle = if (snapshot.isRecording) "Running" else "Buffer stopped",
-                icon = if (snapshot.isRecording) Icons.Default.Stop else Icons.Default.PlayArrow,
-                onClick = onToggleBuffer,
-                modifier = Modifier.weight(1f)
-            )
-
-            ActionTile(
-                title = if (snapshot.isSessionRecording) "Stop Session" else "Record Session",
-                subtitle = if (snapshot.isSessionRecording) "Recording live" else "Session capture",
-                icon = Icons.Default.FiberManualRecord,
-                onClick = onToggleSession,
-                isActiveDanger = snapshot.isSessionRecording,
-                isEnabled = !snapshot.isSaveInProgress,
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        // Row 2: [Save Last 5m] [Microphone] [System Audio]
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            val extSeconds = snapshot.longBufferDurationSeconds
-            val extTitle = if (extSeconds % 60 == 0) "Save Last ${extSeconds / 60}m" else "Save Last ${extSeconds}s"
-            ActionTile(
-                title = extTitle,
-                subtitle = when {
-                    snapshot.isSaveInProgress -> "Saving..."
-                    !snapshot.isRecording -> "Buffer idle"
-                    !snapshot.longBufferEnabled -> "Disabled"
-                    else -> "Extended replay"
-                },
-                icon = Icons.Default.History,
-                onClick = onSaveExtendedReplay,
-                isEnabled = snapshot.canSaveExtendedReplay,
-                modifier = Modifier.weight(1f)
-            )
-
-            val micMuted = snapshot.isMicrophoneMuted
-            val micEnabled = snapshot.isMicrophoneEnabled
-            ActionTile(
-                title = "Microphone",
-                subtitle = when {
-                    !micEnabled -> "Disabled"
-                    micMuted -> "Muted"
-                    else -> "Active"
-                },
-                icon = if (micMuted || !micEnabled) Icons.Default.MicOff else Icons.Default.Mic,
-                onClick = onToggleMicrophone,
-                isEnabled = micEnabled,
-                iconTint = when {
-                    !micEnabled -> AppColors.TextTertiary
-                    micMuted -> AppColors.Warning
-                    else -> AppColors.Accent
-                },
-                modifier = Modifier.weight(1f)
-            )
-
-            val sysMuted = snapshot.isSystemAudioMuted
-            val sysEnabled = snapshot.isSystemAudioEnabled
-            ActionTile(
-                title = "System Audio",
-                subtitle = when {
-                    !sysEnabled -> "Disabled"
-                    sysMuted -> "Muted"
-                    else -> "Active"
-                },
-                icon = if (sysMuted || !sysEnabled) Icons.AutoMirrored.Filled.VolumeOff else Icons.AutoMirrored.Filled.VolumeUp,
-                onClick = onToggleSystemAudio,
-                isEnabled = sysEnabled,
-                iconTint = when {
-                    !sysEnabled -> AppColors.TextTertiary
-                    sysMuted -> AppColors.Warning
-                    else -> AppColors.Accent
-                },
-                modifier = Modifier.weight(1f)
-            )
-        }
-    }
-}
-
-// ==================== Shared UI Components ====================
-
-@Composable
-private fun DeckModeButton(
-    keepScreenAwake: Boolean,
-    onToggle: () -> Unit
-) {
-    Surface(
-        onClick = onToggle,
-        shape = RoundedCornerShape(16.dp),
-        color = if (keepScreenAwake) AppColors.Accent.copy(alpha = 0.2f) else AppColors.SurfaceGlass,
-        border = androidx.compose.foundation.BorderStroke(
-            1.dp,
-            if (keepScreenAwake) AppColors.Accent else AppColors.GlassBorder
+        Icon(
+            imageVector = if (isRunning) Icons.Rounded.Stop else Icons.Rounded.PlayArrow,
+            contentDescription = null,
+            tint = AppColors.Danger,
+            modifier = Modifier.size(18.dp)
         )
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp),
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-            verticalAlignment = Alignment.CenterVertically
+        AnimatedVisibility(
+            visible = isRunning,
+            enter = fadeIn() + expandHorizontally(),
+            exit = fadeOut() + shrinkHorizontally()
         ) {
-            Icon(
-                imageVector = Icons.Default.Lightbulb,
-                contentDescription = "Deck Mode",
-                tint = if (keepScreenAwake) AppColors.Accent else AppColors.TextSecondary,
-                modifier = Modifier.size(15.dp)
-            )
             Text(
-                text = if (keepScreenAwake) "Deck On" else "Deck",
-                style = MaterialTheme.typography.labelSmall.copy(
-                    color = if (keepScreenAwake) AppColors.Accent else AppColors.TextSecondary,
-                    fontWeight = FontWeight.SemiBold
-                )
+                text = "Stop Buffer",
+                style = MaterialTheme.typography.labelLarge,
+                color = AppColors.Danger,
+                modifier = Modifier.padding(start = 6.dp, end = 3.dp)
             )
         }
     }
 }
 
+// ==================== Controls ====================
+
 @Composable
-fun BufferPillButton(
-    isRunning: Boolean,
-    onClick: () -> Unit
+private fun ControlGrid(
+    snapshot: CompanionStateSnapshot,
+    columns: Int,
+    onControl: (HomeControl) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(16.dp),
-        color = if (isRunning) AppColors.DangerContainer else AppColors.Accent.copy(alpha = 0.15f),
-        border = androidx.compose.foundation.BorderStroke(
-            1.dp,
-            if (isRunning) AppColors.Danger.copy(alpha = 0.5f) else AppColors.Accent.copy(alpha = 0.4f)
-        )
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = if (isRunning) Icons.Default.Stop else Icons.Default.PlayArrow,
-                contentDescription = null,
-                tint = if (isRunning) AppColors.Danger else AppColors.Accent,
-                modifier = Modifier.size(14.dp)
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-                text = if (isRunning) "Stop Buffer" else "Start",
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    color = if (isRunning) AppColors.Danger else AppColors.Accent
-                )
-            )
+    val tiles = HomeControlLabels.tiles(snapshot)
+    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        tiles.chunked(columns).forEach { row ->
+            // Intrinsic height keeps every tile in a row the same size, even
+            // when one title wraps onto a second line.
+            Row(
+                modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                row.forEach { spec ->
+                    ActionTile(
+                        title = spec.title,
+                        subtitle = spec.subtitle,
+                        icon = iconFor(spec.control, snapshot),
+                        onClick = { onControl(spec.control) },
+                        tone = spec.tone,
+                        isEnabled = spec.isEnabled,
+                        isLoading = spec.isLoading,
+                        modifier = Modifier.weight(1f).fillMaxHeight()
+                    )
+                }
+                repeat(columns - row.size) { Spacer(Modifier.weight(1f)) }
+            }
         }
     }
 }
 
+/** Material equivalents of the desktop's SF Symbols for each action. */
+private fun iconFor(control: HomeControl, snapshot: CompanionStateSnapshot): ImageVector = when (control) {
+    HomeControl.SaveReplay -> Icons.Rounded.Download
+    HomeControl.SaveExtendedReplay -> Icons.Rounded.History
+    HomeControl.ReplayBuffer -> if (snapshot.isRecording) Icons.Rounded.Pause else Icons.Rounded.PlayArrow
+    HomeControl.Session -> if (snapshot.isSessionRecording) Icons.Rounded.Stop else Icons.Rounded.FiberManualRecord
+    HomeControl.Microphone ->
+        if (snapshot.isMicrophoneEnabled && !snapshot.isMicrophoneMuted) Icons.Rounded.Mic else Icons.Rounded.MicOff
+    HomeControl.SystemAudio ->
+        if (snapshot.isSystemAudioEnabled && !snapshot.isSystemAudioMuted) {
+            Icons.AutoMirrored.Rounded.VolumeUp
+        } else {
+            Icons.AutoMirrored.Rounded.VolumeOff
+        }
+}
+
+// ==================== Session history ====================
+
 @Composable
-fun RecentClipsSection(
+private fun SessionClipsSection(
     recentClips: List<CompanionClipSummary>,
     thumbnails: Map<String, String>,
     onClipSelected: (CompanionClipSummary) -> Unit
 ) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "This Session",
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    color = AppColors.TextPrimary
-                )
-            )
-
+    Column(modifier = Modifier.fillMaxWidth().padding(top = 4.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        SectionHeader(title = "This Session") {
             if (recentClips.isNotEmpty()) {
                 Text(
                     text = "${recentClips.size} saved",
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        color = AppColors.TextSecondary
-                    )
+                    style = MaterialTheme.typography.labelMedium,
+                    color = AppColors.TextSecondary
                 )
             }
         }
 
         if (recentClips.isEmpty()) {
-            GlassCard(modifier = Modifier.fillMaxWidth()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .glass(RoundedCornerShape(AppRadii.Medium.dp), AppColors.SurfaceGlassSubtle, rimAlpha = 0.6f)
+                    .padding(16.dp)
+            ) {
                 Text(
                     text = "Clips you save appear here until you quit ReplayMac.",
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        color = AppColors.TextSecondary
-                    ),
-                    modifier = Modifier.padding(14.dp)
+                    style = MaterialTheme.typography.bodySmall,
+                    color = AppColors.TextSecondary
                 )
             }
         } else {
-            GlassCard(modifier = Modifier.fillMaxWidth()) {
+            GlassCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(AppRadii.Medium.dp)) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     recentClips.forEachIndexed { index, clip ->
                         RecentClipItem(
@@ -853,14 +378,7 @@ fun RecentClipsSection(
                             thumbnailBase64 = thumbnails[clip.id],
                             onClick = { onClipSelected(clip) }
                         )
-
-                        if (index < recentClips.size - 1) {
-                            HorizontalDivider(
-                                color = AppColors.GlassBorder.copy(alpha = 0.5f),
-                                thickness = 0.5.dp,
-                                modifier = Modifier.padding(start = 122.dp)
-                            )
-                        }
+                        if (index < recentClips.lastIndex) RowSeparator(startIndent = 122.dp)
                     }
                 }
             }

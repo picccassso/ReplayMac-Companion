@@ -3,13 +3,16 @@ package com.replaymac.companion.ui.components
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,24 +20,29 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.replaymac.companion.ui.theme.AppColors
 import java.util.Locale
 import kotlin.math.min
 
+/** Matches the desktop's MenuBarState.formattedDuration: "00:12", or "01:02:03" past an hour. */
 fun formatDurationSeconds(seconds: Double): String {
     val totalSec = seconds.toInt().coerceAtLeast(0)
     val hours = totalSec / 3600
     val mins = (totalSec % 3600) / 60
     val secs = totalSec % 60
     return if (hours > 0) {
-        String.format(Locale.US, "%d:%02d:%02d", hours, mins, secs)
+        String.format(Locale.US, "%02d:%02d:%02d", hours, mins, secs)
     } else {
-        String.format(Locale.US, "%d:%02d", mins, secs)
+        String.format(Locale.US, "%02d:%02d", mins, secs)
     }
 }
+
+/** Matches the desktop's meter suffix: "Filling…" until the window is full, then "Ready". */
+fun meterFillSuffix(availableSeconds: Double, capSeconds: Int): String =
+    if (availableSeconds < capSeconds) "Filling…" else "Ready"
 
 @Composable
 fun ProgressMeter(
@@ -44,77 +52,48 @@ fun ProgressMeter(
     detail: String,
     modifier: Modifier = Modifier
 ) {
-    val safeCap = if (capSeconds > 0) capSeconds else 30
-    val rawFraction = (availableSeconds / safeCap).toFloat().coerceIn(0f, 1f)
-    val animatedFraction by animateFloatAsState(
-        targetValue = rawFraction,
-        animationSpec = tween(300),
+    val safeCap = capSeconds.coerceAtLeast(1)
+    val fraction by animateFloatAsState(
+        targetValue = (availableSeconds / safeCap).toFloat().coerceIn(0f, 1f),
+        animationSpec = tween(400),
         label = "meterProgress"
     )
+    val suffix = meterFillSuffix(availableSeconds, safeCap)
+    val isReady = suffix == "Ready"
+    val barColor by animateColorAsState(if (isReady) AppColors.Success else AppColors.Accent, label = "meterColor")
+    val digits = MaterialTheme.typography.labelMedium.copy(fontFeatureSettings = "tnum")
 
-    val isReady = availableSeconds >= safeCap
-    val progressColor by animateColorAsState(
-        targetValue = if (isReady) AppColors.Success else AppColors.Accent,
-        label = "meterColor"
-    )
-
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(6.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(7.dp)) {
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(title, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium), color = AppColors.TextPrimary)
+            Spacer(Modifier.weight(1f))
             Text(
-                text = title,
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    color = AppColors.TextPrimary
-                )
+                text = "${formatDurationSeconds(availableSeconds)} / ${formatDurationSeconds(safeCap.toDouble())}",
+                style = digits,
+                color = AppColors.TextPrimary
             )
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "${formatDurationSeconds(availableSeconds)} / ${formatDurationSeconds(safeCap.toDouble())}",
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontFamily = FontFamily.Monospace,
-                        color = AppColors.TextSecondary
-                    )
-                )
-
-                if (isReady) {
-                    Text(
-                        text = "Ready",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = AppColors.Success
-                        )
-                    )
-                }
-            }
+            Text(
+                text = "  $suffix",
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = if (isReady) AppColors.Success else AppColors.TextSecondary
+            )
         }
-
-        LinearProgressIndicator(
-            progress = { animatedFraction },
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(6.dp)
-                .clip(RoundedCornerShape(3.dp)),
-            color = progressColor,
-            trackColor = AppColors.BackgroundSecondary
-        )
-
-        Text(
-            text = detail,
-            style = MaterialTheme.typography.labelSmall.copy(
-                color = AppColors.TextTertiary
+                .clip(CircleShape)
+                .background(AppColors.TextPrimary.copy(alpha = 0.1f))
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(fraction)
+                    .clip(CircleShape)
+                    .background(Brush.horizontalGradient(listOf(barColor.copy(alpha = 0.75f), barColor)))
             )
-        )
+        }
+        Text(detail, style = MaterialTheme.typography.labelSmall, color = AppColors.TextSecondary)
     }
 }
 
@@ -128,32 +107,19 @@ fun DualProgressMeters(
     longBufferDurationSeconds: Int,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
-    ) {
-        val quickAvailable = min(bufferedSeconds, bufferDurationSeconds.toDouble())
+    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         ProgressMeter(
             title = "Quick replay",
-            availableSeconds = quickAvailable,
+            availableSeconds = min(bufferedSeconds, bufferDurationSeconds.toDouble()),
             capSeconds = bufferDurationSeconds,
             detail = "$bufferMemoryFormatted in memory"
         )
-
         if (longBufferEnabled) {
-            val extAvailable = min(extendedBufferElapsedSeconds, longBufferDurationSeconds.toDouble())
-            val diskEstimatedMb = (extAvailable * 2.5).toInt()
-            val diskDetail = if (diskEstimatedMb >= 1000) {
-                String.format(Locale.US, "%.1f GB on disk · Kept on disk", diskEstimatedMb / 1024.0)
-            } else {
-                "$diskEstimatedMb MB on disk · Kept on disk"
-            }
-
             ProgressMeter(
                 title = "Extended replay",
-                availableSeconds = extAvailable,
+                availableSeconds = min(extendedBufferElapsedSeconds, longBufferDurationSeconds.toDouble()),
                 capSeconds = longBufferDurationSeconds,
-                detail = diskDetail
+                detail = "Kept on disk"
             )
         }
     }

@@ -3,6 +3,7 @@ package com.replaymac.companion
 import com.replaymac.companion.data.model.CompanionServerEvent
 import com.replaymac.companion.data.network.CompanionProtocolParser
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -51,6 +52,7 @@ class CompanionStateParserTest {
                 "longBufferEnabled": true,
                 "longBufferDurationSeconds": 300,
                 "capturedDisplayName": "Built-in Retina Display",
+                "isUsingFallbackDisplay": true,
                 "isMicrophoneEnabled": true,
                 "isMicrophoneMuted": false,
                 "isSystemAudioEnabled": true,
@@ -77,6 +79,7 @@ class CompanionStateParserTest {
         assertEquals(30, snapshot.bufferDurationSeconds)
         assertEquals("100 MB", snapshot.bufferMemoryFormatted)
         assertEquals("Built-in Retina Display", snapshot.capturedDisplayName)
+        assertTrue(snapshot.isUsingFallbackDisplay)
         assertEquals(1, snapshot.recentClips.size)
         assertEquals("clip-1", snapshot.recentClips[0].id)
         assertTrue(snapshot.recentClips[0].hasThumbnail)
@@ -115,6 +118,8 @@ class CompanionStateParserTest {
         assertTrue(snapshot.isSessionRecording)
         assertEquals("saving", snapshot.saveStatus)
         assertTrue(snapshot.isSaveInProgress)
+        // Older ReplayMac builds don't send the fallback flag at all.
+        assertFalse(snapshot.isUsingFallbackDisplay)
     }
 
     @Test

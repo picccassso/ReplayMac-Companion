@@ -17,8 +17,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Movie
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.rounded.Movie
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -31,7 +31,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.replaymac.companion.data.model.CompanionClipSummary
@@ -66,6 +65,14 @@ fun clipKindTitle(kind: String): String {
     }
 }
 
+/** "Replay · 0:30 · 24.1 MB · Saved 14:02", the desktop's recent-clip summary. */
+fun clipDetailLine(clip: CompanionClipSummary): String = buildList {
+    add(clipKindTitle(clip.kind))
+    clip.duration?.takeIf { it > 0 }?.let { add(formatDurationSeconds(it)) }
+    formatFileSize(clip.fileSize).takeIf { it.isNotEmpty() }?.let { add(it) }
+    if (clip.savedAt > 0) add("Saved ${formatSavedTime(clip.savedAt)}")
+}.joinToString(" · ")
+
 @Composable
 fun RecentClipItem(
     clip: CompanionClipSummary,
@@ -89,7 +96,7 @@ fun RecentClipItem(
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 10.dp),
+            .padding(horizontal = 14.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -98,7 +105,7 @@ fun RecentClipItem(
             modifier = Modifier
                 .width(96.dp)
                 .height(54.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(10.dp))
                 .background(Color.Black.copy(alpha = 0.45f)),
             contentAlignment = Alignment.Center
         ) {
@@ -111,7 +118,7 @@ fun RecentClipItem(
                 )
             } else {
                 Icon(
-                    imageVector = Icons.Default.Movie,
+                    imageVector = Icons.Rounded.Movie,
                     contentDescription = null,
                     tint = AppColors.TextTertiary,
                     modifier = Modifier.size(24.dp)
@@ -126,39 +133,23 @@ fun RecentClipItem(
         ) {
             Text(
                 text = clip.filename.substringBeforeLast("."),
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontWeight = FontWeight.Medium,
-                    color = AppColors.TextPrimary
-                ),
+                style = MaterialTheme.typography.titleSmall,
+                color = AppColors.TextPrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
 
-            val detailsList = mutableListOf<String>()
-            detailsList.add(clipKindTitle(clip.kind))
-            clip.duration?.let { dur ->
-                if (dur > 0) detailsList.add(formatDurationSeconds(dur))
-            }
-            clip.fileSize?.let { size ->
-                val sizeStr = formatFileSize(size)
-                if (sizeStr.isNotEmpty()) detailsList.add(sizeStr)
-            }
-            if (clip.savedAt > 0) {
-                detailsList.add("Saved ${formatSavedTime(clip.savedAt)}")
-            }
-
             Text(
-                text = detailsList.joinToString(" · "),
-                style = MaterialTheme.typography.labelSmall.copy(
-                    color = AppColors.TextSecondary
-                ),
+                text = clipDetailLine(clip),
+                style = MaterialTheme.typography.labelMedium,
+                color = AppColors.TextSecondary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
         }
 
         Icon(
-            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
             contentDescription = null,
             tint = AppColors.TextTertiary,
             modifier = Modifier.size(20.dp)

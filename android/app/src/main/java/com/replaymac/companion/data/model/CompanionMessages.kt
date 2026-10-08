@@ -103,6 +103,8 @@ data class CompanionStateSnapshot(
     val longBufferEnabled: Boolean = false,
     val longBufferDurationSeconds: Int = 300,
     val capturedDisplayName: String? = null,
+    /** The chosen display was unavailable, so the Mac is capturing another one. */
+    val isUsingFallbackDisplay: Boolean = false,
     val isMicrophoneEnabled: Boolean = false,
     val isMicrophoneMuted: Boolean = false,
     val isSystemAudioEnabled: Boolean = true,

@@ -42,10 +42,13 @@ class CompanionWebSocketClient(
     private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
 
-    private val _events = MutableSharedFlow<CompanionServerEvent>(replay = 1, extraBufferCapacity = 64)
+    // No replay: a late subscriber must never receive a stale snapshot.
+    private val _events = MutableSharedFlow<CompanionServerEvent>(extraBufferCapacity = 64)
     val events: SharedFlow<CompanionServerEvent> = _events.asSharedFlow()
 
     private var currentWebSocket: WebSocket? = null
+    /** Bumped on every connect and disconnect; callbacks from an older generation are ignored. */
+    @Volatile private var generation = 0
     private var pingJob: Job? = null
     private var currentHost: String? = null
     private var currentPort: Int = DEFAULT_PORT
@@ -72,14 +75,23 @@ class CompanionWebSocketClient(
             return
         }
 
+        val socketGeneration = ++generation
         currentWebSocket = okHttpClient.newWebSocket(request, object : WebSocketListener() {
+            // OkHttp keeps calling back on a socket after it has been replaced or
+            // cancelled. Those late callbacks must not touch the current
+            // connection: a cancelled socket reports "Socket closed" and could
+            // overwrite fresh state with an old snapshot.
+            private fun isCurrent() = socketGeneration == generation
+
             override fun onOpen(webSocket: WebSocket, response: Response) {
+                if (!isCurrent()) return
                 Log.d(TAG, "WebSocket opened with $host:$port")
                 sendHello()
                 startPingLoop()
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
+                if (!isCurrent()) return
                 Log.v(TAG, "Received message: $text")
                 handleIncomingMessage(text, host, port)
             }
@@ -90,6 +102,7 @@ class CompanionWebSocketClient(
             }
 
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+                if (!isCurrent()) return
                 Log.d(TAG, "WebSocket closed: $code / $reason")
                 stopPingLoop()
                 if (_connectionState.value !is ConnectionState.Failed) {
@@ -98,6 +111,7 @@ class CompanionWebSocketClient(
             }
 
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+                if (!isCurrent()) return
                 Log.e(TAG, "WebSocket failure: ${t.message}", t)
                 stopPingLoop()
                 if (_connectionState.value !is ConnectionState.Failed) {
@@ -109,12 +123,25 @@ class CompanionWebSocketClient(
 
     fun disconnect() {
         stopPingLoop()
-        try {
-            currentWebSocket?.close(1000, "User disconnected")
-        } catch (_: Exception) {}
-        currentWebSocket?.cancel()
+        // Retire the socket first so its closing callbacks are ignored.
+        generation++
+        val socket = currentWebSocket
         currentWebSocket = null
+        try {
+            socket?.close(1000, "User disconnected")
+        } catch (_: Exception) {}
+        socket?.cancel()
         _connectionState.value = ConnectionState.Disconnected
+    }
+
+    /**
+     * Asks the Mac for a fresh snapshot. ReplayMac answers a hello from an
+     * already-paired device with its current state, so this catches up on
+     * anything missed while the phone was asleep or in the background.
+     */
+    fun resync(): Boolean {
+        if (_connectionState.value !is ConnectionState.Connected) return false
+        return sendMessage(CompanionClientMessage.hello(deviceId = deviceId, deviceName = deviceName, clientVersion = "1.0.0"))
     }
 
     fun clearError() {

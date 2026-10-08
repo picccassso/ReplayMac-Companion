@@ -50,14 +50,15 @@ class CompanionConnectionLogicTest {
 
     @Test
     fun testDurationFormatter() {
-        assertEquals("0:00", formatDurationSeconds(0.0))
-        assertEquals("0:05", formatDurationSeconds(5.2))
-        assertEquals("0:59", formatDurationSeconds(59.9))
-        assertEquals("1:00", formatDurationSeconds(60.0))
-        assertEquals("5:30", formatDurationSeconds(330.0))
-        assertEquals("1:00:00", formatDurationSeconds(3600.0))
-        assertEquals("2:05:10", formatDurationSeconds(7510.0))
-        assertEquals("0:00", formatDurationSeconds(-10.0))
+        // Same output as the desktop's MenuBarState.formattedDuration.
+        assertEquals("00:00", formatDurationSeconds(0.0))
+        assertEquals("00:05", formatDurationSeconds(5.2))
+        assertEquals("00:59", formatDurationSeconds(59.9))
+        assertEquals("01:00", formatDurationSeconds(60.0))
+        assertEquals("05:30", formatDurationSeconds(330.0))
+        assertEquals("01:00:00", formatDurationSeconds(3600.0))
+        assertEquals("02:05:10", formatDurationSeconds(7510.0))
+        assertEquals("00:00", formatDurationSeconds(-10.0))
     }
 
     @Test

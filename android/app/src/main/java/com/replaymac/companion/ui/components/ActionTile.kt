@@ -1,42 +1,57 @@
 package com.replaymac.companion.ui.components
 
-import android.view.HapticFeedbackConstants
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.replaymac.companion.ui.theme.AppColors
+import com.replaymac.companion.ui.theme.AppRadii
 
+/** How a tile is coloured, independent of how it is drawn. */
+enum class TileTone {
+    Normal,
+    /** Accent-filled primary action, like the desktop's prominent Save tile. */
+    Prominent,
+    /** Red while something is actively capturing. */
+    Live,
+    /** Orange for a muted audio source. */
+    Muted,
+    /** Grey for a source that is switched off on the Mac. */
+    Off
+}
+
+private data class TilePalette(val fill: Color, val icon: Color, val title: Color, val subtitle: Color)
+
+private fun paletteFor(tone: TileTone): TilePalette = when (tone) {
+    TileTone.Prominent -> TilePalette(AppColors.Accent, Color.White, Color.White, Color.White.copy(alpha = 0.75f))
+    TileTone.Live -> TilePalette(AppColors.Danger, Color.White, Color.White, Color.White.copy(alpha = 0.8f))
+    TileTone.Muted -> TilePalette(AppColors.SurfaceGlass, AppColors.Warning, AppColors.TextPrimary, AppColors.TextSecondary)
+    TileTone.Off -> TilePalette(AppColors.SurfaceGlass, AppColors.TextSecondary, AppColors.TextPrimary, AppColors.TextSecondary)
+    TileTone.Normal -> TilePalette(AppColors.SurfaceGlass, AppColors.Accent, AppColors.TextPrimary, AppColors.TextSecondary)
+}
+
+/**
+ * The desktop Home page's action tile: symbol beside the title, an accent
+ * fill for the primary action and a quiet fill otherwise. A status line
+ * stands in for the desktop's keyboard shortcut hint.
+ */
 @Composable
 fun ActionTile(
     title: String,
@@ -44,137 +59,48 @@ fun ActionTile(
     icon: ImageVector,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    isProminent: Boolean = false,
-    isActiveDanger: Boolean = false,
+    tone: TileTone = TileTone.Normal,
     isEnabled: Boolean = true,
     isLoading: Boolean = false,
-    iconTint: Color? = null
+    minHeight: Dp = 64.dp
 ) {
-    val view = LocalView.current
+    val palette = paletteFor(tone)
+    val fill by animateColorAsState(palette.fill, label = "tileFill")
+    val iconTint by animateColorAsState(palette.icon, label = "tileIcon")
+    val titleColor by animateColorAsState(palette.title, label = "tileTitle")
+    val subtitleColor by animateColorAsState(palette.subtitle, label = "tileSubtitle")
+    val shape = RoundedCornerShape(AppRadii.Medium.dp)
 
-    val backgroundColor by animateColorAsState(
-        targetValue = when {
-            !isEnabled -> AppColors.SurfaceGlass.copy(alpha = 0.45f)
-            isActiveDanger -> AppColors.Danger
-            isProminent -> AppColors.Accent
-            else -> AppColors.SurfaceGlass
-        },
-        label = "tileBg"
-    )
-
-    val contentColor by animateColorAsState(
-        targetValue = when {
-            isActiveDanger || isProminent -> Color.White
-            !isEnabled -> AppColors.TextTertiary
-            else -> AppColors.TextPrimary
-        },
-        label = "tileContentColor"
-    )
-
-    val resolvedIconTint by animateColorAsState(
-        targetValue = when {
-            isActiveDanger || isProminent -> Color.White
-            !isEnabled -> AppColors.TextTertiary
-            iconTint != null -> iconTint
-            else -> AppColors.Accent
-        },
-        label = "tileIconTint"
-    )
-
-    val subtitleColor by animateColorAsState(
-        targetValue = when {
-            isActiveDanger || isProminent -> Color.White.copy(alpha = 0.85f)
-            !isEnabled -> AppColors.TextTertiary.copy(alpha = 0.7f)
-            else -> AppColors.TextSecondary
-        },
-        label = "tileSubtitleColor"
-    )
-
-    val borderColor = when {
-        isActiveDanger -> AppColors.Danger.copy(alpha = 0.6f)
-        isProminent -> AppColors.AccentVariant.copy(alpha = 0.7f)
-        else -> AppColors.GlassBorder
-    }
-
-    Surface(
+    Row(
         modifier = modifier
-            .height(56.dp)
-            .clip(RoundedCornerShape(14.dp))
-            .alpha(if (isEnabled) 1.0f else 0.45f)
-            .then(
-                if (isEnabled && !isLoading) {
-                    Modifier.clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = ripple(color = Color.White.copy(alpha = 0.3f))
-                    ) {
-                        try {
-                            view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                        } catch (_: Exception) {}
-                        onClick()
-                    }
-                } else {
-                    Modifier
-                }
-            ),
-        shape = RoundedCornerShape(14.dp),
-        color = backgroundColor,
-        border = BorderStroke(1.dp, borderColor)
+            .heightIn(min = minHeight)
+            .glassPressable(onClick = onClick, enabled = isEnabled && !isLoading, shape = shape)
+            .glass(shape, fill, rimAlpha = if (fill.alpha > 0.5f) 0.5f else 1f)
+            .padding(horizontal = 14.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
-        ) {
-            // Icon
-            Box(
-                modifier = Modifier.size(24.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = resolvedIconTint,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.width(10.dp))
-
-            // Action Title + Status Subtitle
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        color = contentColor
-                    ),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        color = subtitleColor
-                    ),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-
-            // Spinner if loading
-            if (isLoading) {
-                Spacer(modifier = Modifier.width(6.dp))
-                CircularProgressIndicator(
-                    modifier = Modifier.size(16.dp),
-                    color = contentColor,
-                    strokeWidth = 2.dp
-                )
-            }
+        if (isLoading) {
+            CircularProgressIndicator(modifier = Modifier.size(20.dp), color = iconTint, strokeWidth = 2.dp)
+        } else {
+            Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(22.dp))
+        }
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleSmall,
+                color = titleColor,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.labelMedium,
+                color = subtitleColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(end = 2.dp)
+            )
         }
     }
 }

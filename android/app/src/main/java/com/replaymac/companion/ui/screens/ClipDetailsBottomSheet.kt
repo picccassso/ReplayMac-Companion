@@ -8,25 +8,22 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.Movie
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Folder
+import androidx.compose.material.icons.rounded.Movie
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -42,13 +39,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.replaymac.companion.data.model.CompanionClipSummary
-import com.replaymac.companion.ui.components.clipKindTitle
-import com.replaymac.companion.ui.components.formatDurationSeconds
-import com.replaymac.companion.ui.components.formatFileSize
-import com.replaymac.companion.ui.components.formatSavedTime
+import com.replaymac.companion.ui.components.AccentButton
+import com.replaymac.companion.ui.components.GlassButton
+import com.replaymac.companion.ui.components.clipDetailLine
 import com.replaymac.companion.ui.theme.AppColors
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -78,23 +73,31 @@ fun ClipDetailsBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = AppColors.SurfaceGlass,
-        contentColor = AppColors.TextPrimary
+        containerColor = AppColors.BackgroundSecondary,
+        contentColor = AppColors.TextPrimary,
+        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
+        dragHandle = {
+            Box(
+                Modifier
+                    .padding(top = 10.dp, bottom = 14.dp)
+                    .size(width = 40.dp, height = 5.dp)
+                    .background(AppColors.TextTertiary, CircleShape)
+            )
+        }
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
-            // Large Thumbnail Preview
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(180.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color.Black.copy(alpha = 0.6f)),
+                    .aspectRatio(16f / 9f)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Color.Black),
                 contentAlignment = Alignment.Center
             ) {
                 if (bitmap != null) {
@@ -106,117 +109,44 @@ fun ClipDetailsBottomSheet(
                     )
                 } else {
                     Icon(
-                        imageVector = Icons.Default.Movie,
+                        imageVector = Icons.Rounded.Movie,
                         contentDescription = null,
                         tint = AppColors.TextTertiary,
-                        modifier = Modifier.size(48.dp)
+                        modifier = Modifier.size(44.dp)
                     )
                 }
             }
 
-            // Filename and Metadata
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
-                    text = clip.filename,
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = AppColors.TextPrimary
-                    )
+                    text = clip.filename.substringBeforeLast("."),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = AppColors.TextPrimary
                 )
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = clipKindTitle(clip.kind),
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            color = AppColors.Accent,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    )
-                    Text("•", color = AppColors.TextTertiary)
-                    clip.duration?.let { dur ->
-                        if (dur > 0) {
-                            Text(
-                                text = formatDurationSeconds(dur),
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    color = AppColors.TextSecondary
-                                )
-                            )
-                            Text("•", color = AppColors.TextTertiary)
-                        }
-                    }
-                    clip.fileSize?.let { size ->
-                        Text(
-                            text = formatFileSize(size),
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                color = AppColors.TextSecondary
-                            )
-                        )
-                        Text("•", color = AppColors.TextTertiary)
-                    }
-                    if (clip.savedAt > 0) {
-                        Text(
-                            text = "Saved ${formatSavedTime(clip.savedAt)}",
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                color = AppColors.TextSecondary
-                            )
-                        )
-                    }
-                }
+                Text(
+                    text = clipDetailLine(clip),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = AppColors.TextSecondary
+                )
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
-
-            // Action Buttons
-            Button(
-                onClick = {
-                    onRevealInFinder(clip.id)
-                    onDismiss()
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = AppColors.Accent),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(imageVector = Icons.Default.Folder, contentDescription = null)
-                    Text(
-                        text = "Reveal in Finder on Mac",
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    )
-                }
-            }
-
-            OutlinedButton(
-                onClick = { showDeleteConfirmation = true },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = AppColors.Danger
-                ),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(imageVector = Icons.Default.Delete, contentDescription = null)
-                    Text(
-                        text = "Delete Clip",
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    )
-                }
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                AccentButton(
+                    text = "Show in Finder",
+                    icon = Icons.Rounded.Folder,
+                    onClick = {
+                        onRevealInFinder(clip.id)
+                        onDismiss()
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+                GlassButton(
+                    text = "Delete",
+                    icon = Icons.Rounded.Delete,
+                    contentColor = AppColors.Danger,
+                    tint = AppColors.Danger.copy(alpha = 0.12f),
+                    onClick = { showDeleteConfirmation = true }
+                )
             }
         }
     }
@@ -224,26 +154,26 @@ fun ClipDetailsBottomSheet(
     if (showDeleteConfirmation) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirmation = false },
-            title = { Text("Delete Clip") },
-            text = { Text("Are you sure you want to delete \"${clip.filename}\" from your Mac? This cannot be undone.") },
+            title = { Text("Delete this clip?") },
+            text = { Text("\u201c${clip.filename}\u201d will be deleted from your Mac. This can\u2019t be undone.") },
             confirmButton = {
-                Button(
+                TextButton(
                     onClick = {
                         showDeleteConfirmation = false
                         onDeleteClip(clip.id)
                         onDismiss()
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = AppColors.Danger)
+                    }
                 ) {
-                    Text("Delete")
+                    Text("Delete", color = AppColors.Danger, style = MaterialTheme.typography.labelLarge)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirmation = false }) {
-                    Text("Cancel")
+                    Text("Cancel", color = AppColors.Accent, style = MaterialTheme.typography.labelLarge)
                 }
             },
             containerColor = AppColors.BackgroundSecondary,
+            shape = RoundedCornerShape(28.dp),
             titleContentColor = AppColors.TextPrimary,
             textContentColor = AppColors.TextSecondary
         )

@@ -1,6 +1,5 @@
 package com.replaymac.companion.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
@@ -18,10 +17,11 @@ private val DarkColorScheme = darkColorScheme(
     onErrorContainer = AppColors.Danger,
     background = AppColors.BackgroundPrimary,
     onBackground = AppColors.TextPrimary,
-    surface = AppColors.SurfaceGlass,
+    surface = AppColors.BackgroundSecondary,
     onSurface = AppColors.TextPrimary,
     surfaceVariant = AppColors.BackgroundSecondary,
     onSurfaceVariant = AppColors.TextSecondary,
+    surfaceContainerHigh = AppColors.BackgroundSecondary,
     outline = AppColors.GlassBorder
 )
 
