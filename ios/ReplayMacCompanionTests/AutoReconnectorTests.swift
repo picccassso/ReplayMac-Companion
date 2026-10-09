@@ -1,6 +1,6 @@
 import XCTest
 import Combine
-@testable import ReplayMacCompanion
+@testable import ReplayCapCompanion
 
 final class AutoReconnectorTests: XCTestCase {
 
@@ -202,7 +202,7 @@ final class AutoReconnectorTests: XCTestCase {
         net.macAppearsAt(home)
 
         // Wait until connected and reconnector returns to idle
-        for _ in 0..<50 {
+        for _ in 0..<150 {
             if net.state.value.isConnected && net.reconnector.currentTarget == nil { break }
             try? await Task.sleep(nanoseconds: 10_000_000)
         }

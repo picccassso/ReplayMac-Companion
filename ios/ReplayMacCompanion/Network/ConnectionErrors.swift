@@ -15,7 +15,7 @@ public enum ConnectionErrors {
             case NSURLErrorTimedOut:
                 return "Your Mac didn't respond. Check it's awake and on the same network."
             case NSURLErrorCannotConnectToHost:
-                return "Nothing is listening there. Check Companion Server is on in ReplayMac."
+                return "Nothing is listening there. Check Companion Server is on in ReplayCap."
             case NSURLErrorCannotFindHost, NSURLErrorDNSLookupFailed:
                 return "That address couldn't be found."
             case NSURLErrorNotConnectedToInternet, NSURLErrorNetworkConnectionLost:
@@ -28,13 +28,13 @@ public enum ConnectionErrors {
         if nsError.domain == NSPOSIXErrorDomain {
             switch POSIXErrorCode(rawValue: Int32(nsError.code)) {
             case .ECONNREFUSED:
-                return "Nothing is listening there. Check Companion Server is on in ReplayMac."
+                return "Nothing is listening there. Check Companion Server is on in ReplayCap."
             case .ETIMEDOUT:
                 return "Your Mac didn't respond. Check it's awake and on the same network."
             case .EHOSTUNREACH, .ENETUNREACH:
                 return "Your Mac isn't reachable from this network."
             case .ECONNRESET:
-                return "ReplayMac closed the connection."
+                return "ReplayCap closed the connection."
             default:
                 break
             }

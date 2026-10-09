@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct ReplayMacCompanionApp: App {
+struct ReplayCapCompanionApp: App {
     @StateObject private var viewModel: CompanionViewModel
 
     init() {

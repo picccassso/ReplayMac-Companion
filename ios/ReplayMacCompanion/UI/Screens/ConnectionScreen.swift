@@ -531,7 +531,7 @@ private struct SearchingRow: View {
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(AppColors.textPrimary)
 
-                Text("ReplayMac needs to be open, and on the same Wi-Fi as this phone.")
+                Text("ReplayCap needs to be open, and on the same Wi-Fi as this phone.")
                     .font(.system(size: 13))
                     .foregroundColor(AppColors.textSecondary)
             }

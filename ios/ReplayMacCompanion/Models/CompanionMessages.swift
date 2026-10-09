@@ -95,7 +95,7 @@ public struct CompanionAuthResponse: Codable, Sendable, Equatable {
     public init(
         type: String = "auth_response",
         status: String,
-        serverName: String = "ReplayMac",
+        serverName: String = "ReplayCap",
         serverVersion: String = "1.0",
         serverId: String? = nil,
         deviceName: String? = nil
@@ -116,7 +116,7 @@ public struct CompanionAuthResponse: Codable, Sendable, Equatable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.type = try container.decodeIfPresent(String.self, forKey: .type) ?? "auth_response"
         self.status = try container.decode(String.self, forKey: .status)
-        self.serverName = try container.decodeIfPresent(String.self, forKey: .serverName) ?? "ReplayMac"
+        self.serverName = try container.decodeIfPresent(String.self, forKey: .serverName) ?? "ReplayCap"
         self.serverVersion = try container.decodeIfPresent(String.self, forKey: .serverVersion) ?? "1.0"
         self.serverId = try container.decodeIfPresent(String.self, forKey: .serverId)
         self.deviceName = try container.decodeIfPresent(String.self, forKey: .deviceName)

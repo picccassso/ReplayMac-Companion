@@ -1,5 +1,5 @@
 import XCTest
-@testable import ReplayMacCompanion
+@testable import ReplayCapCompanion
 
 final class CompanionConnectionLogicTests: XCTestCase {
 

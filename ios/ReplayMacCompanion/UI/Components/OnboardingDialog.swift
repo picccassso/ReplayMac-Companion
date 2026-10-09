@@ -16,7 +16,7 @@ private struct TutorialPage: Identifiable {
 
 private let tutorialPages: [TutorialPage] = [
     TutorialPage(
-        title: "ReplayMac, from your phone",
+        title: "ReplayCap, from your phone",
         subtitle: "Save clips and check on recording without leaving your game.",
         highlights: [
             TutorialHighlight(icon: "arrow.down.circle.fill", title: "Save replays", detail: "Tap once to save the last 30 seconds, or longer."),
@@ -25,7 +25,7 @@ private let tutorialPages: [TutorialPage] = [
     ),
     TutorialPage(
         title: "Connecting",
-        subtitle: "Turn on Companion Server in ReplayMac’s settings first.",
+        subtitle: "Turn on Companion Server in ReplayCap’s settings first.",
         highlights: [
             TutorialHighlight(icon: "wifi", title: "Wi-Fi", detail: "Your Mac shows up automatically when you’re on the same network."),
             TutorialHighlight(icon: "cable.connector", title: "USB Cable", detail: "Plug in with USB-C or Lightning, with Local Network Sharing or port forwarding.")

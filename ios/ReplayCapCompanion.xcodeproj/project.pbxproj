@@ -1,0 +1,660 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		016C52694E00AFCE0E48724B /* ClipDetailsBottomSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD68C83E334DE89A64685F1 /* ClipDetailsBottomSheet.swift */; };
+		035E8F2814B53C865890C5F3 /* CompanionRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF482A77247E4EA269E6DCDB /* CompanionRepository.swift */; };
+		085ADD285A34B6013577300D /* CompanionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90E3AD5DFC61AE5AAA0DF913 /* CompanionState.swift */; };
+		0AAB159C78C4D3ADDB611313 /* GlassTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 610A6E12C4093ACE3EB3EE0B /* GlassTextField.swift */; };
+		1E8A1556400286AFBB8ABBAC /* CompanionModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19C076C745CB4DA6C0D149B0 /* CompanionModelTests.swift */; };
+		218FD7767C7E023B837A4EB8 /* HomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 427F168C162C9B5EC4C2C60F /* HomeScreen.swift */; };
+		28D45C79889C561A6F2D948B /* ReconnectPlanTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2B2177919C7277DE747CEF0 /* ReconnectPlanTests.swift */; };
+		38C5B3D4E503ABB0E606F055 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 10C3FF13E9F7B8C276AC6FB6 /* Assets.xcassets */; };
+		47F145D5041B1048E3CEA892 /* DualProgressMeters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BE6F3CED20546DB18A3E233 /* DualProgressMeters.swift */; };
+		4B0932BECA98E2DF524B47F5 /* RememberedMacStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822E83788537B1C8F64B3D82 /* RememberedMacStore.swift */; };
+		4C4CC7BAB0F957E4987BAF1C /* GlassCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBCFC53EF34CD54C188288A6 /* GlassCard.swift */; };
+		54655ED7535911BB1F7CFE2E /* RememberedMac.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EBF22F6236469EAC2A864AE /* RememberedMac.swift */; };
+		59C9D8AA73B51A0662AE1C3C /* SectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200CB98D55ADB3A993D7C2B4 /* SectionHeader.swift */; };
+		62031BD402449A19C90AE779 /* BonjourDiscoveryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8929DC4A4838060826798137 /* BonjourDiscoveryManager.swift */; };
+		62E3705EF0AD19F7D2E8D424 /* AppColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 201AA261A2B7710E9A217BF9 /* AppColors.swift */; };
+		63298826AAC498EECACA0353 /* ReplayMacCompanionApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AD60368039E7EF37A98DC52 /* ReplayMacCompanionApp.swift */; };
+		66EC93748B1C4DF563A786B3 /* HomeControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48C96B19DB7BD6AA8A5436EE /* HomeControls.swift */; };
+		6D337CBCEC8662078E2E19F1 /* ConnectionErrorsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3704FB95D820AE194950D5 /* ConnectionErrorsTests.swift */; };
+		6E6686FC99F5A28212954DE0 /* OnboardingDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D15AA82D749BB10B877D0CA /* OnboardingDialog.swift */; };
+		7011AE109C4F4CB3F7AB817C /* CompanionProtocolParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F2B799990FF4E8095A3C02F /* CompanionProtocolParser.swift */; };
+		7B719847831088203C52278B /* GlassButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 103B5BA5335803E176D4EBFD /* GlassButtons.swift */; };
+		8033099049F9005AF90FBD63 /* ConnectionErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39EF4080C3C0593FD6D6495D /* ConnectionErrors.swift */; };
+		84C8072799287D251247AD72 /* ActionTile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3235CD7AA43FD64941154E12 /* ActionTile.swift */; };
+		85104B9329CF13690AB34E6F /* CompanionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8409E4AA855E9D95E2EA0C15 /* CompanionViewModel.swift */; };
+		871263DBED5B7B892290FBEF /* CompanionProtocolParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 169C1F9038DD2F54B36B490F /* CompanionProtocolParserTests.swift */; };
+		9E5160E9D55158C26C4FDB70 /* RememberedMacTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B41004D37785E31FCB10D3F6 /* RememberedMacTests.swift */; };
+		9FD6EE3D485AF8C52FDD70A4 /* AutoReconnector.swift in Sources */ = {isa = PBXBuildFile; fileRef = C80BE3CD0A2AD2FD352ADF1F /* AutoReconnector.swift */; };
+		A0CDC14ABC6B23F5D761F1DD /* AutoReconnectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7505CBF0B664EDA101AE8144 /* AutoReconnectorTests.swift */; };
+		ABEF89F5DB0EBE9F6A67C573 /* AppRadii.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB854183D2971C19176B11A4 /* AppRadii.swift */; };
+		B04B5DC26E9CC9E3C2874CC1 /* ReconnectPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8813AAB44E8C7EF4723EA282 /* ReconnectPlan.swift */; };
+		B4CBFBC1EE721931A5A789E0 /* ConnectionScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55345E7EEFFF288780E2EC9 /* ConnectionScreen.swift */; };
+		B6D1EA177967E0937F6F3609 /* GlassBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3289D3703066723DF0B646C6 /* GlassBackground.swift */; };
+		C65CFE327B65996926A859B3 /* RecentClipItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F177A6DA1B650930A6A58FB /* RecentClipItem.swift */; };
+		C9F5CE58220BA5D61352A5E6 /* CompanionMessages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA6B7B6F717AF1029972BF2 /* CompanionMessages.swift */; };
+		D06BA20CC3B7C1A3435EB8A2 /* StatusDot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B0C2A8908C496CBFA77C1D0 /* StatusDot.swift */; };
+		D87D05F1D452C5CCAF11AFD0 /* CompanionWebSocketClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C6EF4968A8839B8712A5C13 /* CompanionWebSocketClient.swift */; };
+		E465BC1BE5DEE4E54DA26618 /* HomeControlLabelsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00CB68D7DDD60FDE9427C1F /* HomeControlLabelsTests.swift */; };
+		F4372C13DB52FE9328C3CCA7 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D3C039E239ABA357C81A2146 /* PrivacyInfo.xcprivacy */; };
+		FB628D393DB8151862E5BC6F /* CompanionConnectionLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D26ECCF5829F251579FFE9 /* CompanionConnectionLogicTests.swift */; };
+		FD7BBA5354712A43C3F78179 /* CompanionWebSocketClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F20133F4FEB80CE4C6059D4E /* CompanionWebSocketClientTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		A4BE2DCBC2F923A67F6CAA85 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 82CC05558E3CC23480C43D7F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BB3B48413640F96C18FD6C39;
+			remoteInfo = ReplayCapCompanion;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0C6EF4968A8839B8712A5C13 /* CompanionWebSocketClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionWebSocketClient.swift; sourceTree = "<group>"; };
+		0EBF22F6236469EAC2A864AE /* RememberedMac.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RememberedMac.swift; sourceTree = "<group>"; };
+		103B5BA5335803E176D4EBFD /* GlassButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassButtons.swift; sourceTree = "<group>"; };
+		10C3FF13E9F7B8C276AC6FB6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		169C1F9038DD2F54B36B490F /* CompanionProtocolParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionProtocolParserTests.swift; sourceTree = "<group>"; };
+		19C076C745CB4DA6C0D149B0 /* CompanionModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionModelTests.swift; sourceTree = "<group>"; };
+		1AD68C83E334DE89A64685F1 /* ClipDetailsBottomSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipDetailsBottomSheet.swift; sourceTree = "<group>"; };
+		1BE6F3CED20546DB18A3E233 /* DualProgressMeters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DualProgressMeters.swift; sourceTree = "<group>"; };
+		200CB98D55ADB3A993D7C2B4 /* SectionHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionHeader.swift; sourceTree = "<group>"; };
+		201AA261A2B7710E9A217BF9 /* AppColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppColors.swift; sourceTree = "<group>"; };
+		3235CD7AA43FD64941154E12 /* ActionTile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionTile.swift; sourceTree = "<group>"; };
+		3289D3703066723DF0B646C6 /* GlassBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassBackground.swift; sourceTree = "<group>"; };
+		37D26ECCF5829F251579FFE9 /* CompanionConnectionLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionConnectionLogicTests.swift; sourceTree = "<group>"; };
+		39EF4080C3C0593FD6D6495D /* ConnectionErrors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionErrors.swift; sourceTree = "<group>"; };
+		3B0C2A8908C496CBFA77C1D0 /* StatusDot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusDot.swift; sourceTree = "<group>"; };
+		3D15AA82D749BB10B877D0CA /* OnboardingDialog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingDialog.swift; sourceTree = "<group>"; };
+		3F2B799990FF4E8095A3C02F /* CompanionProtocolParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionProtocolParser.swift; sourceTree = "<group>"; };
+		427F168C162C9B5EC4C2C60F /* HomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreen.swift; sourceTree = "<group>"; };
+		48C96B19DB7BD6AA8A5436EE /* HomeControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeControls.swift; sourceTree = "<group>"; };
+		4CA6B7B6F717AF1029972BF2 /* CompanionMessages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionMessages.swift; sourceTree = "<group>"; };
+		4F177A6DA1B650930A6A58FB /* RecentClipItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentClipItem.swift; sourceTree = "<group>"; };
+		5EA3EF39A07520B10931532D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		610A6E12C4093ACE3EB3EE0B /* GlassTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassTextField.swift; sourceTree = "<group>"; };
+		7505CBF0B664EDA101AE8144 /* AutoReconnectorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoReconnectorTests.swift; sourceTree = "<group>"; };
+		7AD60368039E7EF37A98DC52 /* ReplayMacCompanionApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplayMacCompanionApp.swift; sourceTree = "<group>"; };
+		822E83788537B1C8F64B3D82 /* RememberedMacStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RememberedMacStore.swift; sourceTree = "<group>"; };
+		8409E4AA855E9D95E2EA0C15 /* CompanionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionViewModel.swift; sourceTree = "<group>"; };
+		8813AAB44E8C7EF4723EA282 /* ReconnectPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReconnectPlan.swift; sourceTree = "<group>"; };
+		8929DC4A4838060826798137 /* BonjourDiscoveryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonjourDiscoveryManager.swift; sourceTree = "<group>"; };
+		90E3AD5DFC61AE5AAA0DF913 /* CompanionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionState.swift; sourceTree = "<group>"; };
+		A05E1B1E9238CB8426529885 /* ReplayCapCompanion.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ReplayCapCompanion.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A882686DA4098BC724A9E49B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		AF482A77247E4EA269E6DCDB /* CompanionRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionRepository.swift; sourceTree = "<group>"; };
+		B41004D37785E31FCB10D3F6 /* RememberedMacTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RememberedMacTests.swift; sourceTree = "<group>"; };
+		C00CB68D7DDD60FDE9427C1F /* HomeControlLabelsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeControlLabelsTests.swift; sourceTree = "<group>"; };
+		C3891D0C503D788F0BC5E820 /* ReplayCapCompanionTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = ReplayCapCompanionTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C55345E7EEFFF288780E2EC9 /* ConnectionScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionScreen.swift; sourceTree = "<group>"; };
+		C80BE3CD0A2AD2FD352ADF1F /* AutoReconnector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoReconnector.swift; sourceTree = "<group>"; };
+		CBCFC53EF34CD54C188288A6 /* GlassCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassCard.swift; sourceTree = "<group>"; };
+		D2B2177919C7277DE747CEF0 /* ReconnectPlanTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReconnectPlanTests.swift; sourceTree = "<group>"; };
+		D3C039E239ABA357C81A2146 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		DB854183D2971C19176B11A4 /* AppRadii.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRadii.swift; sourceTree = "<group>"; };
+		EF3704FB95D820AE194950D5 /* ConnectionErrorsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionErrorsTests.swift; sourceTree = "<group>"; };
+		F20133F4FEB80CE4C6059D4E /* CompanionWebSocketClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionWebSocketClientTests.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		01EA8AF27E6138C58719FFC1 /* ReplayMacCompanion */ = {
+			isa = PBXGroup;
+			children = (
+				CFE85839DE519D059D3BB43E /* App */,
+				469902F7C1EF6AD126CC594E /* Connection */,
+				C4B8B914FA6609F3D982E990 /* Models */,
+				646163F6FEF283B43A41F125 /* Network */,
+				8C6E094D172CD25BDE8C321F /* Repository */,
+				17B1EF5C40D797A9C870B488 /* Resources */,
+				4AB534EE09E65FE0DAAB15F6 /* UI */,
+				6EE41834CF4ED522F854976D /* ViewModels */,
+			);
+			path = ReplayMacCompanion;
+			sourceTree = "<group>";
+		};
+		0B2043B935D5D39D3C7B6392 /* ReplayMacCompanionTests */ = {
+			isa = PBXGroup;
+			children = (
+				7505CBF0B664EDA101AE8144 /* AutoReconnectorTests.swift */,
+				37D26ECCF5829F251579FFE9 /* CompanionConnectionLogicTests.swift */,
+				19C076C745CB4DA6C0D149B0 /* CompanionModelTests.swift */,
+				169C1F9038DD2F54B36B490F /* CompanionProtocolParserTests.swift */,
+				F20133F4FEB80CE4C6059D4E /* CompanionWebSocketClientTests.swift */,
+				EF3704FB95D820AE194950D5 /* ConnectionErrorsTests.swift */,
+				C00CB68D7DDD60FDE9427C1F /* HomeControlLabelsTests.swift */,
+				A882686DA4098BC724A9E49B /* Info.plist */,
+				D2B2177919C7277DE747CEF0 /* ReconnectPlanTests.swift */,
+				B41004D37785E31FCB10D3F6 /* RememberedMacTests.swift */,
+			);
+			path = ReplayMacCompanionTests;
+			sourceTree = "<group>";
+		};
+		17B1EF5C40D797A9C870B488 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				10C3FF13E9F7B8C276AC6FB6 /* Assets.xcassets */,
+				D3C039E239ABA357C81A2146 /* PrivacyInfo.xcprivacy */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		3D6AC8AAE7FCF3F63519BCA4 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				3235CD7AA43FD64941154E12 /* ActionTile.swift */,
+				1BE6F3CED20546DB18A3E233 /* DualProgressMeters.swift */,
+				3289D3703066723DF0B646C6 /* GlassBackground.swift */,
+				103B5BA5335803E176D4EBFD /* GlassButtons.swift */,
+				CBCFC53EF34CD54C188288A6 /* GlassCard.swift */,
+				610A6E12C4093ACE3EB3EE0B /* GlassTextField.swift */,
+				3D15AA82D749BB10B877D0CA /* OnboardingDialog.swift */,
+				4F177A6DA1B650930A6A58FB /* RecentClipItem.swift */,
+				200CB98D55ADB3A993D7C2B4 /* SectionHeader.swift */,
+				3B0C2A8908C496CBFA77C1D0 /* StatusDot.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		469902F7C1EF6AD126CC594E /* Connection */ = {
+			isa = PBXGroup;
+			children = (
+				C80BE3CD0A2AD2FD352ADF1F /* AutoReconnector.swift */,
+				8813AAB44E8C7EF4723EA282 /* ReconnectPlan.swift */,
+			);
+			path = Connection;
+			sourceTree = "<group>";
+		};
+		4AB534EE09E65FE0DAAB15F6 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				3D6AC8AAE7FCF3F63519BCA4 /* Components */,
+				C2BD0EE80C7EAD0654048390 /* Screens */,
+				4B47891F81CB40F90751FBF7 /* Theme */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		4B47891F81CB40F90751FBF7 /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				201AA261A2B7710E9A217BF9 /* AppColors.swift */,
+				DB854183D2971C19176B11A4 /* AppRadii.swift */,
+			);
+			path = Theme;
+			sourceTree = "<group>";
+		};
+		57D65CB70D13D2D1CF794E79 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A05E1B1E9238CB8426529885 /* ReplayCapCompanion.app */,
+				C3891D0C503D788F0BC5E820 /* ReplayCapCompanionTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		646163F6FEF283B43A41F125 /* Network */ = {
+			isa = PBXGroup;
+			children = (
+				8929DC4A4838060826798137 /* BonjourDiscoveryManager.swift */,
+				3F2B799990FF4E8095A3C02F /* CompanionProtocolParser.swift */,
+				0C6EF4968A8839B8712A5C13 /* CompanionWebSocketClient.swift */,
+				39EF4080C3C0593FD6D6495D /* ConnectionErrors.swift */,
+			);
+			path = Network;
+			sourceTree = "<group>";
+		};
+		6EE41834CF4ED522F854976D /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				8409E4AA855E9D95E2EA0C15 /* CompanionViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		8C6E094D172CD25BDE8C321F /* Repository */ = {
+			isa = PBXGroup;
+			children = (
+				AF482A77247E4EA269E6DCDB /* CompanionRepository.swift */,
+				822E83788537B1C8F64B3D82 /* RememberedMacStore.swift */,
+			);
+			path = Repository;
+			sourceTree = "<group>";
+		};
+		C2BD0EE80C7EAD0654048390 /* Screens */ = {
+			isa = PBXGroup;
+			children = (
+				1AD68C83E334DE89A64685F1 /* ClipDetailsBottomSheet.swift */,
+				C55345E7EEFFF288780E2EC9 /* ConnectionScreen.swift */,
+				48C96B19DB7BD6AA8A5436EE /* HomeControls.swift */,
+				427F168C162C9B5EC4C2C60F /* HomeScreen.swift */,
+			);
+			path = Screens;
+			sourceTree = "<group>";
+		};
+		C4B8B914FA6609F3D982E990 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				4CA6B7B6F717AF1029972BF2 /* CompanionMessages.swift */,
+				90E3AD5DFC61AE5AAA0DF913 /* CompanionState.swift */,
+				0EBF22F6236469EAC2A864AE /* RememberedMac.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		CFE85839DE519D059D3BB43E /* App */ = {
+			isa = PBXGroup;
+			children = (
+				5EA3EF39A07520B10931532D /* Info.plist */,
+				7AD60368039E7EF37A98DC52 /* ReplayMacCompanionApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		D2C041E88F24562C7BCE0B8A = {
+			isa = PBXGroup;
+			children = (
+				01EA8AF27E6138C58719FFC1 /* ReplayMacCompanion */,
+				0B2043B935D5D39D3C7B6392 /* ReplayMacCompanionTests */,
+				57D65CB70D13D2D1CF794E79 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		BB3B48413640F96C18FD6C39 /* ReplayCapCompanion */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CC6FF49FF1867A2974BDDFC6 /* Build configuration list for PBXNativeTarget "ReplayCapCompanion" */;
+			buildPhases = (
+				018B144A55A47599E8C6260A /* Sources */,
+				FE2B793C8B87908C0C62E245 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ReplayCapCompanion;
+			packageProductDependencies = (
+			);
+			productName = ReplayCapCompanion;
+			productReference = A05E1B1E9238CB8426529885 /* ReplayCapCompanion.app */;
+			productType = "com.apple.product-type.application";
+		};
+		BD603A9E1997B48D13352997 /* ReplayCapCompanionTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EB8FAAC7331A4CF835406F3A /* Build configuration list for PBXNativeTarget "ReplayCapCompanionTests" */;
+			buildPhases = (
+				13E2B5543AD1A15270DDD1E7 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D5A4F3F85D83E94BC973FE60 /* PBXTargetDependency */,
+			);
+			name = ReplayCapCompanionTests;
+			packageProductDependencies = (
+			);
+			productName = ReplayCapCompanionTests;
+			productReference = C3891D0C503D788F0BC5E820 /* ReplayCapCompanionTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		82CC05558E3CC23480C43D7F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					BB3B48413640F96C18FD6C39 = {
+						DevelopmentTeam = QZTBSUBN77;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 943B5F94B8AB186CDAFE4363 /* Build configuration list for PBXProject "ReplayCapCompanion" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = D2C041E88F24562C7BCE0B8A;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 57D65CB70D13D2D1CF794E79 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				BB3B48413640F96C18FD6C39 /* ReplayCapCompanion */,
+				BD603A9E1997B48D13352997 /* ReplayCapCompanionTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		FE2B793C8B87908C0C62E245 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				38C5B3D4E503ABB0E606F055 /* Assets.xcassets in Resources */,
+				F4372C13DB52FE9328C3CCA7 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		018B144A55A47599E8C6260A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				84C8072799287D251247AD72 /* ActionTile.swift in Sources */,
+				62E3705EF0AD19F7D2E8D424 /* AppColors.swift in Sources */,
+				ABEF89F5DB0EBE9F6A67C573 /* AppRadii.swift in Sources */,
+				9FD6EE3D485AF8C52FDD70A4 /* AutoReconnector.swift in Sources */,
+				62031BD402449A19C90AE779 /* BonjourDiscoveryManager.swift in Sources */,
+				016C52694E00AFCE0E48724B /* ClipDetailsBottomSheet.swift in Sources */,
+				C9F5CE58220BA5D61352A5E6 /* CompanionMessages.swift in Sources */,
+				7011AE109C4F4CB3F7AB817C /* CompanionProtocolParser.swift in Sources */,
+				035E8F2814B53C865890C5F3 /* CompanionRepository.swift in Sources */,
+				085ADD285A34B6013577300D /* CompanionState.swift in Sources */,
+				85104B9329CF13690AB34E6F /* CompanionViewModel.swift in Sources */,
+				D87D05F1D452C5CCAF11AFD0 /* CompanionWebSocketClient.swift in Sources */,
+				8033099049F9005AF90FBD63 /* ConnectionErrors.swift in Sources */,
+				B4CBFBC1EE721931A5A789E0 /* ConnectionScreen.swift in Sources */,
+				47F145D5041B1048E3CEA892 /* DualProgressMeters.swift in Sources */,
+				B6D1EA177967E0937F6F3609 /* GlassBackground.swift in Sources */,
+				7B719847831088203C52278B /* GlassButtons.swift in Sources */,
+				4C4CC7BAB0F957E4987BAF1C /* GlassCard.swift in Sources */,
+				0AAB159C78C4D3ADDB611313 /* GlassTextField.swift in Sources */,
+				66EC93748B1C4DF563A786B3 /* HomeControls.swift in Sources */,
+				218FD7767C7E023B837A4EB8 /* HomeScreen.swift in Sources */,
+				6E6686FC99F5A28212954DE0 /* OnboardingDialog.swift in Sources */,
+				C65CFE327B65996926A859B3 /* RecentClipItem.swift in Sources */,
+				B04B5DC26E9CC9E3C2874CC1 /* ReconnectPlan.swift in Sources */,
+				54655ED7535911BB1F7CFE2E /* RememberedMac.swift in Sources */,
+				4B0932BECA98E2DF524B47F5 /* RememberedMacStore.swift in Sources */,
+				63298826AAC498EECACA0353 /* ReplayMacCompanionApp.swift in Sources */,
+				59C9D8AA73B51A0662AE1C3C /* SectionHeader.swift in Sources */,
+				D06BA20CC3B7C1A3435EB8A2 /* StatusDot.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		13E2B5543AD1A15270DDD1E7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A0CDC14ABC6B23F5D761F1DD /* AutoReconnectorTests.swift in Sources */,
+				FB628D393DB8151862E5BC6F /* CompanionConnectionLogicTests.swift in Sources */,
+				1E8A1556400286AFBB8ABBAC /* CompanionModelTests.swift in Sources */,
+				871263DBED5B7B892290FBEF /* CompanionProtocolParserTests.swift in Sources */,
+				FD7BBA5354712A43C3F78179 /* CompanionWebSocketClientTests.swift in Sources */,
+				6D337CBCEC8662078E2E19F1 /* ConnectionErrorsTests.swift in Sources */,
+				E465BC1BE5DEE4E54DA26618 /* HomeControlLabelsTests.swift in Sources */,
+				28D45C79889C561A6F2D948B /* ReconnectPlanTests.swift in Sources */,
+				9E5160E9D55158C26C4FDB70 /* RememberedMacTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		D5A4F3F85D83E94BC973FE60 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BB3B48413640F96C18FD6C39 /* ReplayCapCompanion */;
+			targetProxy = A4BE2DCBC2F923A67F6CAA85 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		589506879D20F20AF86EEEA2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ReplayMacCompanionTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.replaycap.companion.tests;
+				PRODUCT_NAME = ReplayCapCompanionTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ReplayCap.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ReplayCap";
+			};
+			name = Debug;
+		};
+		7C9362E4DADB1E5A280CB794 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = QZTBSUBN77;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ReplayMacCompanion/App/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.replaycap.companion;
+				PRODUCT_MODULE_NAME = ReplayCapCompanion;
+				PRODUCT_NAME = ReplayCap;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		81089F817D3E5BAFAA5063F8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		8B84AFF1168378E55F7ECC33 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		92BAB047DB0A813636CF7BF1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ReplayMacCompanionTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.replaycap.companion.tests;
+				PRODUCT_NAME = ReplayCapCompanionTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ReplayCap.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ReplayCap";
+			};
+			name = Release;
+		};
+		F32D1D1DF75233EF771E8D2B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = QZTBSUBN77;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ReplayMacCompanion/App/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.replaycap.companion;
+				PRODUCT_MODULE_NAME = ReplayCapCompanion;
+				PRODUCT_NAME = ReplayCap;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		943B5F94B8AB186CDAFE4363 /* Build configuration list for PBXProject "ReplayCapCompanion" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				81089F817D3E5BAFAA5063F8 /* Debug */,
+				8B84AFF1168378E55F7ECC33 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		CC6FF49FF1867A2974BDDFC6 /* Build configuration list for PBXNativeTarget "ReplayCapCompanion" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7C9362E4DADB1E5A280CB794 /* Debug */,
+				F32D1D1DF75233EF771E8D2B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		EB8FAAC7331A4CF835406F3A /* Build configuration list for PBXNativeTarget "ReplayCapCompanionTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				589506879D20F20AF86EEEA2 /* Debug */,
+				92BAB047DB0A813636CF7BF1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 82CC05558E3CC23480C43D7F /* Project object */;
+}

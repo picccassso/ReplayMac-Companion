@@ -1,6 +1,6 @@
 import XCTest
 import Combine
-@testable import ReplayMacCompanion
+@testable import ReplayCapCompanion
 
 final class CompanionWebSocketClientTests: XCTestCase {
 

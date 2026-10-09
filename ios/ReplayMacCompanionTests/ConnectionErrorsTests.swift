@@ -1,5 +1,5 @@
 import XCTest
-@testable import ReplayMacCompanion
+@testable import ReplayCapCompanion
 
 final class ConnectionErrorsTests: XCTestCase {
 
@@ -14,7 +14,7 @@ final class ConnectionErrorsTests: XCTestCase {
     func testNetworkExceptionsGetAReadableReason() {
         let connRefused = NSError(domain: NSPOSIXErrorDomain, code: Int(POSIXError.ECONNREFUSED.rawValue), userInfo: nil)
         XCTAssertEqual(
-            "Nothing is listening there. Check Companion Server is on in ReplayMac.",
+            "Nothing is listening there. Check Companion Server is on in ReplayCap.",
             ConnectionErrors.describe(connRefused, wasConnected: false)
         )
 

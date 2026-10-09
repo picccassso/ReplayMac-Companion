@@ -52,7 +52,7 @@ public struct HomeScreen: View {
         if case .connected(let sName, _, _, _, _, _) = connectionState {
             return sName
         }
-        return "ReplayMac"
+        return "ReplayCap"
     }
 
     private var deviceName: String? {
@@ -344,7 +344,7 @@ private struct SessionClipsSection: View {
 
             if recentClips.isEmpty {
                 GlassCard(cornerRadius: AppRadii.medium, tint: AppColors.surfaceGlassSubtle) {
-                    Text("Clips you save appear here until you quit ReplayMac.")
+                    Text("Clips you save appear here until you quit ReplayCap.")
                         .font(.system(size: 13))
                         .foregroundColor(AppColors.textSecondary)
                         .padding(16)
