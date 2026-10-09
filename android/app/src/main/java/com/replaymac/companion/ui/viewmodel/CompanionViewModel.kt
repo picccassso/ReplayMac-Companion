@@ -2,15 +2,24 @@ package com.replaymac.companion.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.replaymac.companion.data.model.CompanionClipSummary
 import com.replaymac.companion.data.model.CompanionStateSnapshot
 import com.replaymac.companion.data.model.ConnectionState
 import com.replaymac.companion.data.model.DiscoveredMac
+import com.replaymac.companion.data.model.MacEndpoint
+import com.replaymac.companion.data.model.PreviouslyConnectedItem
+import com.replaymac.companion.data.model.RememberedMac
 import com.replaymac.companion.data.network.CompanionWebSocketClient
 import com.replaymac.companion.data.repository.CompanionRepository
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+
+typealias PreviouslyConnectedItem = PreviouslyConnectedItem
 
 class CompanionViewModel(
     private val repository: CompanionRepository
@@ -23,6 +32,41 @@ class CompanionViewModel(
     val isDiscovering: StateFlow<Boolean> = repository.isDiscovering
     val keepScreenAwake: StateFlow<Boolean> = repository.keepScreenAwake
     val hasSeenOnboarding: StateFlow<Boolean> = repository.hasSeenOnboarding
+    val previouslyConnectedMacs: StateFlow<List<RememberedMac>> = repository.previouslyConnectedMacs
+
+    val previouslyConnectedItems: StateFlow<List<PreviouslyConnectedItem>> =
+        combine(repository.previouslyConnectedMacs, repository.discoveredMacs) { saved, discovered ->
+            saved.map { mac ->
+                val match = discovered.firstOrNull { mac.isSameMacAs(it) }
+                val onlineEndpoint = match?.let { MacEndpoint(it.host, it.port) }
+                PreviouslyConnectedItem(
+                    mac = mac,
+                    isOnline = match != null,
+                    onlineEndpoint = onlineEndpoint
+                )
+            }
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.Eagerly,
+            repository.previouslyConnectedMacs.value.map { mac ->
+                val match = repository.discoveredMacs.value.firstOrNull { mac.isSameMacAs(it) }
+                val onlineEndpoint = match?.let { MacEndpoint(it.host, it.port) }
+                PreviouslyConnectedItem(
+                    mac = mac,
+                    isOnline = match != null,
+                    onlineEndpoint = onlineEndpoint
+                )
+            }
+        )
+
+    val filteredDiscoveredMacs: StateFlow<List<DiscoveredMac>> =
+        combine(repository.discoveredMacs, repository.previouslyConnectedMacs) { discovered, saved ->
+            discovered.filter { d -> saved.none { it.isSameMacAs(d) } }
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.Eagerly,
+            repository.discoveredMacs.value.filter { d -> repository.previouslyConnectedMacs.value.none { it.isSameMacAs(d) } }
+        )
 
     private val _showTutorialDialog = MutableStateFlow(!repository.hasSeenOnboarding.value)
     val showTutorialDialog: StateFlow<Boolean> = _showTutorialDialog.asStateFlow()
@@ -92,6 +136,19 @@ class CompanionViewModel(
         _manualHost.value = "127.0.0.1"
         _manualPort.value = "7375"
         repository.connect("127.0.0.1", 7375)
+    }
+
+    fun connectRememberedMac(item: PreviouslyConnectedItem) {
+        val endpoint = item.onlineEndpoint ?: item.mac.networkEndpoint
+        if (endpoint != null) {
+            connect(endpoint.host, endpoint.port.toString())
+        } else if (item.mac.usbPort != null) {
+            connect("127.0.0.1", item.mac.usbPort.toString())
+        }
+    }
+
+    fun forgetMac(mac: RememberedMac) {
+        repository.forgetMac(mac)
     }
 
     fun disconnect() {

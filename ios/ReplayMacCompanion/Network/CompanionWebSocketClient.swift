@@ -201,7 +201,8 @@ public final class CompanionWebSocketClient: @unchecked Sendable {
                     serverVersion: auth.serverVersion,
                     host: host,
                     port: port,
-                    serverId: auth.serverId
+                    serverId: auth.serverId,
+                    deviceName: auth.deviceName
                 ))
             case "pending":
                 stateSubject.send(.pendingApproval(
@@ -241,7 +242,7 @@ public final class CompanionWebSocketClient: @unchecked Sendable {
         }
 
         let wasConnected: Bool
-        if case .connected(_, _, let sHost, let sPort, _) = stateSubject.value,
+        if case .connected(_, _, let sHost, let sPort, _, _) = stateSubject.value,
            sHost == host, sPort == port {
             wasConnected = true
         } else {

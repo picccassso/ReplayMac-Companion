@@ -10,6 +10,8 @@ public final class CompanionViewModel: ObservableObject {
     @Published public var snapshot: CompanionStateSnapshot = .empty
     @Published public var thumbnails: [String: String] = [:]
     @Published public var discoveredMacs: [DiscoveredMac] = []
+    @Published public var previouslyConnectedItems: [PreviouslyConnectedItem] = []
+    @Published public var filteredDiscoveredMacs: [DiscoveredMac] = []
     @Published public var isDiscovering: Bool = false
     @Published public var keepScreenAwake: Bool = false
     @Published public var hasSeenOnboarding: Bool = false
@@ -51,6 +53,27 @@ public final class CompanionViewModel: ObservableObject {
         repository.discoveredMacs
             .receive(on: DispatchQueue.main)
             .assign(to: &$discoveredMacs)
+
+        Publishers.CombineLatest(repository.previouslyConnectedMacs, repository.discoveredMacs)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] savedMacs, discovered in
+                guard let self = self else { return }
+
+                self.previouslyConnectedItems = savedMacs.map { mac in
+                    let onlineMatch = discovered.first { mac.isSameMacAs($0) }
+                    let onlineEndpoint = onlineMatch.map { MacEndpoint(host: $0.host, port: $0.port) }
+                    return PreviouslyConnectedItem(
+                        mac: mac,
+                        isOnline: onlineMatch != nil,
+                        onlineEndpoint: onlineEndpoint
+                    )
+                }
+
+                self.filteredDiscoveredMacs = discovered.filter { disc in
+                    !savedMacs.contains { $0.isSameMacAs(disc) }
+                }
+            }
+            .store(in: &cancellables)
 
         repository.isDiscovering
             .receive(on: DispatchQueue.main)
@@ -119,6 +142,16 @@ public final class CompanionViewModel: ObservableObject {
         manualHost = host
         manualPort = String(port)
         repository.connect(host: host, port: port)
+    }
+
+    public func connectRememberedMac(_ item: PreviouslyConnectedItem) {
+        if let endpoint = item.onlineEndpoint ?? item.mac.networkEndpoint {
+            connect(host: endpoint.host, portStr: String(endpoint.port))
+        }
+    }
+
+    public func forgetMac(_ mac: RememberedMac) {
+        repository.forgetMac(mac)
     }
 
     public func disconnect() {

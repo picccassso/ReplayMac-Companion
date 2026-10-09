@@ -52,7 +52,8 @@ struct ReplayMacCompanionApp: App {
                 } else {
                     ConnectionScreen(
                         connectionState: viewModel.connectionState,
-                        discoveredMacs: viewModel.discoveredMacs,
+                        previouslyConnectedItems: viewModel.previouslyConnectedItems,
+                        discoveredMacs: viewModel.filteredDiscoveredMacs,
                         isDiscovering: viewModel.isDiscovering,
                         manualHost: viewModel.manualHost,
                         manualPort: viewModel.manualPort,
@@ -64,6 +65,12 @@ struct ReplayMacCompanionApp: App {
                         },
                         onConnect: { host, port in
                             viewModel.connect(host: host, portStr: port)
+                        },
+                        onConnectRememberedMac: { item in
+                            viewModel.connectRememberedMac(item)
+                        },
+                        onForgetMac: { mac in
+                            viewModel.forgetMac(mac)
                         },
                         onConnectWired: {
                             viewModel.connectWired()

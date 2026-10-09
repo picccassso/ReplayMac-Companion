@@ -22,7 +22,8 @@ sealed interface ConnectionState {
         val serverVersion: String,
         val host: String,
         val port: Int,
-        val serverId: String? = null
+        val serverId: String? = null,
+        val deviceName: String? = null
     ) : ConnectionState
     /** [wasConnected] separates a dropped connection from one that never opened. */
     data class Failed(

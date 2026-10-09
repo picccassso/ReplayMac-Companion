@@ -49,10 +49,17 @@ public struct HomeScreen: View {
     }
 
     private var serverName: String {
-        if case .connected(let sName, _, _, _, _) = connectionState {
+        if case .connected(let sName, _, _, _, _, _) = connectionState {
             return sName
         }
         return "ReplayMac"
+    }
+
+    private var deviceName: String? {
+        if case .connected(_, _, _, _, _, let dName) = connectionState {
+            return dName
+        }
+        return nil
     }
 
     private func handleControl(_ control: HomeControl) {
@@ -84,6 +91,7 @@ public struct HomeScreen: View {
                     VStack(spacing: 16) {
                         HomeTopBar(
                             serverName: serverName,
+                            deviceName: deviceName,
                             keepScreenAwake: keepScreenAwake,
                             onToggleKeepScreenAwake: onToggleKeepScreenAwake,
                             onOpenTutorial: onOpenTutorial,
@@ -140,10 +148,18 @@ public struct HomeScreen: View {
 
 private struct HomeTopBar: View {
     let serverName: String
+    var deviceName: String? = nil
     let keepScreenAwake: Bool
     let onToggleKeepScreenAwake: () -> Void
     let onOpenTutorial: () -> Void
     let onDisconnect: () -> Void
+
+    private var deviceStatusText: String {
+        if let deviceName, !deviceName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return "Connected • \(deviceName)"
+        }
+        return "Connected"
+    }
 
     var body: some View {
         HStack(spacing: 12) {
@@ -158,7 +174,7 @@ private struct HomeTopBar: View {
                         .fill(AppColors.success)
                         .frame(width: 7, height: 7)
 
-                    Text("Connected")
+                    Text(deviceStatusText)
                         .font(.system(size: 13, weight: .medium))
                         .foregroundColor(AppColors.textSecondary)
                 }

@@ -50,10 +50,28 @@ data class RememberedMac(
     fun isSameMacAs(otherServerId: String?, otherName: String): Boolean =
         if (serverId != null && otherServerId != null) serverId == otherServerId else name == otherName
 
+    fun isSameMacAs(discovered: DiscoveredMac): Boolean =
+        isSameMacAs(discovered.serverId, discovered.name)
+
+    fun isSameMacAs(other: RememberedMac): Boolean =
+        isSameMacAs(other.serverId, other.name)
+
     /** Remembers [endpoint] as the latest way this Mac was reached. */
     fun reachedAt(endpoint: MacEndpoint): RememberedMac = if (endpoint.isUsb) {
         copy(usbPort = endpoint.port, lastUsedUsb = true)
     } else {
         copy(networkEndpoint = endpoint, lastUsedUsb = false)
     }
+}
+
+/**
+ * A previously connected Mac prepared for display in the Connection screen,
+ * indicating whether it is currently online on the local network.
+ */
+data class PreviouslyConnectedItem(
+    val mac: RememberedMac,
+    val isOnline: Boolean,
+    val onlineEndpoint: MacEndpoint? = null
+) {
+    val id: String get() = if (!mac.serverId.isNullOrEmpty()) mac.serverId else mac.name
 }

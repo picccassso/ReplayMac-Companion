@@ -30,6 +30,7 @@ import androidx.compose.material.icons.automirrored.rounded.HelpOutline
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.ContentCopy
+import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.LaptopMac
@@ -44,6 +45,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -60,15 +62,19 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.replaymac.companion.data.model.ConnectionState
 import com.replaymac.companion.data.model.DiscoveredMac
+import com.replaymac.companion.data.model.PreviouslyConnectedItem
+import com.replaymac.companion.data.model.RememberedMac
 import com.replaymac.companion.ui.components.AccentButton
 import com.replaymac.companion.ui.components.GlassBackground
 import com.replaymac.companion.ui.components.GlassButton
 import com.replaymac.companion.ui.components.GlassButtonGroup
 import com.replaymac.companion.ui.components.GlassCard
+import com.replaymac.companion.ui.components.GlassDialog
 import com.replaymac.companion.ui.components.GlassTextField
 import com.replaymac.companion.ui.components.GroupIconButton
 import com.replaymac.companion.ui.components.RowSeparator
 import com.replaymac.companion.ui.components.SectionHeader
+import com.replaymac.companion.ui.components.StatusDot
 import com.replaymac.companion.ui.components.glass
 import com.replaymac.companion.ui.components.glassPressable
 import com.replaymac.companion.ui.components.safeContentPadding
@@ -92,9 +98,13 @@ fun ConnectionScreen(
     onCancelConnection: () -> Unit,
     onDismissError: () -> Unit = {},
     onOpenTutorial: () -> Unit = {},
+    previouslyConnectedItems: List<PreviouslyConnectedItem> = emptyList(),
+    onConnectRemembered: (PreviouslyConnectedItem) -> Unit = {},
+    onForgetMac: (RememberedMac) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+    var macToForget by remember { mutableStateOf<RememberedMac?>(null) }
 
     GlassBackground(modifier = modifier) {
         when (connectionState) {
@@ -111,12 +121,15 @@ fun ConnectionScreen(
                 val failure = connectionState as? ConnectionState.Failed
                 val sections = ConnectionSections(
                     discoveredMacs = discoveredMacs,
+                    previouslyConnectedItems = previouslyConnectedItems,
                     isDiscovering = isDiscovering,
                     manualHost = manualHost,
                     manualPort = manualPort,
                     onManualHostChange = onManualHostChange,
                     onManualPortChange = onManualPortChange,
                     onConnect = onConnect,
+                    onConnectRemembered = onConnectRemembered,
+                    onPromptForget = { macToForget = it },
                     onConnectAdbUsb = onConnectAdbUsb
                 )
                 LazyColumn(
@@ -148,6 +161,7 @@ fun ConnectionScreen(
                         item {
                             Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
                                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    sections.PreviouslyConnected()
                                     sections.Network()
                                     sections.Usb()
                                 }
@@ -157,9 +171,58 @@ fun ConnectionScreen(
                             }
                         }
                     } else {
+                        item { sections.PreviouslyConnected() }
                         item { sections.Network() }
                         item { sections.Usb() }
                         item { sections.Manual() }
+                    }
+                }
+
+                macToForget?.let { targetMac ->
+                    GlassDialog(onDismissRequest = { macToForget = null }) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth(if (isLandscape) 0.55f else 0.88f)
+                                .widthIn(max = 420.dp)
+                                .glass(RoundedCornerShape(AppRadii.Large.dp), AppColors.SurfaceElevated)
+                                .padding(22.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "Forget “${targetMac.name}”?",
+                                style = MaterialTheme.typography.titleLarge,
+                                color = AppColors.TextPrimary,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                text = "You will need to approve this device again if you reconnect.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = AppColors.TextSecondary,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(Modifier.height(22.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                GlassButton(
+                                    text = "Cancel",
+                                    onClick = { macToForget = null },
+                                    modifier = Modifier.weight(1f)
+                                )
+                                AccentButton(
+                                    text = "Forget",
+                                    onClick = {
+                                        val mac = targetMac
+                                        macToForget = null
+                                        onForgetMac(mac)
+                                    },
+                                    color = AppColors.Danger,
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -167,17 +230,37 @@ fun ConnectionScreen(
     }
 }
 
-/** The three ways to reach a Mac, each a titled glass group like a desktop Settings section. */
+/** The ways to reach a Mac, each a titled glass group like a desktop Settings section. */
 private class ConnectionSections(
     val discoveredMacs: List<DiscoveredMac>,
+    val previouslyConnectedItems: List<PreviouslyConnectedItem>,
     val isDiscovering: Boolean,
     val manualHost: String,
     val manualPort: String,
     val onManualHostChange: (String) -> Unit,
     val onManualPortChange: (String) -> Unit,
     val onConnect: (String, String) -> Unit,
+    val onConnectRemembered: (PreviouslyConnectedItem) -> Unit,
+    val onPromptForget: (RememberedMac) -> Unit,
     val onConnectAdbUsb: () -> Unit
 ) {
+    @Composable
+    fun PreviouslyConnected() {
+        if (previouslyConnectedItems.isEmpty()) return
+        Section(title = "Previously Connected") {
+            previouslyConnectedItems.forEachIndexed { index, item ->
+                PreviouslyConnectedRow(
+                    item = item,
+                    onConnect = { onConnectRemembered(item) },
+                    onForget = { onPromptForget(item.mac) }
+                )
+                if (index < previouslyConnectedItems.lastIndex) {
+                    RowSeparator(startIndent = 56.dp)
+                }
+            }
+        }
+    }
+
     @Composable
     fun Network() {
         Section(title = "On This Network", trailing = {
@@ -291,6 +374,83 @@ private fun ErrorBanner(title: String, error: String, onDismiss: () -> Unit) {
 }
 
 // ==================== Rows ====================
+
+@Composable
+fun PreviouslyConnectedRow(
+    item: PreviouslyConnectedItem,
+    onConnect: () -> Unit,
+    onForget: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .glassPressable(
+                onClick = onConnect,
+                enabled = item.isOnline,
+                shape = RoundedCornerShape(0.dp),
+                haptic = false
+            )
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        Icon(
+            Icons.Rounded.LaptopMac,
+            contentDescription = null,
+            tint = if (item.isOnline) AppColors.TextPrimary else AppColors.TextSecondary,
+            modifier = Modifier.size(26.dp)
+        )
+        Column(Modifier.weight(1f)) {
+            Text(
+                item.mac.name,
+                style = MaterialTheme.typography.titleSmall,
+                color = if (item.isOnline) AppColors.TextPrimary else AppColors.TextSecondary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(Modifier.height(2.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                StatusDot(
+                    isLive = item.isOnline,
+                    activeColor = AppColors.Success,
+                    idleColor = AppColors.IndicatorIdle,
+                    size = 7.dp
+                )
+                Text(
+                    text = if (item.isOnline) {
+                        item.onlineEndpoint?.let { "${it.host}:${it.port}" } ?: "Available on network"
+                    } else {
+                        "Offline"
+                    },
+                    style = MaterialTheme.typography.labelMedium,
+                    color = AppColors.TextSecondary
+                )
+            }
+        }
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .glassPressable(onClick = onForget, shape = CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                Icons.Rounded.DeleteOutline,
+                contentDescription = "Forget ${item.mac.name}",
+                tint = AppColors.TextTertiary,
+                modifier = Modifier.size(18.dp)
+            )
+        }
+        AccentButton(
+            text = "Connect",
+            onClick = onConnect,
+            enabled = item.isOnline,
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 9.dp)
+        )
+    }
+}
 
 @Composable
 fun DiscoveredMacRow(mac: DiscoveredMac, onConnect: () -> Unit) {

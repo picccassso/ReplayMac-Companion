@@ -4,10 +4,18 @@ import com.replaymac.companion.data.model.CompanionClipSummary
 import com.replaymac.companion.data.model.CompanionStateSnapshot
 import com.replaymac.companion.data.model.CompanionTelemetryTick
 import com.replaymac.companion.data.model.ConnectionState
+import com.replaymac.companion.data.model.DiscoveredMac
+import com.replaymac.companion.data.model.MacEndpoint
+import com.replaymac.companion.data.model.PreviouslyConnectedItem
+import com.replaymac.companion.data.model.RememberedMac
 import com.replaymac.companion.ui.components.clipKindTitle
 import com.replaymac.companion.ui.components.formatDurationSeconds
 import com.replaymac.companion.ui.components.formatFileSize
+import com.replaymac.companion.ui.screens.formatConnectedStatus
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -91,10 +99,151 @@ class CompanionConnectionLogicTest {
         val pending = ConnectionState.PendingApproval("Studio Mac", "192.168.1.5", 7375)
         assertEquals("Studio Mac", pending.serverName)
 
-        val connected = ConnectionState.Connected("Studio Mac", "1.7.3", "192.168.1.5", 7375)
+        val connected = ConnectionState.Connected(
+            serverName = "Studio Mac",
+            serverVersion = "1.7.3",
+            host = "192.168.1.5",
+            port = 7375,
+            serverId = "srv-123",
+            deviceName = "Pixel 9 Pro"
+        )
+        assertEquals("Studio Mac", connected.serverName)
         assertEquals("1.7.3", connected.serverVersion)
+        assertEquals("192.168.1.5", connected.host)
+        assertEquals(7375, connected.port)
+        assertEquals("srv-123", connected.serverId)
+        assertEquals("Pixel 9 Pro", connected.deviceName)
+
+        val defaultConnected = ConnectionState.Connected("Studio Mac", "1.7.3", "192.168.1.5", 7375)
+        assertNull(defaultConnected.serverId)
+        assertNull(defaultConnected.deviceName)
 
         val failed = ConnectionState.Failed("Connection refused", "127.0.0.1", 7375)
         assertEquals("Connection refused", failed.error)
+    }
+
+    @Test
+    fun testPreviouslyConnectedOnlineOfflineResolution() {
+        val savedMacOnline = RememberedMac(
+            serverId = "srv-1",
+            name = "Office Mac",
+            networkEndpoint = MacEndpoint("192.168.1.10", 7375),
+            usbPort = null,
+            lastUsedUsb = false
+        )
+        val savedMacOffline = RememberedMac(
+            serverId = "srv-2",
+            name = "Home Mac",
+            networkEndpoint = MacEndpoint("192.168.1.20", 7375),
+            usbPort = null,
+            lastUsedUsb = false
+        )
+        val savedMacByName = RememberedMac(
+            serverId = null,
+            name = "Legacy Studio",
+            networkEndpoint = MacEndpoint("192.168.1.30", 7375),
+            usbPort = null,
+            lastUsedUsb = false
+        )
+
+        val discoveredMacs = listOf(
+            DiscoveredMac(
+                id = "disc-1",
+                name = "Office Mac (Renamed)",
+                host = "192.168.1.15",
+                port = 7375,
+                serverId = "srv-1"
+            ),
+            DiscoveredMac(
+                id = "disc-3",
+                name = "Legacy Studio",
+                host = "192.168.1.35",
+                port = 7375,
+                serverId = null
+            )
+        )
+
+        val savedList = listOf(savedMacOnline, savedMacOffline, savedMacByName)
+        val items = savedList.map { mac ->
+            val match = discoveredMacs.firstOrNull { mac.isSameMacAs(it) }
+            val onlineEndpoint = match?.let { MacEndpoint(it.host, it.port) }
+            PreviouslyConnectedItem(
+                mac = mac,
+                isOnline = match != null,
+                onlineEndpoint = onlineEndpoint
+            )
+        }
+
+        assertEquals(3, items.size)
+
+        // Item 1: Online matched by serverId, endpoint reflects current discovered network address
+        val item1 = items[0]
+        assertEquals("srv-1", item1.id)
+        assertTrue(item1.isOnline)
+        assertNotNull(item1.onlineEndpoint)
+        assertEquals("192.168.1.15", item1.onlineEndpoint?.host)
+
+        // Item 2: Offline since not in discoveredMacs
+        val item2 = items[1]
+        assertEquals("srv-2", item2.id)
+        assertFalse(item2.isOnline)
+        assertNull(item2.onlineEndpoint)
+
+        // Item 3: Online matched by name since both have null serverId
+        val item3 = items[2]
+        assertEquals("Legacy Studio", item3.id)
+        assertTrue(item3.isOnline)
+        assertNotNull(item3.onlineEndpoint)
+        assertEquals("192.168.1.35", item3.onlineEndpoint?.host)
+    }
+
+    @Test
+    fun testDiscoveredMacsFilteringExcludesPreviouslyConnected() {
+        val savedMac = RememberedMac(
+            serverId = "srv-1",
+            name = "Office Mac",
+            networkEndpoint = MacEndpoint("192.168.1.10", 7375),
+            usbPort = null,
+            lastUsedUsb = false
+        )
+        val savedList = listOf(savedMac)
+
+        val discoveredOnline1 = DiscoveredMac(
+            id = "disc-1",
+            name = "Office Mac",
+            host = "192.168.1.10",
+            port = 7375,
+            serverId = "srv-1"
+        )
+        val discoveredNew = DiscoveredMac(
+            id = "disc-2",
+            name = "New Discovered Mac",
+            host = "192.168.1.99",
+            port = 7375,
+            serverId = "srv-new"
+        )
+
+        val allDiscovered = listOf(discoveredOnline1, discoveredNew)
+
+        // Filter: exclude any discovered Mac that matches an entry in previouslyConnectedMacs
+        val filtered = allDiscovered.filter { d -> savedList.none { it.isSameMacAs(d) } }
+
+        assertEquals(1, filtered.size)
+        assertEquals("New Discovered Mac", filtered[0].name)
+        assertEquals("srv-new", filtered[0].serverId)
+
+        // When saved Mac is removed (e.g. forgotten by user), the filtered list includes it again
+        val emptySavedList = emptyList<RememberedMac>()
+        val unfilteredAgain = allDiscovered.filter { d -> emptySavedList.none { it.isSameMacAs(d) } }
+        assertEquals(2, unfilteredAgain.size)
+    }
+
+    @Test
+    fun testConnectedStatusLabelFormatting() {
+        assertEquals("Connected • Pixel 9 Pro", formatConnectedStatus("Pixel 9 Pro"))
+        assertEquals("Connected • Alex's Phone", formatConnectedStatus("Alex's Phone"))
+        assertEquals("Connected", formatConnectedStatus(null))
+        assertEquals("Connected", formatConnectedStatus(""))
+        assertEquals("Connected", formatConnectedStatus("   "))
     }
 }

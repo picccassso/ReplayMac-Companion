@@ -21,7 +21,7 @@ public enum ConnectionState: Sendable, Equatable {
     case pendingApproval(serverName: String, host: String, port: Int)
     /// Finding a remembered Mac again, on whichever network or cable it is reachable.
     case reconnecting(serverName: String)
-    case connected(serverName: String, serverVersion: String, host: String, port: Int, serverId: String? = nil)
+    case connected(serverName: String, serverVersion: String, host: String, port: Int, serverId: String? = nil, deviceName: String? = nil)
     /// `wasConnected` separates a dropped connection from one that never opened.
     case failed(error: String, host: String? = nil, port: Int? = nil, wasConnected: Bool = false, pairingDenied: Bool = false)
 

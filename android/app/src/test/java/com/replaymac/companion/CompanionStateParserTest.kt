@@ -228,4 +228,27 @@ class CompanionStateParserTest {
         )
         assertEquals(null, (withoutId as CompanionServerEvent.Auth).auth.serverId)
     }
+
+    @Test
+    fun authResponseCarriesDeviceNameWhenAssignedOrConfirmedByMac() {
+        val withDevice = CompanionProtocolParser.parse(
+            """{"type":"auth_response","status":"approved","serverName":"Studio Mac","serverVersion":"1.7.3","serverId":"5F1C","deviceName":"Pixel 9 Pro"}"""
+        )
+        assertTrue(withDevice is CompanionServerEvent.Auth)
+        val authWithDevice = (withDevice as CompanionServerEvent.Auth).auth
+        assertEquals("Studio Mac", authWithDevice.serverName)
+        assertEquals("Pixel 9 Pro", authWithDevice.deviceName)
+
+        val withoutDevice = CompanionProtocolParser.parse(
+            """{"type":"auth_response","status":"approved","serverName":"Studio Mac","serverVersion":"1.7.3","serverId":"5F1C"}"""
+        )
+        assertTrue(withoutDevice is CompanionServerEvent.Auth)
+        assertEquals(null, (withoutDevice as CompanionServerEvent.Auth).auth.deviceName)
+
+        val withNullDevice = CompanionProtocolParser.parse(
+            """{"type":"auth_response","status":"approved","serverName":"Studio Mac","serverVersion":"1.7.3","deviceName":null}"""
+        )
+        assertTrue(withNullDevice is CompanionServerEvent.Auth)
+        assertEquals(null, (withNullDevice as CompanionServerEvent.Auth).auth.deviceName)
+    }
 }

@@ -3,6 +3,7 @@ import UIKit
 
 public struct ConnectionScreen: View {
     public var connectionState: ConnectionState
+    public var previouslyConnectedItems: [PreviouslyConnectedItem]
     public var discoveredMacs: [DiscoveredMac]
     public var isDiscovering: Bool
     public var manualHost: String
@@ -10,6 +11,8 @@ public struct ConnectionScreen: View {
     public var onManualHostChange: (String) -> Void
     public var onManualPortChange: (String) -> Void
     public var onConnect: (String, String) -> Void
+    public var onConnectRememberedMac: (PreviouslyConnectedItem) -> Void
+    public var onForgetMac: (RememberedMac) -> Void
     public var onConnectWired: () -> Void
     public var onRefreshDiscovery: () -> Void
     public var onCancelConnection: () -> Void
@@ -17,9 +20,11 @@ public struct ConnectionScreen: View {
     public var onOpenTutorial: () -> Void
 
     @State private var showWiredHelp: Bool = false
+    @State private var macToForget: RememberedMac? = nil
 
     public init(
         connectionState: ConnectionState,
+        previouslyConnectedItems: [PreviouslyConnectedItem] = [],
         discoveredMacs: [DiscoveredMac],
         isDiscovering: Bool,
         manualHost: String,
@@ -27,6 +32,8 @@ public struct ConnectionScreen: View {
         onManualHostChange: @escaping (String) -> Void,
         onManualPortChange: @escaping (String) -> Void,
         onConnect: @escaping (String, String) -> Void,
+        onConnectRememberedMac: @escaping (PreviouslyConnectedItem) -> Void = { _ in },
+        onForgetMac: @escaping (RememberedMac) -> Void = { _ in },
         onConnectWired: @escaping () -> Void,
         onRefreshDiscovery: @escaping () -> Void,
         onCancelConnection: @escaping () -> Void,
@@ -34,6 +41,7 @@ public struct ConnectionScreen: View {
         onOpenTutorial: @escaping () -> Void = {}
     ) {
         self.connectionState = connectionState
+        self.previouslyConnectedItems = previouslyConnectedItems
         self.discoveredMacs = discoveredMacs
         self.isDiscovering = isDiscovering
         self.manualHost = manualHost
@@ -41,6 +49,8 @@ public struct ConnectionScreen: View {
         self.onManualHostChange = onManualHostChange
         self.onManualPortChange = onManualPortChange
         self.onConnect = onConnect
+        self.onConnectRememberedMac = onConnectRememberedMac
+        self.onForgetMac = onForgetMac
         self.onConnectWired = onConnectWired
         self.onRefreshDiscovery = onRefreshDiscovery
         self.onCancelConnection = onCancelConnection
@@ -119,6 +129,9 @@ public struct ConnectionScreen: View {
                     if isLandscape {
                         HStack(alignment: .top, spacing: 20) {
                             VStack(spacing: 14) {
+                                if !previouslyConnectedItems.isEmpty {
+                                    previouslyConnectedSection
+                                }
                                 networkSection
                                 usbWiredSection
                             }
@@ -131,6 +144,9 @@ public struct ConnectionScreen: View {
                         }
                     } else {
                         VStack(spacing: 14) {
+                            if !previouslyConnectedItems.isEmpty {
+                                previouslyConnectedSection
+                            }
                             networkSection
                             usbWiredSection
                             manualSection
@@ -141,10 +157,55 @@ public struct ConnectionScreen: View {
                 .padding(.top, 8)
                 .padding(.bottom, 24)
             }
+            .alert(
+                "Forget “\(macToForget?.name ?? "this Mac")”?",
+                isPresented: Binding(
+                    get: { macToForget != nil },
+                    set: { if !$0 { macToForget = nil } }
+                )
+            ) {
+                Button("Cancel", role: .cancel) {
+                    macToForget = nil
+                }
+                Button("Forget", role: .destructive) {
+                    if let mac = macToForget {
+                        onForgetMac(mac)
+                        macToForget = nil
+                    }
+                }
+            } message: {
+                Text("You will need to approve this device again in ReplayMac if you reconnect.")
+            }
         }
     }
 
     // MARK: - Sections
+
+    private var previouslyConnectedSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionHeader(title: "Previously Connected")
+
+            GlassCard(cornerRadius: AppRadii.large) {
+                VStack(spacing: 0) {
+                    ForEach(Array(previouslyConnectedItems.enumerated()), id: \.element.id) { index, item in
+                        PreviouslyConnectedRow(
+                            item: item,
+                            onConnect: {
+                                onConnectRememberedMac(item)
+                            },
+                            onForget: {
+                                macToForget = item.mac
+                            }
+                        )
+
+                        if index < previouslyConnectedItems.count - 1 {
+                            RowSeparator(startIndent: 56)
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     private var networkSection: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -383,6 +444,67 @@ private struct DiscoveredMacRow: View {
             Spacer()
 
             AccentButton(text: "Connect", onClick: onConnect)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+    }
+}
+
+private struct PreviouslyConnectedRow: View {
+    let item: PreviouslyConnectedItem
+    let onConnect: () -> Void
+    let onForget: () -> Void
+
+    var body: some View {
+        HStack(spacing: 14) {
+            Image(systemName: "laptopcomputer")
+                .font(.system(size: 24))
+                .foregroundColor(item.isOnline ? AppColors.accent : AppColors.textSecondary)
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(item.mac.name)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(AppColors.textPrimary)
+                    .lineLimit(1)
+
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(item.isOnline ? AppColors.success : AppColors.textTertiary)
+                        .frame(width: 7, height: 7)
+
+                    if item.isOnline {
+                        if let endpoint = item.onlineEndpoint {
+                            Text("Available • \(endpoint.host):\(endpoint.port)")
+                                .font(.system(size: 12))
+                                .foregroundColor(AppColors.textSecondary)
+                        } else {
+                            Text("Available on network")
+                                .font(.system(size: 12))
+                                .foregroundColor(AppColors.textSecondary)
+                        }
+                    } else {
+                        Text("Offline")
+                            .font(.system(size: 12))
+                            .foregroundColor(AppColors.textTertiary)
+                    }
+                }
+            }
+
+            Spacer()
+
+            Button(action: onForget) {
+                Image(systemName: "trash")
+                    .font(.system(size: 14))
+                    .foregroundColor(AppColors.textTertiary)
+                    .frame(width: 32, height: 32)
+            }
+            .buttonStyle(GlassPressableStyle())
+
+            AccentButton(
+                text: "Connect",
+                enabled: item.isOnline,
+                onClick: onConnect
+            )
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)

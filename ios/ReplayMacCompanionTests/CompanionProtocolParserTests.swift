@@ -31,6 +31,23 @@ final class CompanionProtocolParserTests: XCTestCase {
             return
         }
         XCTAssertEqual(pendingAuth.status, "pending")
+
+        let renamedJson = """
+        {
+            "type": "auth_response",
+            "status": "approved",
+            "serverName": "Living Room Mac",
+            "serverVersion": "1.7.3",
+            "deviceName": "Alex's iPhone"
+        }
+        """
+        let renamedEvent = CompanionProtocolParser.parse(renamedJson)
+        guard case .auth(let renamedAuth) = renamedEvent else {
+            XCTFail("Expected .auth event")
+            return
+        }
+        XCTAssertEqual(renamedAuth.serverName, "Living Room Mac")
+        XCTAssertEqual(renamedAuth.deviceName, "Alex's iPhone")
     }
 
     func testParseStateSnapshot() {

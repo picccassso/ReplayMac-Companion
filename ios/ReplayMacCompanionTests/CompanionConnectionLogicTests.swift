@@ -95,6 +95,13 @@ final class CompanionConnectionLogicTests: XCTestCase {
         let connected = ConnectionState.connected(serverName: "Studio Mac", serverVersion: "1.7.3", host: "192.168.1.5", port: 7375)
         XCTAssertTrue(connected.isConnected)
 
+        let connectedWithDevice = ConnectionState.connected(serverName: "Studio Mac", serverVersion: "1.7.3", host: "192.168.1.5", port: 7375, deviceName: "My iPad")
+        XCTAssertTrue(connectedWithDevice.isConnected)
+        if case .connected(let sName, _, _, _, _, let dName) = connectedWithDevice {
+            XCTAssertEqual(sName, "Studio Mac")
+            XCTAssertEqual(dName, "My iPad")
+        }
+
         let failed = ConnectionState.failed(error: "Connection refused", host: "127.0.0.1", port: 7375)
         XCTAssertFalse(failed.isConnected)
     }

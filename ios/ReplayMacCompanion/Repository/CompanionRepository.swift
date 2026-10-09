@@ -63,6 +63,14 @@ public final class CompanionRepository: @unchecked Sendable {
         discoveryManager.isDiscovering
     }
 
+    private let previouslyConnectedMacsSubject: CurrentValueSubject<[RememberedMac], Never>
+    public var previouslyConnectedMacs: AnyPublisher<[RememberedMac], Never> {
+        previouslyConnectedMacsSubject.eraseToAnyPublisher()
+    }
+    public var currentPreviouslyConnectedMacs: [RememberedMac] {
+        previouslyConnectedMacsSubject.value
+    }
+
     /// The socket's state, shown as `.reconnecting` while the remembered Mac is being found.
     public var connectionState: AnyPublisher<ConnectionState, Never> {
         Publishers.CombineLatest(wsClient.connectionState, reconnector.target)
@@ -105,6 +113,7 @@ public final class CompanionRepository: @unchecked Sendable {
 
         let store = RememberedMacStore(defaults: defaults)
         self.rememberedMacStore = store
+        self.previouslyConnectedMacsSubject = CurrentValueSubject<[RememberedMac], Never>(store.loadAll())
 
         let savedAwake = defaults.bool(forKey: Self.keyKeepAwake)
         self.keepScreenAwakeSubject = CurrentValueSubject<Bool, Never>(savedAwake)
@@ -113,6 +122,7 @@ public final class CompanionRepository: @unchecked Sendable {
         self.hasSeenOnboardingSubject = CurrentValueSubject<Bool, Never>(savedSeen)
 
         let snapSubject = self.snapshotSubject
+        let prevSubject = self.previouslyConnectedMacsSubject
         let recon = AutoReconnector(
             connectionState: ws.connectionState,
             discoveredMacs: disc.discoveredMacs,
@@ -125,8 +135,9 @@ public final class CompanionRepository: @unchecked Sendable {
                 snapSubject?.send(.empty)
                 ws?.connect(host: endpoint.host, port: endpoint.port)
             },
-            onPairingDenied: { [store] in
+            onPairingDenied: { [store, weak prevSubject] in
                 store.clear()
+                prevSubject?.send([])
             }
         )
         self.reconnector = recon
@@ -202,6 +213,11 @@ public final class CompanionRepository: @unchecked Sendable {
         thumbnailsSubject.send([:])
     }
 
+    public func forgetMac(_ mac: RememberedMac) {
+        rememberedMacStore.remove(mac)
+        previouslyConnectedMacsSubject.send(rememberedMacStore.loadAll())
+    }
+
     public func clearError() {
         wsClient.clearError()
     }
@@ -244,11 +260,16 @@ public final class CompanionRepository: @unchecked Sendable {
 
     private func onSocketStateChanged(_ state: ConnectionState) {
         switch state {
-        case .connected(let serverName, _, let host, let port, let serverId):
+        case .connected(let serverName, _, let host, let port, let serverId, _):
             rememberConnectedMac(serverName: serverName, host: host, port: port, serverId: serverId)
         case .failed(_, _, _, let wasConnected, let pairingDenied):
             if pairingDenied {
-                rememberedMacStore.clear()
+                if let target = reconnector.currentTarget {
+                    rememberedMacStore.remove(target)
+                } else {
+                    rememberedMacStore.clear()
+                }
+                previouslyConnectedMacsSubject.send(rememberedMacStore.loadAll())
             } else if wasConnected {
                 reconnectToRememberedMac()
             }
@@ -267,6 +288,7 @@ public final class CompanionRepository: @unchecked Sendable {
             endpoint: endpoint
         )
         rememberedMacStore.save(updated)
+        previouslyConnectedMacsSubject.send(rememberedMacStore.loadAll())
     }
 
     private func openSocket(_ endpoint: MacEndpoint) {

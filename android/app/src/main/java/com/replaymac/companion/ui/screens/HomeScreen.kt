@@ -96,6 +96,7 @@ fun HomeScreen(
     val isCompactLandscape = isLandscape && (screenHeightDp < 500 || screenWidthDp < 960)
     val isCompact = if (isLandscape) isCompactLandscape else (screenWidthDp < 430)
     val serverName = (connectionState as? ConnectionState.Connected)?.serverName ?: "ReplayMac"
+    val deviceName = (connectionState as? ConnectionState.Connected)?.deviceName
     val onControl: (HomeControl) -> Unit = { control ->
         when (control) {
             HomeControl.SaveReplay -> onSaveReplay()
@@ -120,6 +121,7 @@ fun HomeScreen(
             item {
                 HomeTopBar(
                     serverName = serverName,
+                    deviceName = deviceName,
                     keepScreenAwake = keepScreenAwake,
                     onToggleKeepScreenAwake = onToggleKeepScreenAwake,
                     onOpenTutorial = onOpenTutorial,
@@ -173,14 +175,25 @@ fun HomeScreen(
 
 // ==================== Top bar ====================
 
+internal fun formatConnectedStatus(deviceName: String?): String {
+    return if (!deviceName.isNullOrBlank()) {
+        "Connected • $deviceName"
+    } else {
+        "Connected"
+    }
+}
+
 @Composable
 private fun HomeTopBar(
     serverName: String,
+    deviceName: String? = null,
     keepScreenAwake: Boolean,
     onToggleKeepScreenAwake: () -> Unit,
     onOpenTutorial: () -> Unit,
     onDisconnect: () -> Unit
 ) {
+    val statusLabel = formatConnectedStatus(deviceName)
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -196,7 +209,7 @@ private fun HomeTopBar(
             )
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 Box(Modifier.size(6.dp).background(AppColors.Success, CircleShape))
-                Text("Connected", style = MaterialTheme.typography.labelMedium, color = AppColors.TextSecondary)
+                Text(statusLabel, style = MaterialTheme.typography.labelMedium, color = AppColors.TextSecondary)
             }
         }
 

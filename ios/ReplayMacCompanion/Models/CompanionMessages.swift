@@ -90,23 +90,26 @@ public struct CompanionAuthResponse: Codable, Sendable, Equatable {
     public let serverName: String
     public let serverVersion: String
     public let serverId: String?
+    public let deviceName: String?
 
     public init(
         type: String = "auth_response",
         status: String,
         serverName: String = "ReplayMac",
         serverVersion: String = "1.0",
-        serverId: String? = nil
+        serverId: String? = nil,
+        deviceName: String? = nil
     ) {
         self.type = type
         self.status = status
         self.serverName = serverName
         self.serverVersion = serverVersion
         self.serverId = serverId
+        self.deviceName = deviceName
     }
 
     private enum CodingKeys: String, CodingKey {
-        case type, status, serverName, serverVersion, serverId
+        case type, status, serverName, serverVersion, serverId, deviceName
     }
 
     public init(from decoder: Decoder) throws {
@@ -116,6 +119,7 @@ public struct CompanionAuthResponse: Codable, Sendable, Equatable {
         self.serverName = try container.decodeIfPresent(String.self, forKey: .serverName) ?? "ReplayMac"
         self.serverVersion = try container.decodeIfPresent(String.self, forKey: .serverVersion) ?? "1.0"
         self.serverId = try container.decodeIfPresent(String.self, forKey: .serverId)
+        self.deviceName = try container.decodeIfPresent(String.self, forKey: .deviceName)
     }
 }
 

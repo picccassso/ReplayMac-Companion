@@ -217,7 +217,8 @@ class CompanionWebSocketClient(
                             serverVersion = event.auth.serverVersion,
                             host = host,
                             port = port,
-                            serverId = event.auth.serverId
+                            serverId = event.auth.serverId,
+                            deviceName = event.auth.deviceName
                         )
                     }
                     "pending" -> {

@@ -75,7 +75,9 @@ data class CompanionAuthResponse(
     val serverName: String = "ReplayMac",
     val serverVersion: String = "1.0",
     /** Stable identity of the Mac, the same on every network. Missing from older ReplayMac builds. */
-    val serverId: String? = null
+    val serverId: String? = null,
+    /** The friendly name of the paired device assigned or confirmed by the Mac. */
+    val deviceName: String? = null
 )
 
 @Serializable

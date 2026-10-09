@@ -77,6 +77,14 @@ public struct RememberedMac: Sendable, Equatable, Hashable, Codable {
         return name == otherName
     }
 
+    public func isSameMacAs(_ discovered: DiscoveredMac) -> Bool {
+        isSameMacAs(otherServerId: discovered.serverId, otherName: discovered.name)
+    }
+
+    public func isSameMacAs(_ other: RememberedMac) -> Bool {
+        isSameMacAs(otherServerId: other.serverId, otherName: other.name)
+    }
+
     /// Remembers `endpoint` as the latest way this Mac was reached.
     public func reachedAt(_ endpoint: MacEndpoint) -> RememberedMac {
         if endpoint.isUsb {
@@ -96,5 +104,25 @@ public struct RememberedMac: Sendable, Equatable, Hashable, Codable {
                 lastUsedUsb: false
             )
         }
+    }
+}
+
+/// A previously connected Mac prepared for display in the Connection screen,
+/// indicating whether it is currently online on the local network.
+public struct PreviouslyConnectedItem: Identifiable, Sendable, Equatable {
+    public var id: String {
+        if let sId = mac.serverId, !sId.isEmpty {
+            return sId
+        }
+        return mac.name
+    }
+    public let mac: RememberedMac
+    public let isOnline: Bool
+    public let onlineEndpoint: MacEndpoint?
+
+    public init(mac: RememberedMac, isOnline: Bool, onlineEndpoint: MacEndpoint? = nil) {
+        self.mac = mac
+        self.isOnline = isOnline
+        self.onlineEndpoint = onlineEndpoint
     }
 }

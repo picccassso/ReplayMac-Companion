@@ -73,12 +73,18 @@ class CompanionRepository(
     val isDiscovering: StateFlow<Boolean> = nsdManager.isDiscovering
     private val rememberedMacStore = RememberedMacStore(prefs)
 
+    private val _previouslyConnectedMacs = MutableStateFlow<List<RememberedMac>>(rememberedMacStore.loadAll())
+    val previouslyConnectedMacs: StateFlow<List<RememberedMac>> = _previouslyConnectedMacs.asStateFlow()
+
     private val reconnector = AutoReconnector(
         scope = scope,
         connectionState = wsClient.connectionState,
         discoveredMacs = nsdManager.discoveredMacs,
         connect = ::openSocket,
-        onPairingDenied = rememberedMacStore::clear
+        onPairingDenied = {
+            rememberedMacStore.clear()
+            _previouslyConnectedMacs.value = emptyList()
+        }
     )
 
     /** Only look for the Mac while the app is on screen; it's cheap then and pointless otherwise. */
@@ -169,6 +175,7 @@ class CompanionRepository(
      */
     fun onAppForegrounded() {
         isForeground = true
+        _previouslyConnectedMacs.value = rememberedMacStore.loadAll()
         when (wsClient.connectionState.value) {
             is ConnectionState.Connected -> wsClient.resync()
             is ConnectionState.Disconnected, is ConnectionState.Failed -> reconnectToRememberedMac()
@@ -185,6 +192,11 @@ class CompanionRepository(
         }
     }
 
+    fun forgetMac(mac: RememberedMac) {
+        rememberedMacStore.remove(mac)
+        _previouslyConnectedMacs.value = rememberedMacStore.loadAll()
+    }
+
     private fun reconnectToRememberedMac() {
         val mac = rememberedMacStore.load() ?: return
         if (isForeground) reconnector.start(mac)
@@ -193,7 +205,10 @@ class CompanionRepository(
     private fun onSocketStateChanged(state: ConnectionState) {
         when {
             state is ConnectionState.Connected -> rememberConnectedMac(state)
-            state is ConnectionState.Failed && state.pairingDenied -> rememberedMacStore.clear()
+            state is ConnectionState.Failed && state.pairingDenied -> {
+                rememberedMacStore.clear()
+                _previouslyConnectedMacs.value = emptyList()
+            }
             state is ConnectionState.Failed && state.wasConnected -> reconnectToRememberedMac()
         }
     }
@@ -207,6 +222,7 @@ class CompanionRepository(
                 endpoint = MacEndpoint(state.host, state.port)
             )
         )
+        _previouslyConnectedMacs.value = rememberedMacStore.loadAll()
     }
 
     private fun openSocket(endpoint: MacEndpoint) {

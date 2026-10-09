@@ -81,7 +81,8 @@ fun CompanionAppContent(viewModel: CompanionViewModel) {
     val connectionState by viewModel.connectionState.collectAsState()
     val snapshot by viewModel.snapshot.collectAsState()
     val thumbnails by viewModel.thumbnails.collectAsState()
-    val discoveredMacs by viewModel.discoveredMacs.collectAsState()
+    val filteredDiscoveredMacs by viewModel.filteredDiscoveredMacs.collectAsState()
+    val previouslyConnectedItems by viewModel.previouslyConnectedItems.collectAsState()
     val isDiscovering by viewModel.isDiscovering.collectAsState()
     val keepScreenAwake by viewModel.keepScreenAwake.collectAsState()
     val selectedClip by viewModel.selectedClip.collectAsState()
@@ -113,13 +114,16 @@ fun CompanionAppContent(viewModel: CompanionViewModel) {
     } else {
         ConnectionScreen(
             connectionState = connectionState,
-            discoveredMacs = discoveredMacs,
+            discoveredMacs = filteredDiscoveredMacs,
+            previouslyConnectedItems = previouslyConnectedItems,
             isDiscovering = isDiscovering,
             manualHost = manualHost,
             manualPort = manualPort,
             onManualHostChange = { viewModel.setManualHost(it) },
             onManualPortChange = { viewModel.setManualPort(it) },
             onConnect = { host, port -> viewModel.connect(host, port) },
+            onConnectRemembered = { item -> viewModel.connectRememberedMac(item) },
+            onForgetMac = { mac -> viewModel.forgetMac(mac) },
             onConnectAdbUsb = { viewModel.connectAdbUsb() },
             onRefreshDiscovery = { viewModel.refreshDiscovery() },
             onCancelConnection = { viewModel.disconnect() },
