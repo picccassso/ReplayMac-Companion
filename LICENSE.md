@@ -1,8 +1,8 @@
-# ReplayMac Companion License
+# ReplayMac Companion Licence
 
 Copyright (c) 2026 Alex (picccassso)
 
-ReplayMac Companion (published on iOS as **ReplayCap**) is **free, source-available software**. This license covers both the Android and iOS apps in this repository.
+ReplayMac Companion (published on iOS as **ReplayCap**) is **free, source-available software**. This licence covers both the Android and iOS apps in this repository.
 
 You may:
 
@@ -24,8 +24,8 @@ You may not, without written permission:
 
 Contributions submitted to the official ReplayMac Companion repository may be used, modified, and included in ReplayMac Companion by the project owner.
 
-Third-party libraries, frameworks, and tools used by ReplayMac Companion remain under their own licenses.
+Third-party libraries, frameworks, and tools used by ReplayMac Companion remain under their own licences.
 
 ReplayMac Companion is provided **“as is”**, without warranty of any kind. Use it at your own risk.
 
-This license does not make ReplayMac Companion open-source software. ReplayMac Companion is free and source-available, but redistribution and rebranding are restricted.
+This licence grants free, source-available access for personal use, while reserving rights over redistribution, publication of prebuilt binaries, and rebranding.

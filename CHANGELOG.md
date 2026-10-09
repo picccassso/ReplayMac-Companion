@@ -15,7 +15,7 @@ The first version of the companion, 1.0.0 on both Android and iOS.
 - Fix a spurious "Socket closed" error, and stale state overwriting fresh state, caused by callbacks from sockets that had already been replaced
 - Ask the Mac for a fresh snapshot when the app comes back to the foreground
 - Reconnect to the paired Mac automatically, on any network. The app remembers the Mac by the stable ID ReplayMac advertises, along with its last network address and USB port. When the app opens or a connection drops, it looks where discovery sees the Mac now, then where it was last reached, then the other route, switching straight away if the Mac turns up somewhere new. It retries after 1, 2, 4 and 8 seconds and then every 15 seconds, only searches while the app is on screen, and stops and forgets the Mac if it denies the phone
-- Show "Reconnecting" while searching, tell a lost connection apart from one that never opened, and explain failures in plain words ("Nothing is listening there. Check Companion Server is on in ReplayMac.") in place of a bare "Connection failed"
+- Show "Reconnecting" while searching, tell a lost connection apart from one that never opened, and explain failures in plain words ("Nothing is listening there. Check Companion Server is on in ReplayCap.") in place of a bare "Connection failed"
 - Add the iOS companion app, written in pure Swift and SwiftUI with no third-party dependencies, with the same features, wording and tests as the Android app
 - Fix labels being cut off and tiles squashing on compact screens. Small phones and short landscape windows now use a two-column grid with shorter titles such as "Save 30s" and "Stop Session"
 - Lay out the clip details sheet side by side in landscape, with the preview on the left and the details and actions on the right
@@ -24,3 +24,4 @@ The first version of the companion, 1.0.0 on both Android and iOS.
 - Reflect renames from ReplayMac straight away: renaming the Mac or this phone in ReplayMac's Companion settings updates the names on the phone without reconnecting
 - Add a privacy manifest to the iOS app (no tracking, no data collected, UserDefaults used only for the app's own settings) and declare that it uses no non-exempt encryption
 - Rename the iOS app to ReplayCap to match the Mac App Store name, with the bundle identifier `com.replaycap.companion`
+- Add comprehensive documentation: user guide, building and testing guide, architecture overview, companion protocol specification, connection and reconnection mechanics, and privacy and security details

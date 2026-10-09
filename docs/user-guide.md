@@ -1,6 +1,6 @@
 # User guide
 
-This guide walks through setting up ReplayMac Companion, connecting it to your Mac and using every control. The iOS app is called **ReplayCap** and the Android app is labelled **ReplayMac**, but they work the same way. Where they differ, it's called out.
+This guide walks through setting up ReplayMac Companion, connecting it to your Mac and using every control. Both the iOS and Android apps are labelled **ReplayCap**, and they work the same way. Where they differ, it's called out.
 
 ## On your Mac
 
@@ -46,7 +46,11 @@ If you changed the server's port on the Mac, use that port in the command instea
 
 ### USB & Wired Connection (iOS)
 
-The iOS app has a **USB Cable / Localhost** card that connects to `127.0.0.1:7375` on the phone. For that to reach your Mac, something on the iPhone has to forward that port to the Mac, and iOS has no built-in equivalent of `adb reverse`. Wi-Fi is the reliable way to connect an iPhone or iPad for now.
+The iOS app includes a **USB Cable / Localhost** option that connects to `127.0.0.1:7375`. To use a wired connection with your Mac:
+
+1. Connect your iPhone or iPad to your Mac with a USB cable.
+2. Turn on Personal Hotspot over USB, or enable Internet Sharing to your device in macOS System Settings.
+3. Alternatively, forward port 7375 from your Mac using `iproxy 7375 7375` (available via `libimobiledevice`).
 
 ### Enter Manually
 
@@ -62,7 +66,7 @@ You only pair once. After that, ReplayMac recognises the phone and lets it strai
 
 Every Mac you've paired with is listed under **Previously Connected**, most recent first. A green dot and its current address mean the Mac is reachable right now; a grey dot means "Offline". Tap **Connect** to go back to it.
 
-To remove a Mac, tap the bin icon and confirm **Forget**. If you connect to it again later, you'll need to allow the phone on the Mac again.
+To remove a Mac, tap the bin icon and confirm **Forget**. This removes that record from the phone's saved list only. ReplayMac keeps the device authorised on the Mac until you revoke it in **Paired Devices** on the Mac, so connecting again later lets the phone straight in.
 
 ### Reconnecting automatically
 
@@ -133,7 +137,7 @@ The quick guide opens automatically the first time you launch the app. It covers
 
 **Your Mac isn't listed under On This Network.** Check that ReplayMac is open, the Companion server is on, and both devices are on the same Wi-Fi. Guest networks, hotel Wi-Fi and some office networks stop devices from seeing each other, so try **Enter Manually** with the Mac's IP address. On iOS, check that Local Network access is allowed for the app.
 
-**"Nothing is listening there. Check Companion Server is on in ReplayMac."** The phone reached your Mac but nothing answered on that port. Turn the Companion server on, and check the port matches the one on ReplayMac's Companion page.
+**"Nothing is listening there. Check Companion Server is on in ReplayCap."** The phone reached your Mac but nothing answered on that port. Turn the Companion server on, and check the port matches the one on ReplayMac's Companion page.
 
 **"Your Mac didn't respond. Check it's awake and on the same network."** The Mac might be asleep, on a different network, or blocked by a firewall. If you use the macOS firewall, allow incoming connections for ReplayMac.
 

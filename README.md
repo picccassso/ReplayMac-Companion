@@ -23,7 +23,7 @@ The phone finds your Mac on the local network, asks ReplayMac for permission onc
 - **Automatic discovery**: Your Mac appears on its own when both devices are on the same Wi-Fi.
 - **Remembers your Macs**: Previously connected Macs are listed with an online or offline indicator, and you can forget any of them.
 - **Reconnects by itself**: When you reopen the app or the connection drops, it goes looking for your Mac again, even if the Mac's IP address has changed. Renaming your Mac or your phone in ReplayMac shows up on the phone straight away.
-- **USB and manual entry**: Connect an Android phone over a USB cable with `adb reverse`, or type in an IP address and port.
+- **USB and manual entry**: Connect over a USB cable (`adb reverse` on Android, USB tethering or `iproxy` on iOS), or type in an IP address and port.
 
 ### Design
 - Dark, glass-style interface modelled on ReplayMac's Home window, with portrait and landscape layouts for phones and tablets.
@@ -34,7 +34,7 @@ The phone finds your Mac on the local network, asks ReplayMac for permission onc
 - **ReplayMac with the Companion server.** The server was added to ReplayMac after version 1.7.3 and hasn't shipped in a tagged release yet, so for now you need a build of ReplayMac from its `main` branch.
 - **Android** 8.0 (API 26) or later.
 - **iOS / iPadOS** 16 or later.
-- Your phone and Mac on the same local network, or an Android phone plugged into the Mac by USB.
+- Your phone and Mac on the same local network, or plugged into the Mac by USB.
 
 ## Getting started
 
@@ -93,7 +93,7 @@ More fixes are in the [user guide](docs/user-guide.md#troubleshooting).
 
 If you like ReplayMac and want to support its development, consider leaving a tip on [Ko-fi](https://ko-fi.com/picccassso). 🙂
 
-## License
+## Licence
 
 ReplayMac Companion is free and source-available.
 

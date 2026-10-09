@@ -50,7 +50,7 @@ Actions are `saveReplay`, `saveExtendedReplay`, `toggleBuffer`, `toggleSession`,
 {"type":"get_thumbnail","action":"get_thumbnail","clipId":"2B7D…"}
 ```
 
-The apps set `action` to the same value as `type` on clip messages; ReplayMac reads either. Android also sends unused optional fields as `null`, while iOS leaves them out.
+For `type == "action"` commands, ReplayMac reads `message.action`; for clip operations (`get_thumbnail`, `reveal_clip`, `delete_clip`), it reads `message.type`. Both client apps send clean, matching envelopes, so `action` mirrors `type` on clip messages. Android also sends unused optional fields as `null`, while iOS leaves them out.
 
 ## Mac to phone
 
@@ -107,4 +107,4 @@ Each clip has `id`, `filename`, `kind` (`replay`, `extended replay` or `session`
 
 ## Versioning
 
-There's no protocol version number. Both sides tolerate unknown keys and missing optional fields, and the phone ignores message types it doesn't recognise. `clientVersion` is always `"1.0.0"` and ReplayMac doesn't read it yet.
+The protocol operates without a formal version field. Both sides tolerate unknown keys and missing optional fields, and the phone ignores unrecognised message types. The `clientVersion` field reports `"1.0.0"`, preserved for future compatibility.

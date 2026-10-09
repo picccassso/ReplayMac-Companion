@@ -84,14 +84,14 @@ The iOS app was renamed from ReplayMac to ReplayCap, but the folders kept their 
 
 ## What the tests cover
 
-Both platforms have matching unit test suites:
+Both platforms share the same core unit test suites, each with a few platform-specific tests on top:
 
-- **Reconnect plan and loop**: the order addresses are tried in, the backoff sequence, and the auto-reconnector against a fake network (finding the Mac somewhere new, falling back to USB, stopping on denial).
-- **Remembered Macs**: what's kept across network and USB connections, multi-Mac ordering, forgetting, and migration from the old single-Mac storage.
-- **Protocol parsing**: every server message, including missing optional fields, unknown types and malformed JSON.
+- **Reconnect plan and loop**: the order addresses are tried in, the backoff sequence, and the auto-reconnector against a fake network (finding the Mac somewhere new, falling back to USB, stopping on denial). Both platforms cover this thoroughly.
+- **Remembered Macs**: what's kept across network and USB connections, multi-Mac ordering, forgetting, and migration from the old single-Mac storage. Android covers `RememberedMacStore` directly, and iOS covers `RememberedMac`; both cover the model.
+- **Protocol parsing**: every server message, including missing optional fields, unknown types and malformed JSON. Android covers `CompanionProtocolParser` (via `CompanionStateParserTest`), while iOS covers `CompanionProtocolParserTests` alongside its WebSocket client tests.
 - **Client messages**: the JSON the phone sends for `hello`, actions and clip requests.
 - **Home control labels**: tile order, titles, subtitles and enabled states for every state the Mac can be in.
 - **Connection errors**: the plain-language message for each failure.
 - **Formatting and connection logic**: durations, file sizes, clip types, telemetry merging and connection states.
 
-Neither app has UI or instrumented tests yet.
+Test coverage is currently unit-level across both platforms; UI and instrumented tests are planned for future updates.
