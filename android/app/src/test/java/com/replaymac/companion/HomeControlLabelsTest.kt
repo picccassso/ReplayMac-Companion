@@ -78,6 +78,23 @@ class HomeControlLabelsTest {
     }
 
     @Test
+    fun compactTitlesAreProvidedForLongLabels() {
+        assertEquals("Save 5m", HomeControlLabels.extendedReplayCompactTitle(300))
+        assertEquals("Save 90s", HomeControlLabels.extendedReplayCompactTitle(90))
+        assertEquals("Save 45s", HomeControlLabels.extendedReplayCompactTitle(45))
+
+        val readyTile = buffering.tile(HomeControl.SaveReplay)
+        assertEquals("Save 30s", readyTile.compactTitle)
+
+        val idleSession = idle.tile(HomeControl.Session)
+        assertEquals("Record Session", idleSession.compactTitle)
+
+        val recording = idle.copy(isSessionRecording = true, sessionElapsedSeconds = 75.0)
+        val recSession = recording.tile(HomeControl.Session)
+        assertEquals("Stop Session", recSession.compactTitle)
+    }
+
+    @Test
     fun sessionTileTurnsLiveAndShowsElapsedTimeWhileRecording() {
         val recording = idle.copy(isSessionRecording = true, sessionElapsedSeconds = 75.0)
         val session = recording.tile(HomeControl.Session)

@@ -17,6 +17,7 @@ public struct ControlTileSpec: Sendable, Equatable {
     public let tone: TileTone
     public let isEnabled: Bool
     public let isLoading: Bool
+    public let compactTitle: String?
 
     public init(
         control: HomeControl,
@@ -24,7 +25,8 @@ public struct ControlTileSpec: Sendable, Equatable {
         subtitle: String,
         tone: TileTone,
         isEnabled: Bool,
-        isLoading: Bool = false
+        isLoading: Bool = false,
+        compactTitle: String? = nil
     ) {
         self.control = control
         self.title = title
@@ -32,6 +34,7 @@ public struct ControlTileSpec: Sendable, Equatable {
         self.tone = tone
         self.isEnabled = isEnabled
         self.isLoading = isLoading
+        self.compactTitle = compactTitle
     }
 }
 
@@ -70,6 +73,15 @@ public enum HomeControlLabels {
             return "Save Last \(seconds / 60)m"
         } else {
             return "Save Last \(seconds)s"
+        }
+    }
+
+    /// Compact title for whole minutes ("Save 5m") or seconds ("Save 90s").
+    public static func extendedReplayCompactTitle(_ seconds: Int) -> String {
+        if seconds >= 60 && seconds % 60 == 0 {
+            return "Save \(seconds / 60)m"
+        } else {
+            return "Save \(seconds)s"
         }
     }
 
@@ -123,7 +135,8 @@ public enum HomeControlLabels {
             subtitle: subtitle,
             tone: .prominent,
             isEnabled: snapshot.canSaveQuickReplay,
-            isLoading: snapshot.isSaveInProgress
+            isLoading: snapshot.isSaveInProgress,
+            compactTitle: "Save \(snapshot.bufferDurationSeconds)s"
         )
     }
 
@@ -144,7 +157,8 @@ public enum HomeControlLabels {
             title: extendedReplayTitle(snapshot.longBufferDurationSeconds),
             subtitle: subtitle,
             tone: .normal,
-            isEnabled: snapshot.canSaveExtendedReplay
+            isEnabled: snapshot.canSaveExtendedReplay,
+            compactTitle: extendedReplayCompactTitle(snapshot.longBufferDurationSeconds)
         )
     }
 
@@ -154,7 +168,8 @@ public enum HomeControlLabels {
             title: snapshot.isRecording ? "Stop Buffer" : "Start Buffer",
             subtitle: snapshot.isRecording ? "Running" : "Stopped",
             tone: .normal,
-            isEnabled: true
+            isEnabled: true,
+            compactTitle: snapshot.isRecording ? "Stop Buffer" : "Start Buffer"
         )
     }
 
@@ -164,7 +179,8 @@ public enum HomeControlLabels {
             title: snapshot.isSessionRecording ? "Stop & Save Session" : "Record Session",
             subtitle: snapshot.isSessionRecording ? formatDurationSeconds(snapshot.sessionElapsedSeconds) : "Full recording",
             tone: snapshot.isSessionRecording ? .live : .normal,
-            isEnabled: !snapshot.isSaveInProgress
+            isEnabled: !snapshot.isSaveInProgress,
+            compactTitle: snapshot.isSessionRecording ? "Stop Session" : "Record Session"
         )
     }
 

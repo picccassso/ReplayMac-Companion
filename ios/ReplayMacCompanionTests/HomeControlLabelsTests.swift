@@ -83,6 +83,26 @@ final class HomeControlLabelsTests: XCTestCase {
         XCTAssertEqual(HomeControlLabels.extendedReplayTitle(45), "Save Last 45s")
     }
 
+    func testCompactTitlesAreProvidedForLongLabels() {
+        XCTAssertEqual(HomeControlLabels.extendedReplayCompactTitle(300), "Save 5m")
+        XCTAssertEqual(HomeControlLabels.extendedReplayCompactTitle(90), "Save 90s")
+        XCTAssertEqual(HomeControlLabels.extendedReplayCompactTitle(45), "Save 45s")
+
+        let readyTile = tile(for: .saveReplay, in: buffering)
+        XCTAssertEqual(readyTile.compactTitle, "Save 30s")
+
+        let idleSession = tile(for: .session, in: idle)
+        XCTAssertEqual(idleSession.compactTitle, "Record Session")
+
+        let recording = CompanionStateSnapshot(
+            isRecording: false,
+            isSessionRecording: true,
+            sessionElapsedSeconds: 75.0
+        )
+        let recSession = tile(for: .session, in: recording)
+        XCTAssertEqual(recSession.compactTitle, "Stop Session")
+    }
+
     func testSessionTileTurnsLiveAndShowsElapsedTimeWhileRecording() {
         let recording = CompanionStateSnapshot(
             isRecording: false,

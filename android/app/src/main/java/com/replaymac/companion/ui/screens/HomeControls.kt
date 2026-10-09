@@ -13,7 +13,8 @@ data class ControlTileSpec(
     val subtitle: String,
     val tone: TileTone,
     val isEnabled: Boolean,
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val compactTitle: String? = null
 )
 
 /**
@@ -41,6 +42,10 @@ object HomeControlLabels {
     fun extendedReplayTitle(seconds: Int): String =
         if (seconds >= 60 && seconds % 60 == 0) "Save Last ${seconds / 60}m" else "Save Last ${seconds}s"
 
+    /** Compact title for whole minutes ("Save 5m") or seconds ("Save 90s"). */
+    fun extendedReplayCompactTitle(seconds: Int): String =
+        if (seconds >= 60 && seconds % 60 == 0) "Save ${seconds / 60}m" else "Save ${seconds}s"
+
     fun tiles(snapshot: CompanionStateSnapshot): List<ControlTileSpec> = listOf(
         saveReplay(snapshot),
         saveExtendedReplay(snapshot),
@@ -63,7 +68,8 @@ object HomeControlLabels {
         },
         tone = TileTone.Prominent,
         isEnabled = snapshot.canSaveQuickReplay,
-        isLoading = snapshot.isSaveInProgress
+        isLoading = snapshot.isSaveInProgress,
+        compactTitle = "Save ${snapshot.bufferDurationSeconds}s"
     )
 
     private fun saveExtendedReplay(snapshot: CompanionStateSnapshot) = ControlTileSpec(
@@ -76,7 +82,8 @@ object HomeControlLabels {
             else -> "Extended replay"
         },
         tone = TileTone.Normal,
-        isEnabled = snapshot.canSaveExtendedReplay
+        isEnabled = snapshot.canSaveExtendedReplay,
+        compactTitle = extendedReplayCompactTitle(snapshot.longBufferDurationSeconds)
     )
 
     private fun replayBuffer(snapshot: CompanionStateSnapshot) = ControlTileSpec(
@@ -84,7 +91,8 @@ object HomeControlLabels {
         title = if (snapshot.isRecording) "Stop Buffer" else "Start Buffer",
         subtitle = if (snapshot.isRecording) "Running" else "Stopped",
         tone = TileTone.Normal,
-        isEnabled = true
+        isEnabled = true,
+        compactTitle = if (snapshot.isRecording) "Stop Buffer" else "Start Buffer"
     )
 
     private fun session(snapshot: CompanionStateSnapshot) = ControlTileSpec(
@@ -96,7 +104,8 @@ object HomeControlLabels {
             "Full recording"
         },
         tone = if (snapshot.isSessionRecording) TileTone.Live else TileTone.Normal,
-        isEnabled = !snapshot.isSaveInProgress
+        isEnabled = !snapshot.isSaveInProgress,
+        compactTitle = if (snapshot.isSessionRecording) "Stop Session" else "Record Session"
     )
 
     // The Mac enables and unmutes a switched-off source when toggled, so the

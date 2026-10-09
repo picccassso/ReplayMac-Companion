@@ -89,7 +89,12 @@ fun HomeScreen(
     onOpenTutorial: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val screenHeightDp = configuration.screenHeightDp
+    val screenWidthDp = configuration.screenWidthDp
+    val isCompactLandscape = isLandscape && (screenHeightDp < 500 || screenWidthDp < 960)
+    val isCompact = if (isLandscape) isCompactLandscape else (screenWidthDp < 430)
     val serverName = (connectionState as? ConnectionState.Connected)?.serverName ?: "ReplayMac"
     val onControl: (HomeControl) -> Unit = { control ->
         when (control) {
@@ -124,14 +129,33 @@ fun HomeScreen(
 
             item {
                 if (isLandscape) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        StatusCard(snapshot, onToggleBuffer, Modifier.weight(1f))
-                        ControlGrid(snapshot, columns = 3, onControl = onControl, modifier = Modifier.weight(1.5f))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        StatusCard(
+                            snapshot = snapshot,
+                            onToggleBuffer = onToggleBuffer,
+                            modifier = Modifier.weight(if (isCompactLandscape) 0.88f else 1f)
+                        )
+                        ControlGrid(
+                            snapshot = snapshot,
+                            columns = if (isCompactLandscape) 2 else 3,
+                            isCompact = isCompact,
+                            onControl = onControl,
+                            modifier = Modifier.weight(if (isCompactLandscape) 1.12f else 1.5f)
+                        )
                     }
                 } else {
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         StatusCard(snapshot, onToggleBuffer)
-                        ControlGrid(snapshot, columns = 2, onControl = onControl)
+                        ControlGrid(
+                            snapshot = snapshot,
+                            columns = 2,
+                            isCompact = isCompact,
+                            onControl = onControl
+                        )
                     }
                 }
             }
@@ -210,19 +234,25 @@ private fun StatusCard(
 ) {
     GlassCard(modifier = modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(18.dp).animateContentSize()) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                StatusDot(isLive = snapshot.isRecording || snapshot.isSessionRecording)
+            Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Box(modifier = Modifier.padding(top = 4.dp)) {
+                    StatusDot(isLive = snapshot.isRecording || snapshot.isSessionRecording)
+                }
                 Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(
                         text = HomeControlLabels.headline(snapshot),
                         style = MaterialTheme.typography.titleMedium,
-                        color = AppColors.TextPrimary
+                        color = AppColors.TextPrimary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Text(
                         text = HomeControlLabels.subheadline(snapshot),
                         style = MaterialTheme.typography.bodySmall,
                         color = AppColors.TextSecondary,
-                        maxLines = 3
+                        maxLines = 4,
+                        overflow = TextOverflow.Ellipsis,
+                        softWrap = true
                     )
                 }
                 BufferToggleButton(isRunning = snapshot.isRecording, onClick = onToggleBuffer)
@@ -292,16 +322,18 @@ private fun ControlGrid(
     snapshot: CompanionStateSnapshot,
     columns: Int,
     onControl: (HomeControl) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isCompact: Boolean = false
 ) {
     val tiles = HomeControlLabels.tiles(snapshot)
-    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    val spacing = if (isCompact) 10.dp else 12.dp
+    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(spacing)) {
         tiles.chunked(columns).forEach { row ->
             // Intrinsic height keeps every tile in a row the same size, even
             // when one title wraps onto a second line.
             Row(
                 modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(spacing)
             ) {
                 row.forEach { spec ->
                     ActionTile(
@@ -312,6 +344,8 @@ private fun ControlGrid(
                         tone = spec.tone,
                         isEnabled = spec.isEnabled,
                         isLoading = spec.isLoading,
+                        isCompact = isCompact,
+                        compactTitle = spec.compactTitle,
                         modifier = Modifier.weight(1f).fillMaxHeight()
                     )
                 }

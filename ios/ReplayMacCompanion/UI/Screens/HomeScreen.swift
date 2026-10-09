@@ -76,6 +76,9 @@ public struct HomeScreen: View {
         GlassBackground {
             GeometryReader { geo in
                 let isLandscape = geo.size.width > geo.size.height
+                let isCompactLandscape = isLandscape && (geo.size.height < 500 || geo.size.width < 960)
+                let isCompact = isLandscape ? isCompactLandscape : (geo.size.width < 430)
+                let horizontalPadding: CGFloat = isLandscape ? 24 : 16
 
                 ScrollView {
                     VStack(spacing: 16) {
@@ -88,16 +91,22 @@ public struct HomeScreen: View {
                         )
 
                         if isLandscape {
+                            let availableWidth = max(0, geo.size.width - (horizontalPadding * 2) - 16)
+                            let statusWidth: CGFloat = isCompactLandscape
+                                ? max(270, min(340, availableWidth * 0.43))
+                                : max(300, min(420, availableWidth * 0.38))
+
                             HStack(alignment: .top, spacing: 16) {
                                 StatusCard(snapshot: snapshot, onToggleBuffer: onToggleBuffer)
-                                    .frame(maxWidth: .infinity)
+                                    .frame(width: statusWidth)
 
                                 ControlGrid(
                                     snapshot: snapshot,
-                                    columns: 3,
+                                    columns: isCompactLandscape ? 2 : 3,
+                                    isCompact: isCompact,
                                     onControl: handleControl
                                 )
-                                .frame(maxWidth: .infinity * 1.5)
+                                .frame(maxWidth: .infinity)
                             }
                         } else {
                             VStack(spacing: 16) {
@@ -106,6 +115,7 @@ public struct HomeScreen: View {
                                 ControlGrid(
                                     snapshot: snapshot,
                                     columns: 2,
+                                    isCompact: isCompact,
                                     onControl: handleControl
                                 )
                             }
@@ -117,7 +127,7 @@ public struct HomeScreen: View {
                             onClipSelected: onClipSelected
                         )
                     }
-                    .padding(.horizontal, isLandscape ? 24 : 16)
+                    .padding(.horizontal, horizontalPadding)
                     .padding(.top, 8)
                     .padding(.bottom, 24)
                 }
@@ -195,23 +205,29 @@ private struct StatusCard: View {
     var body: some View {
         GlassCard(cornerRadius: AppRadii.large) {
             VStack(alignment: .leading, spacing: 16) {
-                HStack(spacing: 12) {
+                HStack(alignment: .top, spacing: 12) {
                     StatusDot(isLive: snapshot.isRecording || snapshot.isSessionRecording)
+                        .padding(.top, 4)
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text(HomeControlLabels.headline(snapshot))
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(AppColors.textPrimary)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.85)
 
                         Text(HomeControlLabels.subheadline(snapshot))
                             .font(.system(size: 13))
                             .foregroundColor(AppColors.textSecondary)
-                            .lineLimit(2)
+                            .lineLimit(nil)
+                            .minimumScaleFactor(0.85)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
 
-                    Spacer()
+                    Spacer(minLength: 4)
 
                     BufferToggleButton(isRunning: snapshot.isRecording, onClick: onToggleBuffer)
+                        .padding(.top, 1)
                 }
 
                 if snapshot.isRecording {
@@ -262,13 +278,18 @@ private struct BufferToggleButton: View {
 private struct ControlGrid: View {
     let snapshot: CompanionStateSnapshot
     let columns: Int
+    var isCompact: Bool = false
     let onControl: (HomeControl) -> Void
 
     var body: some View {
         let tiles = HomeControlLabels.tiles(snapshot)
-        let gridColumns = Array(repeating: GridItem(.flexible(), spacing: 12), count: columns)
+        let spacing: CGFloat = isCompact ? 10 : 12
+        let gridColumns = Array(
+            repeating: GridItem(.flexible(minimum: isCompact ? 110 : 130), spacing: spacing),
+            count: columns
+        )
 
-        LazyVGrid(columns: gridColumns, spacing: 12) {
+        LazyVGrid(columns: gridColumns, spacing: spacing) {
             ForEach(0..<tiles.count, id: \.self) { index in
                 let spec = tiles[index]
                 ActionTile(
@@ -278,6 +299,9 @@ private struct ControlGrid: View {
                     tone: spec.tone,
                     isEnabled: spec.isEnabled,
                     isLoading: spec.isLoading,
+                    minHeight: isCompact ? 54 : 64,
+                    isCompact: isCompact,
+                    compactTitle: spec.compactTitle,
                     onClick: { onControl(spec.control) }
                 )
             }
