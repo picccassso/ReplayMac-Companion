@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.replaymac.companion.ui.theme.AppColors
@@ -143,7 +144,14 @@ private fun ButtonContent(
         if (icon != null) {
             Icon(icon, contentDescription = null, tint = contentColor, modifier = Modifier.size(17.dp))
         }
-        Text(text = text, style = MaterialTheme.typography.labelLarge, color = contentColor, maxLines = 1)
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelLarge,
+            color = contentColor,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            softWrap = false
+        )
     }
 }
 
