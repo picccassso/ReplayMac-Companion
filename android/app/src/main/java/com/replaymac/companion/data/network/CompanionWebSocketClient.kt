@@ -116,7 +116,7 @@ class CompanionWebSocketClient(
                     // The Mac closing an approved socket (quit, server switched off)
                     // is a lost connection, which the repository reconnects from.
                     _connectionState.value = if (wasConnected()) {
-                        ConnectionState.Failed("ReplayMac closed the connection.", host, port, wasConnected = true)
+                        ConnectionState.Failed("ReplayCap closed the connection.", host, port, wasConnected = true)
                     } else {
                         ConnectionState.Disconnected
                     }

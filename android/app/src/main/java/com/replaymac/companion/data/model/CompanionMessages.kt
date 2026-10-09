@@ -72,7 +72,7 @@ object CompanionActions {
 data class CompanionAuthResponse(
     val type: String = "auth_response",
     val status: String, // "approved", "pending", "denied"
-    val serverName: String = "ReplayMac",
+    val serverName: String = "ReplayCap",
     val serverVersion: String = "1.0",
     /** Stable identity of the Mac, the same on every network. Missing from older ReplayMac builds. */
     val serverId: String? = null,

@@ -196,7 +196,7 @@ fun ConnectionScreen(
                             )
                             Spacer(Modifier.height(8.dp))
                             Text(
-                                text = "You will need to approve this device again if you reconnect.",
+                                text = "You will need to allow this device again if you reconnect.",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = AppColors.TextSecondary,
                                 textAlign = TextAlign.Center
@@ -326,7 +326,7 @@ private fun ConnectionHeader(
         Column(modifier = Modifier.weight(1f).padding(start = 4.dp, top = 4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text("Connect to your Mac", style = MaterialTheme.typography.headlineLarge, color = AppColors.TextPrimary)
             Text(
-                text = "Turn on Companion Server in ReplayMac’s settings, then choose your Mac.",
+                text = "Turn on Companion Server in ReplayCap’s settings, then choose your Mac.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = AppColors.TextSecondary
             )
@@ -494,7 +494,7 @@ private fun SearchingRow(isSearching: Boolean) {
                 color = AppColors.TextPrimary
             )
             Text(
-                text = "ReplayMac needs to be open, and on the same Wi-Fi as this phone.",
+                text = "ReplayCap needs to be open, and on the same Wi-Fi as this phone.",
                 style = MaterialTheme.typography.bodySmall,
                 color = AppColors.TextSecondary
             )
@@ -655,7 +655,7 @@ fun PendingApprovalView(serverName: String, onCancel: () -> Unit, modifier: Modi
     Box(modifier) {
         StatusPanel(
             title = "Waiting for approval",
-            message = "Click Approve in ReplayMac on “$serverName” to pair this phone.",
+            message = "Click Allow in ReplayCap on “$serverName” to pair this phone.",
             onCancel = onCancel
         ) {
             Icon(Icons.Rounded.Lock, contentDescription = null, tint = AppColors.TextSecondary, modifier = Modifier.size(32.dp))

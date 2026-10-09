@@ -23,7 +23,7 @@ class ConnectionErrorsTest {
         // OkHttp reports a socket closed without a WebSocket close frame as a bare EOFException.
         assertNotEquals("Connection failed", ConnectionErrors.describe(EOFException(), wasConnected = false))
         assertEquals(
-            "Nothing is listening there. Check Companion Server is on in ReplayMac.",
+            "Nothing is listening there. Check Companion Server is on in ReplayCap.",
             ConnectionErrors.describe(ConnectException("Connection refused"), wasConnected = false)
         )
         assertEquals(
