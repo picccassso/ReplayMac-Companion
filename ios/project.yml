@@ -1,0 +1,47 @@
+name: ReplayMacCompanion
+options:
+  bundleIdPrefix: com.replaymac
+  deploymentTarget:
+    iOS: "16.0"
+  xcodeVersion: "16.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    IPHONEOS_DEPLOYMENT_TARGET: "16.0"
+    SWIFT_VERSION: "5.0"
+    CODE_SIGNING_ALLOWED: NO
+    CODE_SIGNING_REQUIRED: NO
+    CODE_SIGN_IDENTITY: ""
+targets:
+  ReplayMacCompanion:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: ReplayMacCompanion
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.replaymac.companion
+        PRODUCT_NAME: ReplayMac
+        PRODUCT_MODULE_NAME: ReplayMacCompanion
+        INFOPLIST_FILE: ReplayMacCompanion/App/Info.plist
+        TARGETED_DEVICE_FAMILY: "1,2"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        GENERATE_INFOPLIST_FILE: NO
+  ReplayMacCompanionTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: ReplayMacCompanionTests
+    dependencies:
+      - target: ReplayMacCompanion
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.replaymac.companion.tests
+        PRODUCT_NAME: ReplayMacCompanionTests
+        INFOPLIST_FILE: ReplayMacCompanionTests/Info.plist
+        GENERATE_INFOPLIST_FILE: NO
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/ReplayMac.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ReplayMac"
+        BUNDLE_LOADER: "$(TEST_HOST)"

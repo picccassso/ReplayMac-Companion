@@ -40,3 +40,10 @@ signing.properties
 
 # Android Profiler
 *.hprof
+
+# Xcode
+*.xcuserstate
+project.xcworkspace/
+xcuserdata/
+DerivedData/
+*.moved-builder

@@ -1,0 +1,279 @@
+import Foundation
+import Combine
+
+public final class CompanionWebSocketClient: @unchecked Sendable {
+    public static let defaultPort = 7375
+
+    public let deviceId: String
+    public let deviceName: String
+
+    private let session: URLSession
+    private let stateSubject = CurrentValueSubject<ConnectionState, Never>(.disconnected)
+    public var connectionState: AnyPublisher<ConnectionState, Never> {
+        stateSubject.eraseToAnyPublisher()
+    }
+    public var currentConnectionState: ConnectionState {
+        stateSubject.value
+    }
+
+    private let eventsSubject = PassthroughSubject<CompanionServerEvent, Never>()
+    public var events: AnyPublisher<CompanionServerEvent, Never> {
+        eventsSubject.eraseToAnyPublisher()
+    }
+
+    private let lock = NSLock()
+    private var webSocketTask: URLSessionWebSocketTask?
+    private var generation: Int = 0
+    private var pingTask: Task<Void, Never>?
+    private var currentHost: String?
+    private var currentPort: Int = defaultPort
+
+    public init(
+        deviceId: String,
+        deviceName: String,
+        session: URLSession? = nil
+    ) {
+        self.deviceId = deviceId
+        self.deviceName = deviceName
+        if let session = session {
+            self.session = session
+        } else {
+            let config = URLSessionConfiguration.default
+            config.timeoutIntervalForRequest = 5.0
+            config.timeoutIntervalForResource = 0 // Indefinite for WebSocket
+            self.session = URLSession(configuration: config)
+        }
+    }
+
+    deinit {
+        disconnect()
+    }
+
+    public func connect(host: String, port: Int = defaultPort) {
+        disconnect()
+
+        let cleanHost = host.trimmingCharacters(in: .whitespacesAndNewlines)
+            .components(separatedBy: "%").first ?? host
+        let formattedHost: String
+        if cleanHost.contains(":") && !cleanHost.hasPrefix("[") {
+            formattedHost = "[\(cleanHost)]"
+        } else {
+            formattedHost = cleanHost
+        }
+
+        guard let url = URL(string: "ws://\(formattedHost):\(port)") else {
+            stateSubject.send(.failed(error: "Invalid host address: \(host)", host: host, port: port, wasConnected: false))
+            return
+        }
+
+        lock.lock()
+        currentHost = host
+        currentPort = port
+        generation += 1
+        let socketGeneration = generation
+        let task = session.webSocketTask(with: url)
+        webSocketTask = task
+        lock.unlock()
+
+        stateSubject.send(.connecting(host: host, port: port))
+
+        task.resume()
+
+        // Send hello immediately upon initiating connection
+        sendHello()
+        startPingLoop()
+        listenForMessages(task: task, generation: socketGeneration, host: host, port: port)
+    }
+
+    public func disconnect() {
+        lock.lock()
+        stopPingLoopLocked()
+        generation += 1
+        let task = webSocketTask
+        webSocketTask = nil
+        currentHost = nil
+        lock.unlock()
+
+        task?.cancel(with: .normalClosure, reason: "User disconnected".data(using: .utf8))
+        stateSubject.send(.disconnected)
+    }
+
+    public func resync() -> Bool {
+        guard case .connected = currentConnectionState else { return false }
+        let msg = CompanionClientMessage.hello(deviceId: deviceId, deviceName: deviceName, clientVersion: "1.0.0")
+        return sendMessage(msg)
+    }
+
+    public func clearError() {
+        if case .failed = currentConnectionState {
+            stateSubject.send(.disconnected)
+        }
+    }
+
+    public func sendHello() {
+        let msg = CompanionClientMessage.hello(deviceId: deviceId, deviceName: deviceName, clientVersion: "1.0.0")
+        _ = sendMessage(msg)
+    }
+
+    public func sendAction(_ actionName: String) -> Bool {
+        sendMessage(CompanionClientMessage.action(actionName))
+    }
+
+    public func getThumbnail(_ clipId: String) -> Bool {
+        sendMessage(CompanionClientMessage.getThumbnail(clipId))
+    }
+
+    public func revealClip(_ clipId: String) -> Bool {
+        sendMessage(CompanionClientMessage.revealClip(clipId))
+    }
+
+    public func deleteClip(_ clipId: String) -> Bool {
+        sendMessage(CompanionClientMessage.deleteClip(clipId))
+    }
+
+    public func ping() -> Bool {
+        sendMessage(CompanionClientMessage.ping())
+    }
+
+    private func sendMessage(_ msg: CompanionClientMessage) -> Bool {
+        lock.lock()
+        guard let task = webSocketTask else {
+            lock.unlock()
+            return false
+        }
+        lock.unlock()
+
+        do {
+            let jsonString = try CompanionProtocolParser.encodeClientMessage(msg)
+            task.send(.string(jsonString)) { error in
+                if let error = error {
+                    // Send error logged
+                    _ = error
+                }
+            }
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    private func listenForMessages(task: URLSessionWebSocketTask, generation: Int, host: String, port: Int) {
+        task.receive { [weak self] result in
+            guard let self = self else { return }
+
+            self.lock.lock()
+            let isCurrent = (self.generation == generation)
+            self.lock.unlock()
+            guard isCurrent else { return }
+
+            switch result {
+            case .success(let message):
+                let text: String
+                switch message {
+                case .string(let s):
+                    text = s
+                case .data(let d):
+                    text = String(decoding: d, as: UTF8.self)
+                @unknown default:
+                    text = ""
+                }
+
+                self.handleIncomingMessage(text, host: host, port: port)
+
+                // Continue listening
+                self.listenForMessages(task: task, generation: generation, host: host, port: port)
+
+            case .failure(let error):
+                self.handleSocketFailure(error, host: host, port: port)
+            }
+        }
+    }
+
+    private func handleIncomingMessage(_ text: String, host: String, port: Int) {
+        let event = CompanionProtocolParser.parse(text)
+
+        switch event {
+        case .auth(let auth):
+            switch auth.status.lowercased() {
+            case "approved":
+                stateSubject.send(.connected(
+                    serverName: auth.serverName,
+                    serverVersion: auth.serverVersion,
+                    host: host,
+                    port: port,
+                    serverId: auth.serverId
+                ))
+            case "pending":
+                stateSubject.send(.pendingApproval(
+                    serverName: auth.serverName,
+                    host: host,
+                    port: port
+                ))
+            case "denied":
+                stateSubject.send(.failed(
+                    error: "Pairing denied by \(auth.serverName)",
+                    host: host,
+                    port: port,
+                    wasConnected: false,
+                    pairingDenied: true
+                ))
+            default:
+                break
+            }
+
+        default:
+            break
+        }
+
+        eventsSubject.send(event)
+    }
+
+    private func handleSocketFailure(_ error: Error, host: String, port: Int) {
+        lock.lock()
+        stopPingLoopLocked()
+
+        // If we are already in a failed state (e.g. pairing was denied by the server
+        // and the server subsequently closed the socket), do not clobber it with
+        // a generic socket closure error.
+        if case .failed = stateSubject.value {
+            lock.unlock()
+            return
+        }
+
+        let wasConnected: Bool
+        if case .connected(_, _, let sHost, let sPort, _) = stateSubject.value,
+           sHost == host, sPort == port {
+            wasConnected = true
+        } else {
+            wasConnected = false
+        }
+        lock.unlock()
+
+        let desc = ConnectionErrors.describe(error, wasConnected: wasConnected)
+        stateSubject.send(.failed(
+            error: desc,
+            host: host,
+            port: port,
+            wasConnected: wasConnected,
+            pairingDenied: false
+        ))
+    }
+
+    private func startPingLoop() {
+        lock.lock()
+        stopPingLoopLocked()
+        pingTask = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 20_000_000_000)
+                guard !Task.isCancelled, let self = self else { break }
+                _ = self.ping()
+            }
+        }
+        lock.unlock()
+    }
+
+    private func stopPingLoopLocked() {
+        pingTask?.cancel()
+        pingTask = nil
+    }
+}

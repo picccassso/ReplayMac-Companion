@@ -1,0 +1,654 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		11FD70293C9700AB7AFCAB68 /* CompanionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 332DB1EB92F097E0FDB32799 /* CompanionViewModel.swift */; };
+		1278F80CAEF2B2C2063F4386 /* CompanionConnectionLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B339C5483265CCD7AE26F7F /* CompanionConnectionLogicTests.swift */; };
+		18477945BA9EB7786810715D /* GlassTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1225BE0B2156FB2C8DD0FB72 /* GlassTextField.swift */; };
+		2137B162AEE62300C6B754BF /* CompanionProtocolParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = A436EB6DD883956E9246F354 /* CompanionProtocolParser.swift */; };
+		29E6AAB97FE482B8F87F73E4 /* ConnectionScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36A72538FEA0F782038140EA /* ConnectionScreen.swift */; };
+		3549590CDB62F8632DF90B43 /* GlassBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C331878131F28B50301DA33 /* GlassBackground.swift */; };
+		45B6C77EBC66591954822C2B /* OnboardingDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61DE5BB01216C6F48C300C57 /* OnboardingDialog.swift */; };
+		46C47C70CDEBEAD6CE783705 /* ConnectionErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5486AA319A3DAECFACA6F9B5 /* ConnectionErrors.swift */; };
+		47386A8F01ADE4359B067915 /* BonjourDiscoveryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B917C7649DF53186F86693A /* BonjourDiscoveryManager.swift */; };
+		49048698D50FA15732F90B38 /* RememberedMac.swift in Sources */ = {isa = PBXBuildFile; fileRef = C542D3DFCDAC3C814FF2C9E4 /* RememberedMac.swift */; };
+		4DB9B88F8CF5D80253522290 /* RememberedMacStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93C8C0CA1DD45200A34FC78F /* RememberedMacStore.swift */; };
+		5B9BC36E1EFE9F78D8E3572F /* CompanionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26204F0B38524BE353C73E1A /* CompanionState.swift */; };
+		60194816CCC71910A4850F2E /* RememberedMacTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A446522FE36FBB98C1DF1BC5 /* RememberedMacTests.swift */; };
+		667A6CC34AC7BF0132A9146A /* HomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1FA273004804B0D00EC5519 /* HomeScreen.swift */; };
+		6B9F0A56970EBBE8D20123B0 /* ReconnectPlanTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 737E68778E3640AC5EF6703D /* ReconnectPlanTests.swift */; };
+		6D0284DB659F2CA00F3BB605 /* ReconnectPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9ABEA4089F664BF7659FD47 /* ReconnectPlan.swift */; };
+		6EBCA8CB88332E4D1B53C404 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F1B1F0DC4A7BE08C8FFFBA77 /* Assets.xcassets */; };
+		816BEACB11DC3EDFD4C536E4 /* HomeControlLabelsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AEF0A2F9CABA883D108AEA8 /* HomeControlLabelsTests.swift */; };
+		89EACC2F2A63EA167362C717 /* AppRadii.swift in Sources */ = {isa = PBXBuildFile; fileRef = D11F9841D8B65C795D3B467F /* AppRadii.swift */; };
+		97CF549D4124BD6985D9BCAC /* AppColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = E002C39F7941054F014AB623 /* AppColors.swift */; };
+		98541EECC5808661E2D45EB5 /* CompanionRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0380585EB121FFEDD8D34B0D /* CompanionRepository.swift */; };
+		9AA2CB791DF5EC897FB584D1 /* AutoReconnector.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBE0B891438408FF51A1AA44 /* AutoReconnector.swift */; };
+		9ACEBD37A424DE45DC6796C3 /* RecentClipItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 754E0D3C5D7C2FAABF2DF14E /* RecentClipItem.swift */; };
+		AAFFD2042BE6BFBDD993B3E6 /* ConnectionErrorsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D87E8537EBD0DAA8D915AE2 /* ConnectionErrorsTests.swift */; };
+		AB0BC4C993C8CA13508D5167 /* GlassButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BA04400D93A08F6C7DF8C18 /* GlassButtons.swift */; };
+		AEBE4C23059852EDF38DDD4D /* CompanionWebSocketClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 229079E21BB3D46813052144 /* CompanionWebSocketClient.swift */; };
+		B4361D723ED488540B0E4768 /* HomeControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E52291982441487DDE9112E /* HomeControls.swift */; };
+		BCFFF5F8451F1EBDCD07AF5C /* ReplayMacCompanionApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96AE2AB6D210FE3737E0F7D6 /* ReplayMacCompanionApp.swift */; };
+		CF0131CC6244A87993B936EA /* GlassCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33246C3B7D3C4C9EA218EFE9 /* GlassCard.swift */; };
+		D02BD2BDB364EA9CF8664C29 /* ActionTile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 718D511DDDBD8BEAFFFE02BA /* ActionTile.swift */; };
+		D384152A59E6F341EEF65651 /* ClipDetailsBottomSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7480FDB667F3A7EBFCDC8167 /* ClipDetailsBottomSheet.swift */; };
+		D750B79E14039CB6F3979317 /* CompanionModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34E129AF218FFC3E3B03AB52 /* CompanionModelTests.swift */; };
+		D81FED6259CF95108F1E66A6 /* DualProgressMeters.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2B099767143ECF950B13463 /* DualProgressMeters.swift */; };
+		E552B3CFC8B511A4340EA2A6 /* CompanionWebSocketClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8291596EC120E195CD4BE74 /* CompanionWebSocketClientTests.swift */; };
+		F062FDBA8180EDD223F4197D /* SectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2909634CB74BF44644CA660F /* SectionHeader.swift */; };
+		F2DF32D0C072BA790A6725A7 /* StatusDot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E18995477157A709285AFE3 /* StatusDot.swift */; };
+		F46C8E16ED662DCED60318A0 /* AutoReconnectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0FBE2BB80453A60BF456271 /* AutoReconnectorTests.swift */; };
+		FA0DB93BAD2FEA5FCB365342 /* CompanionMessages.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6B4A70C023ABF776BDEBD44 /* CompanionMessages.swift */; };
+		FD582634771452B357BF4C58 /* CompanionProtocolParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F3A88EED7AF8235967D8CC8 /* CompanionProtocolParserTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		19A6C4C30B05CAAF4DE03294 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 041AE73C86FE6D7DAF5F8E87 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D04626BD7E1826C7F516D967;
+			remoteInfo = ReplayMacCompanion;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0380585EB121FFEDD8D34B0D /* CompanionRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionRepository.swift; sourceTree = "<group>"; };
+		1225BE0B2156FB2C8DD0FB72 /* GlassTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassTextField.swift; sourceTree = "<group>"; };
+		1F3A88EED7AF8235967D8CC8 /* CompanionProtocolParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionProtocolParserTests.swift; sourceTree = "<group>"; };
+		229079E21BB3D46813052144 /* CompanionWebSocketClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionWebSocketClient.swift; sourceTree = "<group>"; };
+		26204F0B38524BE353C73E1A /* CompanionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionState.swift; sourceTree = "<group>"; };
+		2909634CB74BF44644CA660F /* SectionHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionHeader.swift; sourceTree = "<group>"; };
+		2BEE376E360CE522B16BBD46 /* ReplayMacCompanionTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = ReplayMacCompanionTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		2C331878131F28B50301DA33 /* GlassBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassBackground.swift; sourceTree = "<group>"; };
+		33246C3B7D3C4C9EA218EFE9 /* GlassCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassCard.swift; sourceTree = "<group>"; };
+		332DB1EB92F097E0FDB32799 /* CompanionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionViewModel.swift; sourceTree = "<group>"; };
+		34E129AF218FFC3E3B03AB52 /* CompanionModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionModelTests.swift; sourceTree = "<group>"; };
+		36A72538FEA0F782038140EA /* ConnectionScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionScreen.swift; sourceTree = "<group>"; };
+		3AEF0A2F9CABA883D108AEA8 /* HomeControlLabelsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeControlLabelsTests.swift; sourceTree = "<group>"; };
+		3B339C5483265CCD7AE26F7F /* CompanionConnectionLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionConnectionLogicTests.swift; sourceTree = "<group>"; };
+		5486AA319A3DAECFACA6F9B5 /* ConnectionErrors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionErrors.swift; sourceTree = "<group>"; };
+		5BA04400D93A08F6C7DF8C18 /* GlassButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassButtons.swift; sourceTree = "<group>"; };
+		5E18995477157A709285AFE3 /* StatusDot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusDot.swift; sourceTree = "<group>"; };
+		5E52291982441487DDE9112E /* HomeControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeControls.swift; sourceTree = "<group>"; };
+		61DE5BB01216C6F48C300C57 /* OnboardingDialog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingDialog.swift; sourceTree = "<group>"; };
+		718D511DDDBD8BEAFFFE02BA /* ActionTile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionTile.swift; sourceTree = "<group>"; };
+		737E68778E3640AC5EF6703D /* ReconnectPlanTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReconnectPlanTests.swift; sourceTree = "<group>"; };
+		7480FDB667F3A7EBFCDC8167 /* ClipDetailsBottomSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipDetailsBottomSheet.swift; sourceTree = "<group>"; };
+		754E0D3C5D7C2FAABF2DF14E /* RecentClipItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentClipItem.swift; sourceTree = "<group>"; };
+		7B917C7649DF53186F86693A /* BonjourDiscoveryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonjourDiscoveryManager.swift; sourceTree = "<group>"; };
+		7D87E8537EBD0DAA8D915AE2 /* ConnectionErrorsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionErrorsTests.swift; sourceTree = "<group>"; };
+		919323CEE02BC794AE14B471 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		93C8C0CA1DD45200A34FC78F /* RememberedMacStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RememberedMacStore.swift; sourceTree = "<group>"; };
+		96AE2AB6D210FE3737E0F7D6 /* ReplayMacCompanionApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplayMacCompanionApp.swift; sourceTree = "<group>"; };
+		A1FA273004804B0D00EC5519 /* HomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreen.swift; sourceTree = "<group>"; };
+		A2B099767143ECF950B13463 /* DualProgressMeters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DualProgressMeters.swift; sourceTree = "<group>"; };
+		A436EB6DD883956E9246F354 /* CompanionProtocolParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionProtocolParser.swift; sourceTree = "<group>"; };
+		A446522FE36FBB98C1DF1BC5 /* RememberedMacTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RememberedMacTests.swift; sourceTree = "<group>"; };
+		B8291596EC120E195CD4BE74 /* CompanionWebSocketClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionWebSocketClientTests.swift; sourceTree = "<group>"; };
+		C542D3DFCDAC3C814FF2C9E4 /* RememberedMac.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RememberedMac.swift; sourceTree = "<group>"; };
+		C6B4A70C023ABF776BDEBD44 /* CompanionMessages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionMessages.swift; sourceTree = "<group>"; };
+		CBE0B891438408FF51A1AA44 /* AutoReconnector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoReconnector.swift; sourceTree = "<group>"; };
+		CCC4580E1E5B38A0A93DB3CD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		D11F9841D8B65C795D3B467F /* AppRadii.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRadii.swift; sourceTree = "<group>"; };
+		D9ABEA4089F664BF7659FD47 /* ReconnectPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReconnectPlan.swift; sourceTree = "<group>"; };
+		E002C39F7941054F014AB623 /* AppColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppColors.swift; sourceTree = "<group>"; };
+		E0FBE2BB80453A60BF456271 /* AutoReconnectorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoReconnectorTests.swift; sourceTree = "<group>"; };
+		F1B1F0DC4A7BE08C8FFFBA77 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F403147990E47060CF697A3F /* ReplayMacCompanion.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ReplayMacCompanion.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		02F0DC7F13CE3A501970EFA2 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				C6B4A70C023ABF776BDEBD44 /* CompanionMessages.swift */,
+				26204F0B38524BE353C73E1A /* CompanionState.swift */,
+				C542D3DFCDAC3C814FF2C9E4 /* RememberedMac.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		076FA7D55849104D21D6B00A /* ReplayMacCompanionTests */ = {
+			isa = PBXGroup;
+			children = (
+				E0FBE2BB80453A60BF456271 /* AutoReconnectorTests.swift */,
+				3B339C5483265CCD7AE26F7F /* CompanionConnectionLogicTests.swift */,
+				34E129AF218FFC3E3B03AB52 /* CompanionModelTests.swift */,
+				1F3A88EED7AF8235967D8CC8 /* CompanionProtocolParserTests.swift */,
+				B8291596EC120E195CD4BE74 /* CompanionWebSocketClientTests.swift */,
+				7D87E8537EBD0DAA8D915AE2 /* ConnectionErrorsTests.swift */,
+				3AEF0A2F9CABA883D108AEA8 /* HomeControlLabelsTests.swift */,
+				919323CEE02BC794AE14B471 /* Info.plist */,
+				737E68778E3640AC5EF6703D /* ReconnectPlanTests.swift */,
+				A446522FE36FBB98C1DF1BC5 /* RememberedMacTests.swift */,
+			);
+			path = ReplayMacCompanionTests;
+			sourceTree = "<group>";
+		};
+		0AD2D3E611098DC6C55B182F /* Screens */ = {
+			isa = PBXGroup;
+			children = (
+				7480FDB667F3A7EBFCDC8167 /* ClipDetailsBottomSheet.swift */,
+				36A72538FEA0F782038140EA /* ConnectionScreen.swift */,
+				5E52291982441487DDE9112E /* HomeControls.swift */,
+				A1FA273004804B0D00EC5519 /* HomeScreen.swift */,
+			);
+			path = Screens;
+			sourceTree = "<group>";
+		};
+		0C04BEC99525EBD1BD66DD98 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				80E8A5926A8B521B684A83F4 /* Components */,
+				0AD2D3E611098DC6C55B182F /* Screens */,
+				8DEFA631C8A4567A6A45D44F /* Theme */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		342270C782E61B0AE1EA0870 /* Connection */ = {
+			isa = PBXGroup;
+			children = (
+				CBE0B891438408FF51A1AA44 /* AutoReconnector.swift */,
+				D9ABEA4089F664BF7659FD47 /* ReconnectPlan.swift */,
+			);
+			path = Connection;
+			sourceTree = "<group>";
+		};
+		4305CFBDEB6C7DF270191B02 /* Repository */ = {
+			isa = PBXGroup;
+			children = (
+				0380585EB121FFEDD8D34B0D /* CompanionRepository.swift */,
+				93C8C0CA1DD45200A34FC78F /* RememberedMacStore.swift */,
+			);
+			path = Repository;
+			sourceTree = "<group>";
+		};
+		507938FCB2D214506F95E54B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F403147990E47060CF697A3F /* ReplayMacCompanion.app */,
+				2BEE376E360CE522B16BBD46 /* ReplayMacCompanionTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		585AFCE9C472E3018DB41366 /* ReplayMacCompanion */ = {
+			isa = PBXGroup;
+			children = (
+				B6614C78D8138B2C5CA793B0 /* App */,
+				342270C782E61B0AE1EA0870 /* Connection */,
+				02F0DC7F13CE3A501970EFA2 /* Models */,
+				FFBCC7449A2082340E46AFD1 /* Network */,
+				4305CFBDEB6C7DF270191B02 /* Repository */,
+				A881B21EEE3C80A4BD62257B /* Resources */,
+				0C04BEC99525EBD1BD66DD98 /* UI */,
+				C303F4B1F23C058503D0CDFC /* ViewModels */,
+			);
+			path = ReplayMacCompanion;
+			sourceTree = "<group>";
+		};
+		5A5D73197D677DDA48CAF989 = {
+			isa = PBXGroup;
+			children = (
+				585AFCE9C472E3018DB41366 /* ReplayMacCompanion */,
+				076FA7D55849104D21D6B00A /* ReplayMacCompanionTests */,
+				507938FCB2D214506F95E54B /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		80E8A5926A8B521B684A83F4 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				718D511DDDBD8BEAFFFE02BA /* ActionTile.swift */,
+				A2B099767143ECF950B13463 /* DualProgressMeters.swift */,
+				2C331878131F28B50301DA33 /* GlassBackground.swift */,
+				5BA04400D93A08F6C7DF8C18 /* GlassButtons.swift */,
+				33246C3B7D3C4C9EA218EFE9 /* GlassCard.swift */,
+				1225BE0B2156FB2C8DD0FB72 /* GlassTextField.swift */,
+				61DE5BB01216C6F48C300C57 /* OnboardingDialog.swift */,
+				754E0D3C5D7C2FAABF2DF14E /* RecentClipItem.swift */,
+				2909634CB74BF44644CA660F /* SectionHeader.swift */,
+				5E18995477157A709285AFE3 /* StatusDot.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		8DEFA631C8A4567A6A45D44F /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				E002C39F7941054F014AB623 /* AppColors.swift */,
+				D11F9841D8B65C795D3B467F /* AppRadii.swift */,
+			);
+			path = Theme;
+			sourceTree = "<group>";
+		};
+		A881B21EEE3C80A4BD62257B /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				F1B1F0DC4A7BE08C8FFFBA77 /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		B6614C78D8138B2C5CA793B0 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				CCC4580E1E5B38A0A93DB3CD /* Info.plist */,
+				96AE2AB6D210FE3737E0F7D6 /* ReplayMacCompanionApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		C303F4B1F23C058503D0CDFC /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				332DB1EB92F097E0FDB32799 /* CompanionViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		FFBCC7449A2082340E46AFD1 /* Network */ = {
+			isa = PBXGroup;
+			children = (
+				7B917C7649DF53186F86693A /* BonjourDiscoveryManager.swift */,
+				A436EB6DD883956E9246F354 /* CompanionProtocolParser.swift */,
+				229079E21BB3D46813052144 /* CompanionWebSocketClient.swift */,
+				5486AA319A3DAECFACA6F9B5 /* ConnectionErrors.swift */,
+			);
+			path = Network;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		05C1A7309292B186DA4E5C26 /* ReplayMacCompanionTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9147F1D65E28924141C35DEB /* Build configuration list for PBXNativeTarget "ReplayMacCompanionTests" */;
+			buildPhases = (
+				B3138A4910640F8F38F7C357 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1AD7E9E06F4A01E34A07B3AF /* PBXTargetDependency */,
+			);
+			name = ReplayMacCompanionTests;
+			packageProductDependencies = (
+			);
+			productName = ReplayMacCompanionTests;
+			productReference = 2BEE376E360CE522B16BBD46 /* ReplayMacCompanionTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		D04626BD7E1826C7F516D967 /* ReplayMacCompanion */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 32D4796BAB3620E73BB30ABD /* Build configuration list for PBXNativeTarget "ReplayMacCompanion" */;
+			buildPhases = (
+				7FF37108B203ABF4CF6265B9 /* Sources */,
+				B56F584208769DA8038A6528 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ReplayMacCompanion;
+			packageProductDependencies = (
+			);
+			productName = ReplayMacCompanion;
+			productReference = F403147990E47060CF697A3F /* ReplayMacCompanion.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		041AE73C86FE6D7DAF5F8E87 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+				};
+			};
+			buildConfigurationList = EC8E9A00A5056880BEC374A6 /* Build configuration list for PBXProject "ReplayMacCompanion" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 5A5D73197D677DDA48CAF989;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 507938FCB2D214506F95E54B /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D04626BD7E1826C7F516D967 /* ReplayMacCompanion */,
+				05C1A7309292B186DA4E5C26 /* ReplayMacCompanionTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		B56F584208769DA8038A6528 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6EBCA8CB88332E4D1B53C404 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		7FF37108B203ABF4CF6265B9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D02BD2BDB364EA9CF8664C29 /* ActionTile.swift in Sources */,
+				97CF549D4124BD6985D9BCAC /* AppColors.swift in Sources */,
+				89EACC2F2A63EA167362C717 /* AppRadii.swift in Sources */,
+				9AA2CB791DF5EC897FB584D1 /* AutoReconnector.swift in Sources */,
+				47386A8F01ADE4359B067915 /* BonjourDiscoveryManager.swift in Sources */,
+				D384152A59E6F341EEF65651 /* ClipDetailsBottomSheet.swift in Sources */,
+				FA0DB93BAD2FEA5FCB365342 /* CompanionMessages.swift in Sources */,
+				2137B162AEE62300C6B754BF /* CompanionProtocolParser.swift in Sources */,
+				98541EECC5808661E2D45EB5 /* CompanionRepository.swift in Sources */,
+				5B9BC36E1EFE9F78D8E3572F /* CompanionState.swift in Sources */,
+				11FD70293C9700AB7AFCAB68 /* CompanionViewModel.swift in Sources */,
+				AEBE4C23059852EDF38DDD4D /* CompanionWebSocketClient.swift in Sources */,
+				46C47C70CDEBEAD6CE783705 /* ConnectionErrors.swift in Sources */,
+				29E6AAB97FE482B8F87F73E4 /* ConnectionScreen.swift in Sources */,
+				D81FED6259CF95108F1E66A6 /* DualProgressMeters.swift in Sources */,
+				3549590CDB62F8632DF90B43 /* GlassBackground.swift in Sources */,
+				AB0BC4C993C8CA13508D5167 /* GlassButtons.swift in Sources */,
+				CF0131CC6244A87993B936EA /* GlassCard.swift in Sources */,
+				18477945BA9EB7786810715D /* GlassTextField.swift in Sources */,
+				B4361D723ED488540B0E4768 /* HomeControls.swift in Sources */,
+				667A6CC34AC7BF0132A9146A /* HomeScreen.swift in Sources */,
+				45B6C77EBC66591954822C2B /* OnboardingDialog.swift in Sources */,
+				9ACEBD37A424DE45DC6796C3 /* RecentClipItem.swift in Sources */,
+				6D0284DB659F2CA00F3BB605 /* ReconnectPlan.swift in Sources */,
+				49048698D50FA15732F90B38 /* RememberedMac.swift in Sources */,
+				4DB9B88F8CF5D80253522290 /* RememberedMacStore.swift in Sources */,
+				BCFFF5F8451F1EBDCD07AF5C /* ReplayMacCompanionApp.swift in Sources */,
+				F062FDBA8180EDD223F4197D /* SectionHeader.swift in Sources */,
+				F2DF32D0C072BA790A6725A7 /* StatusDot.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B3138A4910640F8F38F7C357 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F46C8E16ED662DCED60318A0 /* AutoReconnectorTests.swift in Sources */,
+				1278F80CAEF2B2C2063F4386 /* CompanionConnectionLogicTests.swift in Sources */,
+				D750B79E14039CB6F3979317 /* CompanionModelTests.swift in Sources */,
+				FD582634771452B357BF4C58 /* CompanionProtocolParserTests.swift in Sources */,
+				E552B3CFC8B511A4340EA2A6 /* CompanionWebSocketClientTests.swift in Sources */,
+				AAFFD2042BE6BFBDD993B3E6 /* ConnectionErrorsTests.swift in Sources */,
+				816BEACB11DC3EDFD4C536E4 /* HomeControlLabelsTests.swift in Sources */,
+				6B9F0A56970EBBE8D20123B0 /* ReconnectPlanTests.swift in Sources */,
+				60194816CCC71910A4850F2E /* RememberedMacTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		1AD7E9E06F4A01E34A07B3AF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D04626BD7E1826C7F516D967 /* ReplayMacCompanion */;
+			targetProxy = 19A6C4C30B05CAAF4DE03294 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		6C04C76CAA5FFE140FBF1BFF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ReplayMacCompanionTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.replaymac.companion.tests;
+				PRODUCT_NAME = ReplayMacCompanionTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ReplayMac.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ReplayMac";
+			};
+			name = Release;
+		};
+		911CBA4F1C7DE4D27E85122A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ReplayMacCompanion/App/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.replaymac.companion;
+				PRODUCT_MODULE_NAME = ReplayMacCompanion;
+				PRODUCT_NAME = ReplayMac;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		928FF618A9121634C749E651 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		979F8D4B1446A7192B2C6EF5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		AC1343AB557EB006DAE8C4E1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ReplayMacCompanionTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.replaymac.companion.tests;
+				PRODUCT_NAME = ReplayMacCompanionTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ReplayMac.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ReplayMac";
+			};
+			name = Debug;
+		};
+		E388368AAFD9BBB6B3E4D81A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ReplayMacCompanion/App/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.replaymac.companion;
+				PRODUCT_MODULE_NAME = ReplayMacCompanion;
+				PRODUCT_NAME = ReplayMac;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		32D4796BAB3620E73BB30ABD /* Build configuration list for PBXNativeTarget "ReplayMacCompanion" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				911CBA4F1C7DE4D27E85122A /* Debug */,
+				E388368AAFD9BBB6B3E4D81A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		9147F1D65E28924141C35DEB /* Build configuration list for PBXNativeTarget "ReplayMacCompanionTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AC1343AB557EB006DAE8C4E1 /* Debug */,
+				6C04C76CAA5FFE140FBF1BFF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		EC8E9A00A5056880BEC374A6 /* Build configuration list for PBXProject "ReplayMacCompanion" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				979F8D4B1446A7192B2C6EF5 /* Debug */,
+				928FF618A9121634C749E651 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 041AE73C86FE6D7DAF5F8E87 /* Project object */;
+}
