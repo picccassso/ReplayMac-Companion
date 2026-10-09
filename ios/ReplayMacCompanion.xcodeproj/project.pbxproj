@@ -43,6 +43,7 @@
 		E552B3CFC8B511A4340EA2A6 /* CompanionWebSocketClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8291596EC120E195CD4BE74 /* CompanionWebSocketClientTests.swift */; };
 		F062FDBA8180EDD223F4197D /* SectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2909634CB74BF44644CA660F /* SectionHeader.swift */; };
 		F2DF32D0C072BA790A6725A7 /* StatusDot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E18995477157A709285AFE3 /* StatusDot.swift */; };
+		F42251B39E262549EE55F03E /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 99ED617918C2D97A1D258212 /* PrivacyInfo.xcprivacy */; };
 		F46C8E16ED662DCED60318A0 /* AutoReconnectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0FBE2BB80453A60BF456271 /* AutoReconnectorTests.swift */; };
 		FA0DB93BAD2FEA5FCB365342 /* CompanionMessages.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6B4A70C023ABF776BDEBD44 /* CompanionMessages.swift */; };
 		FD582634771452B357BF4C58 /* CompanionProtocolParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F3A88EED7AF8235967D8CC8 /* CompanionProtocolParserTests.swift */; };
@@ -87,6 +88,7 @@
 		919323CEE02BC794AE14B471 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		93C8C0CA1DD45200A34FC78F /* RememberedMacStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RememberedMacStore.swift; sourceTree = "<group>"; };
 		96AE2AB6D210FE3737E0F7D6 /* ReplayMacCompanionApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplayMacCompanionApp.swift; sourceTree = "<group>"; };
+		99ED617918C2D97A1D258212 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		A1FA273004804B0D00EC5519 /* HomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreen.swift; sourceTree = "<group>"; };
 		A2B099767143ECF950B13463 /* DualProgressMeters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DualProgressMeters.swift; sourceTree = "<group>"; };
 		A436EB6DD883956E9246F354 /* CompanionProtocolParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionProtocolParser.swift; sourceTree = "<group>"; };
@@ -234,6 +236,7 @@
 			isa = PBXGroup;
 			children = (
 				F1B1F0DC4A7BE08C8FFFBA77 /* Assets.xcassets */,
+				99ED617918C2D97A1D258212 /* PrivacyInfo.xcprivacy */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -342,6 +345,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6EBCA8CB88332E4D1B53C404 /* Assets.xcassets in Resources */,
+				F42251B39E262549EE55F03E /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
