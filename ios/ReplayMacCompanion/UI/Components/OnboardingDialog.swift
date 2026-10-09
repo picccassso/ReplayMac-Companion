@@ -27,8 +27,8 @@ private let tutorialPages: [TutorialPage] = [
         title: "Connecting",
         subtitle: "Turn on Companion Server in ReplayCap’s settings first.",
         highlights: [
-            TutorialHighlight(icon: "wifi", title: "Wi-Fi", detail: "Your Mac shows up automatically when you’re on the same network."),
-            TutorialHighlight(icon: "cable.connector", title: "USB Cable", detail: "Plug in with USB-C or Lightning, with Local Network Sharing or port forwarding.")
+            TutorialHighlight(icon: "wifi", title: "Wi-Fi (Recommended)", detail: "Your Mac shows up automatically when you’re on the same Wi-Fi network."),
+            TutorialHighlight(icon: "cable.connector", title: "Wired Tethering", detail: "Connect via USB cable when Personal Hotspot or local network sharing is active.")
         ]
     ),
     TutorialPage(

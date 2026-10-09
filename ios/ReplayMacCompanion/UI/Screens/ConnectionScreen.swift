@@ -65,7 +65,7 @@ public struct ConnectionScreen: View {
                 CenteredStatus {
                     StatusPanel(
                         title: "Waiting for approval",
-                        message: "Click Approve in ReplayMac on “\(sName)” to pair this phone.",
+                        message: "Click Allow in ReplayCap on “\(sName)” to pair this phone.",
                         onCancel: onCancelConnection
                     ) {
                         Image(systemName: "lock.fill")
@@ -174,7 +174,7 @@ public struct ConnectionScreen: View {
                     }
                 }
             } message: {
-                Text("You will need to approve this device again in ReplayMac if you reconnect.")
+                Text("You will need to allow this device again in ReplayCap if you reconnect.")
             }
         }
     }
@@ -354,7 +354,7 @@ private struct ConnectionHeader: View {
                     .font(.system(size: 26, weight: .bold))
                     .foregroundColor(AppColors.textPrimary)
 
-                Text("Turn on Companion Server in ReplayMac’s settings, then choose your Mac.")
+                Text("Turn on Companion Server in ReplayCap’s settings, then choose your Mac.")
                     .font(.system(size: 14))
                     .foregroundColor(AppColors.textSecondary)
             }

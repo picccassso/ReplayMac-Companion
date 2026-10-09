@@ -147,6 +147,8 @@ public final class CompanionViewModel: ObservableObject {
     public func connectRememberedMac(_ item: PreviouslyConnectedItem) {
         if let endpoint = item.onlineEndpoint ?? item.mac.networkEndpoint {
             connect(host: endpoint.host, portStr: String(endpoint.port))
+        } else if let usbPort = item.mac.usbPort {
+            connectWired(portStr: String(usbPort))
         }
     }
 

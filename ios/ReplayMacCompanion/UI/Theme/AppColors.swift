@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Mirrors the macOS dark appearance ReplayMac uses on the desktop: system
+/// Mirrors the macOS dark appearance ReplayCap uses on the desktop: system
 /// blue accent, Apple's label greys, and translucent white fills for glass.
 public enum AppColors {
     public static let accent = Color(red: 10/255, green: 132/255, blue: 255/255) // #0A84FF

@@ -53,7 +53,7 @@ public struct DiscoveredMac: Identifiable, Sendable, Equatable, Hashable {
     public let name: String
     public let host: String
     public let port: Int
-    /// ReplayMac's stable identity from its Bonjour TXT record, when it advertises one.
+    /// ReplayCap's stable identity from its Bonjour TXT record, when it advertises one.
     public let serverId: String?
     public let lastSeenTimestamp: Date
 
