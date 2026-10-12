@@ -53,7 +53,7 @@ private data class TutorialPage(val title: String, val subtitle: String, val hig
 
 private val tutorialPages = listOf(
     TutorialPage(
-        title = "ReplayCap, from your phone",
+        title = "ReplayMac, from your phone",
         subtitle = "Save clips and check on recording without leaving your game.",
         highlights = listOf(
             Highlight(Icons.Rounded.Download, "Save replays", "Tap once to save the last 30 seconds, or longer."),
@@ -62,7 +62,7 @@ private val tutorialPages = listOf(
     ),
     TutorialPage(
         title = "Connecting",
-        subtitle = "Turn on Companion Server in ReplayCap’s settings first.",
+        subtitle = "Turn on Companion Server in ReplayMac’s settings first.",
         highlights = listOf(
             Highlight(Icons.Rounded.Wifi, "Wi-Fi", "Your Mac shows up automatically when you’re on the same network."),
             Highlight(Icons.Rounded.Usb, "USB", "Plug in, then run ‘adb reverse tcp:7375 tcp:7375’ on your Mac.")

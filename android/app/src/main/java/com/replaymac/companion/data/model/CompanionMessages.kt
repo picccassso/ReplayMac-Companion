@@ -84,13 +84,13 @@ object CompanionActions {
 data class CompanionAuthResponse(
     val type: String = "auth_response",
     val status: String, // "approved", "pending", "denied"
-    val serverName: String = "ReplayCap",
+    val serverName: String = "ReplayMac",
     val serverVersion: String = "1.0",
     /** Stable identity of the Mac, the same on every network. Missing from older ReplayMac builds. */
     val serverId: String? = null,
     /** The friendly name of the paired device assigned or confirmed by the Mac. */
     val deviceName: String? = null,
-    /** On "pending": the code ReplayCap shows next to Allow, so the user can check it's this phone. */
+    /** On "pending": the code ReplayMac shows next to Allow, so the user can check it's this phone. */
     val pairingCode: String? = null,
     /** On "approved", only right after the user clicked Allow: the secret that proves this phone next time. */
     val pairingSecret: String? = null,
@@ -104,7 +104,7 @@ data class CompanionAuthChallenge(
     val type: String = "auth_challenge",
     val nonce: String,
     val serverId: String,
-    val serverName: String = "ReplayCap",
+    val serverName: String = "ReplayMac",
     val serverVersion: String = "1.0"
 )
 

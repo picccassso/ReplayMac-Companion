@@ -150,7 +150,7 @@ class CompanionSessionTest {
 
         assertEquals(ConnectionState.Disconnected, session.closedState(wasConnected = false))
         assertEquals(
-            "ReplayCap closed the connection.",
+            "ReplayMac closed the connection.",
             (session.closedState(wasConnected = true) as ConnectionState.Failed).error
         )
     }

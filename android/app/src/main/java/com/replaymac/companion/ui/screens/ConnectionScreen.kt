@@ -333,7 +333,7 @@ private fun ConnectionHeader(
         Column(modifier = Modifier.weight(1f).padding(start = 4.dp, top = 4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text("Connect to your Mac", style = MaterialTheme.typography.headlineLarge, color = AppColors.TextPrimary)
             Text(
-                text = "Turn on Companion Server in ReplayCap’s settings, then choose your Mac.",
+                text = "Turn on Companion Server in ReplayMac’s settings, then choose your Mac.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = AppColors.TextSecondary
             )
@@ -501,7 +501,7 @@ private fun SearchingRow(isSearching: Boolean) {
                 color = AppColors.TextPrimary
             )
             Text(
-                text = "ReplayCap needs to be open, and on the same Wi-Fi as this phone.",
+                text = "ReplayMac needs to be open, and on the same Wi-Fi as this phone.",
                 style = MaterialTheme.typography.bodySmall,
                 color = AppColors.TextSecondary
             )
@@ -673,9 +673,9 @@ fun PendingApprovalView(
         StatusPanel(
             title = "Waiting for approval",
             message = if (pairingCode != null) {
-                "Check that ReplayCap on “$serverName” shows this code, then click Allow."
+                "Check that ReplayMac on “$serverName” shows this code, then click Allow."
             } else {
-                "Click Allow in ReplayCap on “$serverName” to pair this phone."
+                "Click Allow in ReplayMac on “$serverName” to pair this phone."
             },
             onCancel = onCancel,
             detail = pairingCode?.let { code -> { PairingCodeText(code) } }

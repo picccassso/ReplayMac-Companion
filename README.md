@@ -4,7 +4,7 @@
 
 ReplayCap Companion is a remote control for [ReplayCap](https://github.com/picccassso/ReplayMac) (also known as ReplayMac) that runs on your phone. Prop your phone up next to your keyboard and you can save a replay, start or stop the replay buffer, record a session or mute your audio without touching the Mac or remembering a hotkey.
 
-The phone finds your Mac on the local network, asks ReplayMac for permission once, and then mirrors the Mac's Home page in real time. Both an Android app (Kotlin and Jetpack Compose) and an iOS app (Swift and SwiftUI) live in this repository, and they're kept at feature parity.
+The phone finds your Mac on the local network, asks ReplayMac for permission once, and then mirrors the Mac's Home page in real time. Both an Android app (Kotlin and Jetpack Compose) and an iOS app (Swift and SwiftUI) live in this repository, and they're kept at feature parity. On iPhone and iPad the app is called **ReplayCap**; on Android it's **ReplayMac**.
 
 ## Features
 

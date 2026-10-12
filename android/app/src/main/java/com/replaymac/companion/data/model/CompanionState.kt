@@ -19,7 +19,7 @@ sealed interface ConnectionState {
         val serverName: String,
         val host: String,
         val port: Int,
-        /** The code ReplayCap shows for this request, when it sends one. */
+        /** The code ReplayMac shows for this request, when it sends one. */
         val pairingCode: String? = null
     ) : ConnectionState
     /** Finding a remembered Mac again, on whichever network or cable it is reachable. */

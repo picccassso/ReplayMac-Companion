@@ -99,13 +99,13 @@ iOS builds on Apple frameworks only: SwiftUI, Combine, Foundation, UIKit and Net
 
 ## Naming
 
-The repository is called ReplayMac Companion, the apps are called ReplayCap on both platforms, and some older names are still in the code:
+The repository is called ReplayMac Companion. The app is called ReplayCap on iOS (Apple doesn't allow "Mac" in App Store names) and ReplayMac on Android, and some older names are still in the code:
 
 | Where | Name |
 | --- | --- |
 | Android package and application ID | `com.replaymac.companion` |
 | Android Gradle project | `ReplayMacCompanion` |
-| Android launcher label | ReplayCap |
+| Android launcher label | ReplayMac |
 | iOS source folders | `ios/ReplayMacCompanion/`, `ios/ReplayMacCompanionTests/` |
 | iOS project, target and Swift module | `ReplayCapCompanion` |
 | iOS bundle ID and display name | `com.replaycap.companion`, ReplayCap |

@@ -1,6 +1,6 @@
 # User guide
 
-This guide walks through setting up ReplayMac Companion, connecting it to your Mac and using every control. Both the iOS and Android apps are labelled **ReplayCap**, and they work the same way. Where they differ, it's called out.
+This guide walks through setting up ReplayMac Companion, connecting it to your Mac and using every control. The app is called **ReplayCap** on iPhone and iPad, matching the Mac App Store name, and **ReplayMac** on Android. Both work the same way and with either edition of the Mac app. Where they differ, it's called out.
 
 ## On your Mac
 

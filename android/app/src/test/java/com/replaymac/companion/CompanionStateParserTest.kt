@@ -211,10 +211,10 @@ class CompanionStateParserTest {
     @Test
     fun errorCarriesItsCode() {
         val event = CompanionProtocolParser.parse(
-            """{"type":"error","message":"ReplayCap is already pairing another phone.","code":"busy"}"""
+            """{"type":"error","message":"ReplayMac is already pairing another phone.","code":"busy"}"""
         )
         assertEquals(
-            CompanionServerEvent.Error("ReplayCap is already pairing another phone.", "busy"),
+            CompanionServerEvent.Error("ReplayMac is already pairing another phone.", "busy"),
             event
         )
     }

@@ -114,7 +114,7 @@ The app checks these situations in order and displays the first matching message
 | The Mac said no | `auth_response` with `denied` | `auth_response` with `denied` | Pairing denied by *Mac name* |
 | Anything else | | | The error's own message, or "Connection failed" |
 
-Android shows "ReplayCap closed the connection." when the Mac cleanly closes a working connection. iOS shows "The connection to your Mac was interrupted." in the same situation, because it checks for a dropped connection first.
+Android shows "ReplayMac closed the connection." when the Mac cleanly closes a working connection. iOS shows "The connection to your Mac was interrupted." in the same situation, because it checks for a dropped connection first.
 
 ## Discovery
 

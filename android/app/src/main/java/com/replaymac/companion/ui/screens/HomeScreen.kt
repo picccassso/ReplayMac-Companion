@@ -95,7 +95,7 @@ fun HomeScreen(
     val screenWidthDp = configuration.screenWidthDp
     val isCompactLandscape = isLandscape && (screenHeightDp < 500 || screenWidthDp < 960)
     val isCompact = if (isLandscape) isCompactLandscape else (screenWidthDp < 430)
-    val serverName = (connectionState as? ConnectionState.Connected)?.serverName ?: "ReplayCap"
+    val serverName = (connectionState as? ConnectionState.Connected)?.serverName ?: "ReplayMac"
     val deviceName = (connectionState as? ConnectionState.Connected)?.deviceName
     val onControl: (HomeControl) -> Unit = { control ->
         when (control) {
@@ -411,7 +411,7 @@ private fun SessionClipsSection(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = "Clips you save appear here until you quit ReplayCap.",
+                    text = "Clips you save appear here until you quit ReplayMac.",
                     style = MaterialTheme.typography.bodySmall,
                     color = AppColors.TextSecondary
                 )
