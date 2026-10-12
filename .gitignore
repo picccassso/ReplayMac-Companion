@@ -51,3 +51,6 @@ DerivedData/
 
 # App Store screenshots (kept locally, uploaded to App Store Connect)
 App Store Photos/
+
+# Local release builds and archives
+dist/

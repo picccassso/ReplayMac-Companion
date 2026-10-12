@@ -32,10 +32,24 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 ### Release builds
 
 ```bash
-./gradlew :app:assembleRelease
+./gradlew :app:assembleRelease   # APK for sideloading and GitHub releases
+./gradlew :app:bundleRelease     # AAB for Google Play
 ```
 
-The APK lands in `app/build/outputs/apk/release/app-release.apk`. The release build is currently signed with the debug key and isn't minified, which is fine for sideloading but not for Google Play. To ship to Play, add a real `signingConfigs` block that reads a keystore. The `.gitignore` already excludes `*.jks`, `*.keystore`, `release-key.properties` and `signing.properties`, so keep those files out of the repo.
+The APK lands in `app/build/outputs/apk/release/app-release.apk` and the bundle in `app/build/outputs/bundle/release/app-release.aab`. Neither is minified.
+
+Release builds are signed with the project's release key, which is never committed. Gradle reads its location and passwords from `android/release-key.properties`:
+
+```properties
+storeFile=/absolute/path/to/replaycap-companion-release.jks
+storePassword=...
+keyAlias=replaycap-companion
+keyPassword=...
+```
+
+Without that file, release builds come out unsigned (`app-release-unsigned.apk`) instead of falling back to the debug key, so a debug-signed build can't be shipped by accident. Building your own copy? Create a key with `keytool -genkeypair -storetype PKCS12 -keyalg RSA -keysize 4096 -validity 10000 -alias replaycap-companion -keystore your-key.jks` and point the properties file at it. Android only installs an update signed with the same key as the installed app, so to install a build signed with your own key, uninstall the official app first.
+
+The `.gitignore` excludes `*.jks`, `*.keystore`, `release-key.properties` and `signing.properties`, so keep those files out of the repo.
 
 ## iOS
 
