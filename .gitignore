@@ -48,3 +48,6 @@ project.xcworkspace/
 xcuserdata/
 DerivedData/
 *.moved-builder
+
+# App Store screenshots (kept locally, uploaded to App Store Connect)
+App Store Photos/

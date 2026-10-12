@@ -73,7 +73,7 @@ ReplayMac keeps trusted devices in its `pairedCompanionDevices` default and thei
 | `action` | `action` | Run a control (see below). |
 | `get_thumbnail` | `clipId` | Ask for a clip's thumbnail. |
 | `reveal_clip` | `clipId` | Show the clip in Finder. |
-| `delete_clip` | `clipId` | Delete the clip from the Mac. |
+| `delete_clip` | `clipId` | Move the clip to the Trash on the Mac. |
 | `ping` | | Keepalive. |
 
 Actions are `saveReplay`, `saveExtendedReplay`, `toggleBuffer`, `toggleSession`, `toggleMicrophone` and `toggleSystemAudio`. ReplayMac also accepts snake_case spellings.

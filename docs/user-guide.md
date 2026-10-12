@@ -119,7 +119,7 @@ Clips you save while ReplayMac is open appear under **This Session**, newest fir
 Tap a clip to open its details:
 
 - **Show in Finder** reveals the clip on your Mac.
-- **Delete** removes the clip from your Mac after you confirm. This can't be undone from the phone.
+- **Delete** moves the clip to the Trash on your Mac after you confirm. To get it back, restore it from the Trash on the Mac.
 
 ### Deck mode
 

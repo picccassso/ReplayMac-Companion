@@ -424,7 +424,7 @@ private struct DiscoveredMacRow: View {
                     .foregroundColor(AppColors.textPrimary)
                     .lineLimit(1)
 
-                Text("\(mac.host):\(mac.port)")
+                Text(verbatim: "\(mac.host):\(mac.port)")
                     .font(.system(size: 13))
                     .foregroundColor(AppColors.textSecondary)
             }
@@ -462,7 +462,7 @@ private struct PreviouslyConnectedRow: View {
 
                     if item.isOnline {
                         if let endpoint = item.onlineEndpoint {
-                            Text("Available • \(endpoint.host):\(endpoint.port)")
+                            Text(verbatim: "Available • \(endpoint.host):\(endpoint.port)")
                                 .font(.system(size: 12))
                                 .foregroundColor(AppColors.textSecondary)
                         } else {

@@ -162,7 +162,7 @@ fun ClipDetailsBottomSheet(
         AlertDialog(
             onDismissRequest = { showDeleteConfirmation = false },
             title = { Text("Delete this clip?") },
-            text = { Text("\u201c${clip.filename}\u201d will be deleted from your Mac. This can\u2019t be undone.") },
+            text = { Text("\u201c${clip.filename}\u201d will be moved to the Trash on your Mac.") },
             confirmButton = {
                 TextButton(
                     onClick = {

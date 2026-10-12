@@ -60,7 +60,7 @@ public struct ClipDetailsBottomSheet: View {
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("“\(clip.filename)” will be deleted from your Mac. This can’t be undone.")
+            Text("“\(clip.filename)” will be moved to the Trash on your Mac.")
         }
     }
 
