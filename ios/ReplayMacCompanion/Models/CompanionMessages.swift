@@ -9,6 +9,9 @@ public struct CompanionClientMessage: Codable, Sendable, Equatable {
     public let clientVersion: String?
     public let action: String?
     public let clipId: String?
+    public let protocolVersion: Int?
+    /// Base64 HMAC answering an `auth_challenge`; nil when this phone holds no secret for the Mac.
+    public let proof: String?
 
     public init(
         type: String,
@@ -16,7 +19,9 @@ public struct CompanionClientMessage: Codable, Sendable, Equatable {
         deviceName: String? = nil,
         clientVersion: String? = nil,
         action: String? = nil,
-        clipId: String? = nil
+        clipId: String? = nil,
+        protocolVersion: Int? = nil,
+        proof: String? = nil
     ) {
         self.type = type
         self.deviceId = deviceId
@@ -24,15 +29,22 @@ public struct CompanionClientMessage: Codable, Sendable, Equatable {
         self.clientVersion = clientVersion
         self.action = action
         self.clipId = clipId
+        self.protocolVersion = protocolVersion
+        self.proof = proof
     }
 
-    public static func hello(deviceId: String, deviceName: String, clientVersion: String = "1.0.0") -> CompanionClientMessage {
+    public static func hello(deviceId: String, deviceName: String, clientVersion: String = CompanionProtocol.clientVersion) -> CompanionClientMessage {
         CompanionClientMessage(
             type: "hello",
             deviceId: deviceId,
             deviceName: deviceName,
-            clientVersion: clientVersion
+            clientVersion: clientVersion,
+            protocolVersion: CompanionProtocol.version
         )
+    }
+
+    public static func authProof(_ proof: String?) -> CompanionClientMessage {
+        CompanionClientMessage(type: "auth_proof", proof: proof)
     }
 
     public static func action(_ actionName: String) -> CompanionClientMessage {
@@ -71,6 +83,17 @@ public struct CompanionClientMessage: Codable, Sendable, Equatable {
     }
 }
 
+// MARK: - Protocol
+
+public enum CompanionProtocol {
+    /// ReplayCap refuses phones that send an older version in `hello`.
+    public static let version = 2
+
+    public static var clientVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
+    }
+}
+
 // MARK: - Action Names
 
 public enum CompanionActions {
@@ -91,6 +114,12 @@ public struct CompanionAuthResponse: Codable, Sendable, Equatable {
     public let serverVersion: String
     public let serverId: String?
     public let deviceName: String?
+    /// With "pending": the code ReplayCap's Allow prompt shows.
+    public let pairingCode: String?
+    /// With "approved", only right after the user clicks Allow: the secret to keep for this Mac.
+    public let pairingSecret: String?
+    /// With "denied": "user_denied", "revoked" or "invalid_proof".
+    public let reason: String?
 
     public init(
         type: String = "auth_response",
@@ -98,7 +127,10 @@ public struct CompanionAuthResponse: Codable, Sendable, Equatable {
         serverName: String = "ReplayCap",
         serverVersion: String = "1.0",
         serverId: String? = nil,
-        deviceName: String? = nil
+        deviceName: String? = nil,
+        pairingCode: String? = nil,
+        pairingSecret: String? = nil,
+        reason: String? = nil
     ) {
         self.type = type
         self.status = status
@@ -106,10 +138,13 @@ public struct CompanionAuthResponse: Codable, Sendable, Equatable {
         self.serverVersion = serverVersion
         self.serverId = serverId
         self.deviceName = deviceName
+        self.pairingCode = pairingCode
+        self.pairingSecret = pairingSecret
+        self.reason = reason
     }
 
     private enum CodingKeys: String, CodingKey {
-        case type, status, serverName, serverVersion, serverId, deviceName
+        case type, status, serverName, serverVersion, serverId, deviceName, pairingCode, pairingSecret, reason
     }
 
     public init(from decoder: Decoder) throws {
@@ -120,6 +155,26 @@ public struct CompanionAuthResponse: Codable, Sendable, Equatable {
         self.serverVersion = try container.decodeIfPresent(String.self, forKey: .serverVersion) ?? "1.0"
         self.serverId = try container.decodeIfPresent(String.self, forKey: .serverId)
         self.deviceName = try container.decodeIfPresent(String.self, forKey: .deviceName)
+        self.pairingCode = try container.decodeIfPresent(String.self, forKey: .pairingCode)
+        self.pairingSecret = try container.decodeIfPresent(String.self, forKey: .pairingSecret)
+        self.reason = try container.decodeIfPresent(String.self, forKey: .reason)
+    }
+}
+
+/// Sent by a Mac this phone is paired with; answered with `auth_proof`.
+public struct CompanionAuthChallenge: Codable, Sendable, Equatable {
+    public let type: String
+    public let nonce: String
+    public let serverId: String
+    public let serverName: String
+    public let serverVersion: String
+
+    public init(type: String = "auth_challenge", nonce: String, serverId: String, serverName: String = "ReplayCap", serverVersion: String = "1.0") {
+        self.type = type
+        self.nonce = nonce
+        self.serverId = serverId
+        self.serverName = serverName
+        self.serverVersion = serverVersion
     }
 }
 
@@ -362,9 +417,18 @@ public struct CompanionPongMessage: Codable, Sendable, Equatable {
 public struct CompanionErrorMessage: Codable, Sendable, Equatable {
     public let type: String
     public let message: String
+    /// Every code except "not_authorized" means ReplayCap is about to close the connection.
+    public let code: String?
 
-    public init(type: String = "error", message: String) {
+    public init(type: String = "error", message: String, code: String? = nil) {
         self.type = type
         self.message = message
+        self.code = code
+    }
+
+    /// Whether this error explains why the connection is about to close.
+    public var endsConnection: Bool {
+        guard let code = code else { return false }
+        return code != "not_authorized"
     }
 }

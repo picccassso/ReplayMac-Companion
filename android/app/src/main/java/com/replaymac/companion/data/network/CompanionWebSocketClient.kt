@@ -5,6 +5,7 @@ import android.util.Log
 import com.replaymac.companion.data.model.CompanionClientMessage
 import com.replaymac.companion.data.model.CompanionServerEvent
 import com.replaymac.companion.data.model.ConnectionState
+import com.replaymac.companion.data.repository.PairingSecretStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -26,6 +27,7 @@ import java.util.concurrent.TimeUnit
 
 class CompanionWebSocketClient(
     private val deviceId: String,
+    private val secrets: PairingSecretStore,
     private val deviceName: String = "${Build.MANUFACTURER} ${Build.MODEL}",
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO),
     private val okHttpClient: OkHttpClient = OkHttpClient.Builder()
@@ -77,6 +79,7 @@ class CompanionWebSocketClient(
         }
 
         val socketGeneration = ++generation
+        val session = CompanionSession(deviceId, host, port, secrets)
         currentWebSocket = okHttpClient.newWebSocket(request, object : WebSocketListener() {
             // OkHttp keeps calling back on a socket after it has been replaced or
             // cancelled. Those late callbacks must not touch the current
@@ -99,8 +102,9 @@ class CompanionWebSocketClient(
 
             override fun onMessage(webSocket: WebSocket, text: String) {
                 if (!isCurrent()) return
-                Log.v(TAG, "Received message: $text")
-                handleIncomingMessage(text, host, port)
+                // Auth replies can carry the pairing secret, which must never reach logcat.
+                if (!text.contains("pairingSecret")) Log.v(TAG, "Received message: $text")
+                handleIncomingMessage(text, session)
             }
 
             override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
@@ -113,13 +117,7 @@ class CompanionWebSocketClient(
                 Log.d(TAG, "WebSocket closed: $code / $reason")
                 stopPingLoop()
                 if (_connectionState.value !is ConnectionState.Failed) {
-                    // The Mac closing an approved socket (quit, server switched off)
-                    // is a lost connection, which the repository reconnects from.
-                    _connectionState.value = if (wasConnected()) {
-                        ConnectionState.Failed("ReplayCap closed the connection.", host, port, wasConnected = true)
-                    } else {
-                        ConnectionState.Disconnected
-                    }
+                    _connectionState.value = session.closedState(wasConnected())
                 }
             }
 
@@ -128,13 +126,7 @@ class CompanionWebSocketClient(
                 Log.e(TAG, "WebSocket failure: ${t.message}", t)
                 stopPingLoop()
                 if (_connectionState.value !is ConnectionState.Failed) {
-                    val lost = wasConnected()
-                    _connectionState.value = ConnectionState.Failed(
-                        error = ConnectionErrors.describe(t, lost),
-                        host = host,
-                        port = port,
-                        wasConnected = lost
-                    )
+                    _connectionState.value = session.failedState(t, wasConnected())
                 }
             }
         })
@@ -201,50 +193,19 @@ class CompanionWebSocketClient(
     private fun sendMessage(msg: CompanionClientMessage): Boolean {
         val ws = currentWebSocket ?: return false
         val jsonString = CompanionProtocolParser.encodeClientMessage(msg)
-        Log.v(TAG, "Sending message: $jsonString")
+        if (msg.proof == null) Log.v(TAG, "Sending message: $jsonString")
         return ws.send(jsonString)
     }
 
-    private fun handleIncomingMessage(text: String, host: String, port: Int) {
+    private fun handleIncomingMessage(text: String, session: CompanionSession) {
         val event = CompanionProtocolParser.parse(text)
-
-        when (event) {
-            is CompanionServerEvent.Auth -> {
-                when (event.auth.status.lowercase()) {
-                    "approved" -> {
-                        _connectionState.value = ConnectionState.Connected(
-                            serverName = event.auth.serverName,
-                            serverVersion = event.auth.serverVersion,
-                            host = host,
-                            port = port,
-                            serverId = event.auth.serverId,
-                            deviceName = event.auth.deviceName
-                        )
-                    }
-                    "pending" -> {
-                        _connectionState.value = ConnectionState.PendingApproval(
-                            serverName = event.auth.serverName,
-                            host = host,
-                            port = port
-                        )
-                    }
-                    "denied" -> {
-                        _connectionState.value = ConnectionState.Failed(
-                            error = "Pairing denied by ${event.auth.serverName}",
-                            host = host,
-                            port = port,
-                            pairingDenied = true
-                        )
-                    }
-                }
-            }
-            is CompanionServerEvent.Error -> {
-                Log.w(TAG, "Server reported error: ${event.message}")
-            }
-            else -> {
-                // Snapshot, state changed, telemetry, thumbnail, pong, etc.
-            }
+        if (event is CompanionServerEvent.Error) {
+            Log.w(TAG, "Server reported error: ${event.message} (${event.code})")
         }
+
+        val step = session.handle(event)
+        step.reply?.let(::sendMessage)
+        step.state?.let { _connectionState.value = it }
 
         val emitted = _events.tryEmit(event)
         if (!emitted) {

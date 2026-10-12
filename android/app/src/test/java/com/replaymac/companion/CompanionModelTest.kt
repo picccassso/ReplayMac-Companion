@@ -23,6 +23,18 @@ class CompanionModelTest {
         assertTrue(encoded.contains("\"type\":\"hello\""))
         assertTrue(encoded.contains("\"deviceId\":\"test-device-123\""))
         assertTrue(encoded.contains("\"deviceName\":\"Pixel 9 Pro\""))
+        assertTrue(encoded.contains("\"protocolVersion\":2"))
+    }
+
+    @Test
+    fun authProofEncodesProofOrLeavesItOut() {
+        val withProof = CompanionProtocolParser.encodeClientMessage(CompanionClientMessage.authProof("cHJvb2Y="))
+        assertTrue(withProof.contains("\"type\":\"auth_proof\""))
+        assertTrue(withProof.contains("\"proof\":\"cHJvb2Y=\""))
+
+        val withoutProof = CompanionProtocolParser.encodeClientMessage(CompanionClientMessage.authProof(null))
+        assertTrue(withoutProof.contains("\"type\":\"auth_proof\""))
+        assertFalse(withoutProof.contains("\"proof\":\""))
     }
 
     @Test

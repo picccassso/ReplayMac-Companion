@@ -2,19 +2,26 @@ package com.replaymac.companion.data.model
 
 sealed interface CompanionServerEvent {
     data class Auth(val auth: CompanionAuthResponse) : CompanionServerEvent
+    data class AuthChallenge(val challenge: CompanionAuthChallenge) : CompanionServerEvent
     data class Snapshot(val snapshot: CompanionStateSnapshot) : CompanionServerEvent
     data class StateChanged(val snapshot: CompanionStateSnapshot) : CompanionServerEvent
     data class Telemetry(val tick: CompanionTelemetryTick) : CompanionServerEvent
     data class Thumbnail(val clipId: String, val base64: String?) : CompanionServerEvent
     data object Pong : CompanionServerEvent
-    data class Error(val message: String) : CompanionServerEvent
+    data class Error(val message: String, val code: String? = null) : CompanionServerEvent
     data class Unknown(val rawType: String, val rawJson: String) : CompanionServerEvent
 }
 
 sealed interface ConnectionState {
     data object Disconnected : ConnectionState
     data class Connecting(val host: String, val port: Int) : ConnectionState
-    data class PendingApproval(val serverName: String, val host: String, val port: Int) : ConnectionState
+    data class PendingApproval(
+        val serverName: String,
+        val host: String,
+        val port: Int,
+        /** The code ReplayCap shows for this request, when it sends one. */
+        val pairingCode: String? = null
+    ) : ConnectionState
     /** Finding a remembered Mac again, on whichever network or cable it is reachable. */
     data class Reconnecting(val serverName: String) : ConnectionState
     data class Connected(

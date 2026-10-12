@@ -13,6 +13,7 @@ public final class CompanionViewModel: ObservableObject {
     @Published public var previouslyConnectedItems: [PreviouslyConnectedItem] = []
     @Published public var filteredDiscoveredMacs: [DiscoveredMac] = []
     @Published public var isDiscovering: Bool = false
+    @Published public var isLocalNetworkDenied: Bool = false
     @Published public var keepScreenAwake: Bool = false
     @Published public var hasSeenOnboarding: Bool = false
     @Published public var showTutorialDialog: Bool = false
@@ -79,6 +80,10 @@ public final class CompanionViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .assign(to: &$isDiscovering)
 
+        repository.localNetworkDenied
+            .receive(on: DispatchQueue.main)
+            .assign(to: &$isLocalNetworkDenied)
+
         repository.keepScreenAwake
             .receive(on: DispatchQueue.main)
             .assign(to: &$keepScreenAwake)
@@ -137,19 +142,15 @@ public final class CompanionViewModel: ObservableObject {
         repository.connect(host: trimmedHost, port: port)
     }
 
-    public func connectWired(host: String = "127.0.0.1", portStr: String = "7375") {
-        let port = Int(portStr) ?? 7375
-        manualHost = host
-        manualPort = String(port)
-        repository.connect(host: host, port: port)
-    }
-
     public func connectRememberedMac(_ item: PreviouslyConnectedItem) {
         if let endpoint = item.onlineEndpoint ?? item.mac.networkEndpoint {
             connect(host: endpoint.host, portStr: String(endpoint.port))
-        } else if let usbPort = item.mac.usbPort {
-            connectWired(portStr: String(usbPort))
         }
+    }
+
+    public func openAppSettings() {
+        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+        UIApplication.shared.open(url)
     }
 
     public func forgetMac(_ mac: RememberedMac) {

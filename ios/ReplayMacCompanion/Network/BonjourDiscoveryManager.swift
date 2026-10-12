@@ -22,6 +22,13 @@ public final class BonjourDiscoveryManager: NSObject, @unchecked Sendable, NetSe
         isDiscoveringSubject.value
     }
 
+    /// The user turned off Local Network access for this app, so discovery
+    /// can't see any Mac until they turn it back on in Settings.
+    private let localNetworkDeniedSubject = CurrentValueSubject<Bool, Never>(false)
+    public var localNetworkDenied: AnyPublisher<Bool, Never> {
+        localNetworkDeniedSubject.removeDuplicates().eraseToAnyPublisher()
+    }
+
     private let lock = NSLock()
     private var browser: NWBrowser?
     private var discoveredMap: [String: DiscoveredMac] = [:]
@@ -50,12 +57,25 @@ public final class BonjourDiscoveryManager: NSObject, @unchecked Sendable, NetSe
         isDiscoveringSubject.send(true)
         lock.unlock()
 
-        nwBrowser.stateUpdateHandler = { [weak self] state in
+        nwBrowser.stateUpdateHandler = { [weak self, weak nwBrowser] state in
             guard let self = self else { return }
             switch state {
             case .ready:
+                self.localNetworkDeniedSubject.send(false)
                 self.isDiscoveringSubject.send(true)
-            case .failed, .cancelled:
+            case .waiting(let error):
+                // Recovers on its own once access is granted.
+                self.localNetworkDeniedSubject.send(Self.isLocalNetworkDenied(error))
+            case .failed(let error):
+                self.localNetworkDeniedSubject.send(Self.isLocalNetworkDenied(error))
+                self.lock.lock()
+                // Let the next startDiscovery() build a fresh browser.
+                if self.browser === nwBrowser {
+                    self.browser = nil
+                }
+                self.isDiscoveringSubject.send(false)
+                self.lock.unlock()
+            case .cancelled:
                 self.lock.lock()
                 self.isDiscoveringSubject.send(false)
                 self.lock.unlock()
@@ -119,6 +139,13 @@ public final class BonjourDiscoveryManager: NSObject, @unchecked Sendable, NetSe
         lock.unlock()
 
         discoveredSubject.send(list)
+    }
+
+    static func isLocalNetworkDenied(_ error: NWError) -> Bool {
+        if case .dns(let code) = error {
+            return code == DNSServiceErrorType(kDNSServiceErr_PolicyDenied)
+        }
+        return false
     }
 
     private func handleBrowseResults(results: Set<NWBrowser.Result>, changes: Set<NWBrowser.Result.Change>) {

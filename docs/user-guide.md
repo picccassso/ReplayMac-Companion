@@ -10,12 +10,12 @@ The companion talks to the Companion server built into ReplayMac. To check it's 
 2. Choose **Companion** in the sidebar.
 3. Make sure the switch under **Server Status** is on. It reads "Companion Server Active" when it's running.
 
-The server is on by default and listens on port **7375**. The Companion page also shows:
+The server is off until you turn it on, and then listens on port **7375**. If it can't start, for example because another app already uses the port, the reason shows under the switch. The Companion page also shows:
 
 - **Server Name**: the name your phone shows for this Mac. Click **Edit** to change it, or **Reset** to go back to the Mac's own name.
 - **Local IP Address**: the addresses you can type into the phone if discovery doesn't work. The eye button hides them, which is handy when you're streaming or sharing your screen.
 - **Port**: change it if 7375 clashes with something else (any port from 1024 to 65535).
-- **USB Tethering Setup**: the `adb reverse` command for Android phones on a cable.
+- **Android over USB**: the `adb reverse` command for Android phones on a cable.
 - **Paired Devices**: every phone you've allowed, with a green **Active** badge when it's connected. You can **Rename** or **Revoke** each one, or **Revoke All Devices…** at once.
 
 ## Connecting your phone
@@ -28,7 +28,7 @@ When your phone and Mac are on the same Wi-Fi, the Mac appears here within a few
 
 If the list says "No Macs found", tap the refresh button at the top of the screen to search again.
 
-On iOS, the first launch asks for permission to find devices on your local network. The app can't see your Mac without it. If you tapped **Don't Allow** by mistake, turn it back on in the iOS Settings app under Privacy & Security > Local Network.
+On iOS, the first launch asks for permission to find devices on your local network. The app can't see your Mac without it. If you tapped **Don't Allow** by mistake, the app tells you Local Network access is off and gives you an **Open Settings** button. You can also find it in the iOS Settings app under Privacy & Security > Local Network.
 
 ### USB (Android)
 
@@ -44,13 +44,15 @@ On iOS, the first launch asks for permission to find devices on your local netwo
 
 If you changed the server's port on the Mac, use that port in the command instead (the Mac's Companion page shows the exact command).
 
-### USB & Wired Connection (iOS)
+### USB Cable (iOS)
 
-The iOS app includes a **USB Cable / Localhost** option that connects to `127.0.0.1:7375`. To use a wired connection with your Mac:
+An iPhone can't reach the Mac over a plain USB cable, but Personal Hotspot over USB puts the two on their own wired network:
 
-1. Connect your iPhone or iPad to your Mac with a USB cable.
-2. Turn on Personal Hotspot over USB, or enable Internet Sharing to your device in macOS System Settings.
-3. Alternatively, forward port 7375 from your Mac using `iproxy 7375 7375` (available via `libimobiledevice`).
+1. Connect your iPhone to your Mac with a USB cable.
+2. On the iPhone, turn on Settings > Personal Hotspot.
+3. Your Mac appears under **On This Network**. Tap **Connect**.
+
+The **USB Cable** card on the connection screen shows these steps. iPads without cellular don't have Personal Hotspot, so they connect over Wi-Fi.
 
 ### Enter Manually
 
@@ -58,7 +60,7 @@ Type your Mac's IP address (or host name) and port, then tap **Connect**. You'll
 
 ### Pairing
 
-The first time a phone connects, the app shows **Waiting for approval** and ReplayMac asks on your Mac whether to allow the device to connect. Click **Allow** and the phone moves straight to the Home screen. Click **Deny** and the phone is turned away.
+The first time a phone connects, the app shows **Waiting for approval** with a 4-digit code, and ReplayMac asks on your Mac whether to allow the device, showing a code too. Check the two codes match, then click **Allow** and the phone moves straight to the Home screen. If they don't match, the request isn't from your phone, so click **Deny**. Allow has to be clicked with the mouse; pressing Return does nothing, so you can't approve a device by accident while you're typing or playing. Nobody answering within a minute counts as no.
 
 You only pair once. After that, ReplayMac recognises the phone and lets it straight in, until you revoke it on the Mac.
 
@@ -147,7 +149,17 @@ The quick guide opens automatically the first time you launch the app. It covers
 
 **"The connection to your Mac was interrupted."** The connection dropped after it was working, for example because the Mac went to sleep or the phone changed networks. The app starts reconnecting by itself.
 
-**"Pairing denied by …"** The Mac clicked **Deny**, or the phone was revoked in ReplayMac's Paired Devices list. Connect again and click **Allow** on the Mac.
+**"Pairing denied by …"** Someone clicked **Deny** on the Mac. Connect again and click **Allow** on the Mac.
+
+**"“…” removed this phone."** The phone was revoked in ReplayMac's Paired Devices list. Connect again to pair it.
+
+**"“…” couldn't verify this phone."** The Mac no longer recognises this phone's pairing, for example after the Mac's settings were reset. Connect again to pair it.
+
+**"Another device is waiting for approval on the Mac."** Someone else's Allow prompt is already up. Answer it on the Mac, then try again.
+
+**"Pairing was declined on the Mac. Try again in a moment."** After a Deny, or a prompt nobody answered, the Mac waits 30 seconds before it will ask about the same phone again.
+
+**"Update ReplayCap Companion on this device to connect."** The app is older than the Mac. Update it from the App Store or Google Play.
 
 **USB on Android doesn't connect.** Run `adb devices` to check the phone shows up, then run the `adb reverse` command again. It needs to be run each time the phone is plugged back in.
 

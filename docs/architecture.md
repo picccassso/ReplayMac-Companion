@@ -36,13 +36,14 @@ Android paths are relative to `android/app/src/main/java/com/replaymac/companion
 ## From the Mac to the screen
 
 1. The socket client receives a text frame and hands it to the parser.
-2. If it's an `auth_response`, the client updates its connection state straight away: `approved` becomes Connected, `pending` becomes Pending Approval, and `denied` becomes a failure flagged as a pairing denial.
-3. Every message is then sent on as an event. The repository listens for these and:
+2. If it's an `auth_challenge`, the client answers with `auth_proof`, an HMAC of the nonce keyed with the Mac's pairing secret (see [Companion protocol](protocol.md#pairing-and-sign-in)). On Android this logic lives in `data/network/CompanionSession.kt`; on iOS in `Network/CompanionWebSocketClient.swift` with `Security/PairingProof.swift`.
+3. If it's an `auth_response`, the client updates its connection state straight away: `approved` becomes Connected, `pending` becomes Pending Approval, and `denied` becomes a failure flagged as a pairing denial.
+4. Every message is then sent on as an event. The repository listens for these and:
    - replaces the snapshot on `state_snapshot` and `state_changed`, then asks for any missing thumbnails and drops ones for clips that have gone;
    - copies the timer and memory fields from `telemetry_tick` into the current snapshot;
    - stores the base64 image from `thumbnail_response`.
-4. The repository also watches the connection state. A new connection gets saved to the remembered Macs. A pairing denial clears them. A connection that drops after working starts the reconnector.
-5. The repository publishes a combined connection state. While the reconnector is searching and the socket hasn't settled, it reports **Reconnecting** with the Mac's name in place of the raw Connecting or Failed state.
+5. The repository also watches the connection state. A new connection gets saved to the remembered Macs. A pairing denial clears them. A connection that drops after working starts the reconnector.
+6. The repository publishes a combined connection state. While the reconnector is searching and the socket hasn't settled, it reports **Reconnecting** with the Mac's name in place of the raw Connecting or Failed state.
 6. The view model forwards everything to the UI. The app shows Home only when the state is Connected and the connection screen for everything else. Navigation stays flat, so the app simply swaps between the two.
 
 Android uses `StateFlow` and `SharedFlow` on a `SupervisorJob() + Dispatchers.IO` scope in the repository, and Compose collects them with `collectAsState()`. iOS uses Combine subjects inside `@unchecked Sendable` classes protected by `NSLock`, and the `@MainActor` view model receives them on the main queue into `@Published` properties.
@@ -79,7 +80,7 @@ Android keeps everything in one `SharedPreferences` file, `replaymac_companion_p
 
 | Key | Holds |
 | --- | --- |
-| `device_id` | A random UUID created on first launch, sent in every `hello` |
+| `device_id` | A random UUID created on first launch, sent in every `hello`. On iOS it lives in the Keychain instead |
 | `last_host`, `last_port` | The last address you connected to (never the USB loopback), used to fill in Enter Manually |
 | `keep_awake` | Deck mode on or off |
 | `has_seen_onboarding` | Whether the quick guide has been dismissed |

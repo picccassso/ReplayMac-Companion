@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Android 12+. The device ID and pairing secrets must stay on this phone: a
+    restored copy would share the ID without the secret and fight the original.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="sharedpref" path="replaymac_companion_prefs.xml" />
+        <exclude domain="sharedpref" path="replaymac_companion_secrets.xml" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="sharedpref" path="replaymac_companion_prefs.xml" />
+        <exclude domain="sharedpref" path="replaymac_companion_secrets.xml" />
+    </device-transfer>
+</data-extraction-rules>

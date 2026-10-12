@@ -1,5 +1,6 @@
 package com.replaymac.companion.data.network
 
+import com.replaymac.companion.data.model.CompanionAuthChallenge
 import com.replaymac.companion.data.model.CompanionAuthResponse
 import com.replaymac.companion.data.model.CompanionClientMessage
 import com.replaymac.companion.data.model.CompanionErrorMessage
@@ -31,6 +32,10 @@ object CompanionProtocolParser {
                     val auth = json.decodeFromJsonElement<CompanionAuthResponse>(root)
                     CompanionServerEvent.Auth(auth)
                 }
+                "auth_challenge" -> {
+                    val challenge = json.decodeFromJsonElement<CompanionAuthChallenge>(root)
+                    CompanionServerEvent.AuthChallenge(challenge)
+                }
                 "state_snapshot" -> {
                     val snapshot = json.decodeFromJsonElement<CompanionStateSnapshot>(root)
                     CompanionServerEvent.Snapshot(snapshot)
@@ -50,7 +55,7 @@ object CompanionProtocolParser {
                 "pong" -> CompanionServerEvent.Pong
                 "error" -> {
                     val err = json.decodeFromJsonElement<CompanionErrorMessage>(root)
-                    CompanionServerEvent.Error(err.message)
+                    CompanionServerEvent.Error(err.message, err.code)
                 }
                 else -> CompanionServerEvent.Unknown(type, text)
             }

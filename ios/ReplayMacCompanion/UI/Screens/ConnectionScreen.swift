@@ -6,6 +6,7 @@ public struct ConnectionScreen: View {
     public var previouslyConnectedItems: [PreviouslyConnectedItem]
     public var discoveredMacs: [DiscoveredMac]
     public var isDiscovering: Bool
+    public var isLocalNetworkDenied: Bool
     public var manualHost: String
     public var manualPort: String
     public var onManualHostChange: (String) -> Void
@@ -13,13 +14,13 @@ public struct ConnectionScreen: View {
     public var onConnect: (String, String) -> Void
     public var onConnectRememberedMac: (PreviouslyConnectedItem) -> Void
     public var onForgetMac: (RememberedMac) -> Void
-    public var onConnectWired: () -> Void
+    public var onOpenSettings: () -> Void
     public var onRefreshDiscovery: () -> Void
     public var onCancelConnection: () -> Void
     public var onDismissError: () -> Void
     public var onOpenTutorial: () -> Void
 
-    @State private var showWiredHelp: Bool = false
+    @State private var showUsbHelp: Bool = false
     @State private var macToForget: RememberedMac? = nil
 
     public init(
@@ -27,6 +28,7 @@ public struct ConnectionScreen: View {
         previouslyConnectedItems: [PreviouslyConnectedItem] = [],
         discoveredMacs: [DiscoveredMac],
         isDiscovering: Bool,
+        isLocalNetworkDenied: Bool = false,
         manualHost: String,
         manualPort: String,
         onManualHostChange: @escaping (String) -> Void,
@@ -34,7 +36,7 @@ public struct ConnectionScreen: View {
         onConnect: @escaping (String, String) -> Void,
         onConnectRememberedMac: @escaping (PreviouslyConnectedItem) -> Void = { _ in },
         onForgetMac: @escaping (RememberedMac) -> Void = { _ in },
-        onConnectWired: @escaping () -> Void,
+        onOpenSettings: @escaping () -> Void = {},
         onRefreshDiscovery: @escaping () -> Void,
         onCancelConnection: @escaping () -> Void,
         onDismissError: @escaping () -> Void = {},
@@ -44,6 +46,7 @@ public struct ConnectionScreen: View {
         self.previouslyConnectedItems = previouslyConnectedItems
         self.discoveredMacs = discoveredMacs
         self.isDiscovering = isDiscovering
+        self.isLocalNetworkDenied = isLocalNetworkDenied
         self.manualHost = manualHost
         self.manualPort = manualPort
         self.onManualHostChange = onManualHostChange
@@ -51,7 +54,7 @@ public struct ConnectionScreen: View {
         self.onConnect = onConnect
         self.onConnectRememberedMac = onConnectRememberedMac
         self.onForgetMac = onForgetMac
-        self.onConnectWired = onConnectWired
+        self.onOpenSettings = onOpenSettings
         self.onRefreshDiscovery = onRefreshDiscovery
         self.onCancelConnection = onCancelConnection
         self.onDismissError = onDismissError
@@ -61,16 +64,22 @@ public struct ConnectionScreen: View {
     public var body: some View {
         GlassBackground {
             switch connectionState {
-            case .pendingApproval(let sName, _, _):
+            case .pendingApproval(let sName, _, _, let code):
                 CenteredStatus {
                     StatusPanel(
                         title: "Waiting for approval",
-                        message: "Click Allow in ReplayCap on “\(sName)” to pair this phone.",
+                        message: code == nil
+                            ? "Click Allow in ReplayCap on “\(sName)” to pair this phone."
+                            : "Check that ReplayCap on “\(sName)” shows this code, then click Allow.",
                         onCancel: onCancelConnection
                     ) {
-                        Image(systemName: "lock.fill")
-                            .font(.system(size: 34))
-                            .foregroundColor(AppColors.textSecondary)
+                        if let code = code {
+                            PairingCodeView(code: code)
+                        } else {
+                            Image(systemName: "lock.fill")
+                                .font(.system(size: 34))
+                                .foregroundColor(AppColors.textSecondary)
+                        }
                     }
                 }
 
@@ -91,7 +100,7 @@ public struct ConnectionScreen: View {
                 CenteredStatus {
                     StatusPanel(
                         title: "Reconnecting",
-                        message: "Looking for “\(sName)” on this network and over USB.",
+                        message: "Looking for “\(sName)” on this network.",
                         onCancel: onCancelConnection
                     ) {
                         ProgressView()
@@ -133,7 +142,7 @@ public struct ConnectionScreen: View {
                                     previouslyConnectedSection
                                 }
                                 networkSection
-                                usbWiredSection
+                                usbHelpSection
                             }
                             .frame(maxWidth: .infinity)
 
@@ -148,7 +157,7 @@ public struct ConnectionScreen: View {
                                 previouslyConnectedSection
                             }
                             networkSection
-                            usbWiredSection
+                            usbHelpSection
                             manualSection
                         }
                     }
@@ -217,9 +226,13 @@ public struct ConnectionScreen: View {
                 }
             }
 
+            if isLocalNetworkDenied {
+                LocalNetworkDeniedCard(onOpenSettings: onOpenSettings)
+            }
+
             GlassCard(cornerRadius: AppRadii.large) {
                 if discoveredMacs.isEmpty {
-                    SearchingRow(isSearching: isDiscovering)
+                    SearchingRow(isSearching: isDiscovering && !isLocalNetworkDenied)
                 } else {
                     VStack(spacing: 0) {
                         ForEach(Array(discoveredMacs.enumerated()), id: \.element.id) { index, mac in
@@ -237,61 +250,56 @@ public struct ConnectionScreen: View {
         }
     }
 
-    private var usbWiredSection: some View {
+    /// iPhone can't reach the Mac through a plain USB cable, but Personal
+    /// Hotspot over USB puts both on one network, where discovery finds the Mac.
+    private var usbHelpSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SectionHeader(title: "USB & Wired Connection")
+            SectionHeader(title: "USB Cable")
 
             GlassCard(cornerRadius: AppRadii.large) {
                 VStack(spacing: 0) {
-                    HStack(spacing: 14) {
-                        Image(systemName: "cable.connector")
-                            .font(.system(size: 24))
-                            .foregroundColor(AppColors.textSecondary)
-
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("USB Cable / Localhost")
-                                .font(.system(size: 15, weight: .semibold))
-                                .foregroundColor(AppColors.textPrimary)
-
-                            Text("Connects to 127.0.0.1:7375")
-                                .font(.system(size: 13))
+                    Button(action: {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            showUsbHelp.toggle()
+                        }
+                    }) {
+                        HStack(spacing: 14) {
+                            Image(systemName: "cable.connector")
+                                .font(.system(size: 24))
                                 .foregroundColor(AppColors.textSecondary)
-                        }
 
-                        Spacer()
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Connect with a cable")
+                                    .font(.system(size: 15, weight: .semibold))
+                                    .foregroundColor(AppColors.textPrimary)
 
-                        Button(action: {
-                            withAnimation(.easeInOut(duration: 0.2)) {
-                                showWiredHelp.toggle()
+                                Text("Uses Personal Hotspot over USB")
+                                    .font(.system(size: 13))
+                                    .foregroundColor(AppColors.textSecondary)
                             }
-                        }) {
-                            Image(systemName: "info.circle")
-                                .font(.system(size: 19))
-                                .foregroundColor(showWiredHelp ? AppColors.accent : AppColors.textTertiary)
-                                .frame(width: 36, height: 36)
+
+                            Spacer()
+
+                            Image(systemName: showUsbHelp ? "chevron.up" : "chevron.down")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(AppColors.textTertiary)
                         }
-                        .buttonStyle(GlassPressableStyle())
-
-                        AccentButton(text: "Connect", onClick: onConnectWired)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                        .contentShape(Rectangle())
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
+                    .buttonStyle(.plain)
+                    .accessibilityHint(showUsbHelp ? "Hides the steps" : "Shows the steps")
 
-                    if showWiredHelp {
+                    if showUsbHelp {
                         RowSeparator(startIndent: 16)
 
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("To connect directly via USB cable:")
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundColor(AppColors.textPrimary)
-
-                            Text("1. Connect your iPhone to your Mac via USB.\n2. Enable Personal Hotspot (USB) or Internet Sharing on your Mac to create a wired network.\n3. Alternatively, forward port 7375 from your Mac using ‘iproxy 7375 7375’.")
-                                .font(.system(size: 12))
-                                .foregroundColor(AppColors.textSecondary)
-                                .lineSpacing(3)
-                        }
-                        .padding(16)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                        Text("1. Connect your iPhone to your Mac with a USB cable.\n2. On iPhone, turn on Settings > Personal Hotspot.\n3. Your Mac appears under On This Network. Tap Connect.")
+                            .font(.system(size: 12))
+                            .foregroundColor(AppColors.textSecondary)
+                            .lineSpacing(3)
+                            .padding(16)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
             }
@@ -379,6 +387,45 @@ private struct ConnectionHeader: View {
                     onClick: onRefresh
                 )
             }
+        }
+    }
+}
+
+private struct PairingCodeView: View {
+    let code: String
+
+    var body: some View {
+        Text(code.map(String.init).joined(separator: " "))
+            .font(.system(size: 40, weight: .semibold, design: .monospaced))
+            .foregroundColor(AppColors.textPrimary)
+            .accessibilityLabel("Pairing code \(code.map(String.init).joined(separator: " "))")
+    }
+}
+
+private struct LocalNetworkDeniedCard: View {
+    let onOpenSettings: () -> Void
+
+    var body: some View {
+        GlassCard(cornerRadius: AppRadii.large) {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(alignment: .top, spacing: 12) {
+                    Image(systemName: "wifi.exclamationmark")
+                        .font(.system(size: 22))
+                        .foregroundColor(.orange)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Local Network access is off")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(AppColors.textPrimary)
+                        Text("ReplayCap needs it to find and control your Mac. Turn on Local Network in Settings.")
+                            .font(.system(size: 13))
+                            .foregroundColor(AppColors.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                AccentButton(text: "Open Settings", onClick: onOpenSettings)
+            }
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 }
@@ -565,13 +612,13 @@ private struct StatusPanel<Badge: View>: View {
     let title: String
     let message: String
     let onCancel: () -> Void
-    let badge: () -> Badge
+    @ViewBuilder let badge: () -> Badge
 
     var body: some View {
         GlassCard(cornerRadius: AppRadii.large) {
             VStack(spacing: 16) {
                 badge()
-                    .frame(height: 36)
+                    .frame(minHeight: 36)
 
                 VStack(spacing: 4) {
                     Text(title)

@@ -8,6 +8,7 @@ public final class CompanionWebSocketClient: @unchecked Sendable {
     public let deviceName: String
 
     private let session: URLSession
+    private let secretStore: PairingSecretStoring
     private let stateSubject = CurrentValueSubject<ConnectionState, Never>(.disconnected)
     public var connectionState: AnyPublisher<ConnectionState, Never> {
         stateSubject.eraseToAnyPublisher()
@@ -27,14 +28,20 @@ public final class CompanionWebSocketClient: @unchecked Sendable {
     private var pingTask: Task<Void, Never>?
     private var currentHost: String?
     private var currentPort: Int = defaultPort
+    /// The Mac's last word before it closes the socket, shown instead of a generic error.
+    private var closingServerMessage: String?
+    /// The Mac's id from its challenge, in case the following auth_response omits it.
+    private var challengeServerId: String?
 
     public init(
         deviceId: String,
         deviceName: String,
+        secretStore: PairingSecretStoring = KeychainPairingSecretStore(),
         session: URLSession? = nil
     ) {
         self.deviceId = deviceId
         self.deviceName = deviceName
+        self.secretStore = secretStore
         if let session = session {
             self.session = session
         } else {
@@ -69,6 +76,8 @@ public final class CompanionWebSocketClient: @unchecked Sendable {
         lock.lock()
         currentHost = host
         currentPort = port
+        closingServerMessage = nil
+        challengeServerId = nil
         generation += 1
         let socketGeneration = generation
         let task = session.webSocketTask(with: url)
@@ -100,8 +109,7 @@ public final class CompanionWebSocketClient: @unchecked Sendable {
 
     public func resync() -> Bool {
         guard case .connected = currentConnectionState else { return false }
-        let msg = CompanionClientMessage.hello(deviceId: deviceId, deviceName: deviceName, clientVersion: "1.0.0")
-        return sendMessage(msg)
+        return sendMessage(CompanionClientMessage.hello(deviceId: deviceId, deviceName: deviceName))
     }
 
     public func clearError() {
@@ -111,8 +119,7 @@ public final class CompanionWebSocketClient: @unchecked Sendable {
     }
 
     public func sendHello() {
-        let msg = CompanionClientMessage.hello(deviceId: deviceId, deviceName: deviceName, clientVersion: "1.0.0")
-        _ = sendMessage(msg)
+        _ = sendMessage(CompanionClientMessage.hello(deviceId: deviceId, deviceName: deviceName))
     }
 
     public func sendAction(_ actionName: String) -> Bool {
@@ -193,40 +200,91 @@ public final class CompanionWebSocketClient: @unchecked Sendable {
         let event = CompanionProtocolParser.parse(text)
 
         switch event {
+        case .challenge(let challenge):
+            answer(challenge)
+
         case .auth(let auth):
-            switch auth.status.lowercased() {
-            case "approved":
-                stateSubject.send(.connected(
-                    serverName: auth.serverName,
-                    serverVersion: auth.serverVersion,
-                    host: host,
-                    port: port,
-                    serverId: auth.serverId,
-                    deviceName: auth.deviceName
-                ))
-            case "pending":
-                stateSubject.send(.pendingApproval(
-                    serverName: auth.serverName,
-                    host: host,
-                    port: port
-                ))
-            case "denied":
-                stateSubject.send(.failed(
-                    error: "Pairing denied by \(auth.serverName)",
-                    host: host,
-                    port: port,
-                    wasConnected: false,
-                    pairingDenied: true
-                ))
-            default:
-                break
-            }
+            handleAuth(auth, host: host, port: port)
+
+        case .serverError(let error) where error.endsConnection:
+            lock.lock()
+            closingServerMessage = error.message
+            lock.unlock()
 
         default:
             break
         }
 
         eventsSubject.send(event)
+    }
+
+    /// Proves this phone holds the Mac's pairing secret. With no secret the
+    /// proof is left out, and the Mac asks the user to approve the phone again.
+    private func answer(_ challenge: CompanionAuthChallenge) {
+        lock.lock()
+        challengeServerId = challenge.serverId
+        lock.unlock()
+
+        let proof = secretStore.secret(forServerId: challenge.serverId).map {
+            PairingProof.make(secret: $0, serverId: challenge.serverId, deviceId: deviceId, nonce: challenge.nonce)
+        }
+        _ = sendMessage(CompanionClientMessage.authProof(proof))
+    }
+
+    private func handleAuth(_ auth: CompanionAuthResponse, host: String, port: Int) {
+        lock.lock()
+        let serverId = auth.serverId ?? challengeServerId
+        lock.unlock()
+
+        switch auth.status.lowercased() {
+        case "approved":
+            // Saved before reporting the connection, so the phone can sign in
+            // next time even if it's closed the moment it connects.
+            if let serverId = serverId,
+               let encoded = auth.pairingSecret,
+               let secret = Data(base64Encoded: encoded) {
+                secretStore.save(secret, forServerId: serverId)
+            }
+            stateSubject.send(.connected(
+                serverName: auth.serverName,
+                serverVersion: auth.serverVersion,
+                host: host,
+                port: port,
+                serverId: auth.serverId,
+                deviceName: auth.deviceName
+            ))
+        case "pending":
+            stateSubject.send(.pendingApproval(
+                serverName: auth.serverName,
+                host: host,
+                port: port,
+                pairingCode: auth.pairingCode
+            ))
+        case "denied":
+            if let serverId = serverId {
+                secretStore.remove(forServerId: serverId)
+            }
+            stateSubject.send(.failed(
+                error: Self.denialMessage(reason: auth.reason, serverName: auth.serverName),
+                host: host,
+                port: port,
+                wasConnected: false,
+                pairingDenied: true
+            ))
+        default:
+            break
+        }
+    }
+
+    static func denialMessage(reason: String?, serverName: String) -> String {
+        switch reason {
+        case "revoked":
+            return "“\(serverName)” removed this phone. Connect again to pair."
+        case "invalid_proof":
+            return "“\(serverName)” couldn't verify this phone. Connect again to pair."
+        default:
+            return "Pairing denied by \(serverName)"
+        }
     }
 
     private func handleSocketFailure(_ error: Error, host: String, port: Int) {
@@ -248,9 +306,10 @@ public final class CompanionWebSocketClient: @unchecked Sendable {
         } else {
             wasConnected = false
         }
+        let serverMessage = closingServerMessage
         lock.unlock()
 
-        let desc = ConnectionErrors.describe(error, wasConnected: wasConnected)
+        let desc = serverMessage ?? ConnectionErrors.describe(error, wasConnected: wasConnected)
         stateSubject.send(.failed(
             error: desc,
             host: host,

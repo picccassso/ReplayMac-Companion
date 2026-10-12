@@ -5,6 +5,7 @@ import com.replaymac.companion.data.network.CompanionProtocolParser
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -204,6 +205,56 @@ class CompanionStateParserTest {
         val errEvent = CompanionProtocolParser.parse("""{"type":"error","message":"Invalid token"}""")
         assertTrue(errEvent is CompanionServerEvent.Error)
         assertEquals("Invalid token", (errEvent as CompanionServerEvent.Error).message)
+        assertNull(errEvent.code)
+    }
+
+    @Test
+    fun errorCarriesItsCode() {
+        val event = CompanionProtocolParser.parse(
+            """{"type":"error","message":"ReplayCap is already pairing another phone.","code":"busy"}"""
+        )
+        assertEquals(
+            CompanionServerEvent.Error("ReplayCap is already pairing another phone.", "busy"),
+            event
+        )
+    }
+
+    @Test
+    fun parsesAuthChallenge() {
+        val event = CompanionProtocolParser.parse(
+            """{"type":"auth_challenge","nonce":"bm9uY2U=","serverId":"5F1C","serverName":"Studio Mac","serverVersion":"1.8.0"}"""
+        )
+        assertTrue(event is CompanionServerEvent.AuthChallenge)
+        val challenge = (event as CompanionServerEvent.AuthChallenge).challenge
+        assertEquals("bm9uY2U=", challenge.nonce)
+        assertEquals("5F1C", challenge.serverId)
+        assertEquals("Studio Mac", challenge.serverName)
+        assertEquals("1.8.0", challenge.serverVersion)
+    }
+
+    @Test
+    fun authResponseCarriesPairingFieldsWhenSent() {
+        val pending = CompanionProtocolParser.parse(
+            """{"type":"auth_response","status":"pending","serverName":"Mac","serverVersion":"1.8.0","pairingCode":"4821"}"""
+        ) as CompanionServerEvent.Auth
+        assertEquals("4821", pending.auth.pairingCode)
+
+        val approved = CompanionProtocolParser.parse(
+            """{"type":"auth_response","status":"approved","serverName":"Mac","serverVersion":"1.8.0","serverId":"5F1C","pairingSecret":"c2VjcmV0"}"""
+        ) as CompanionServerEvent.Auth
+        assertEquals("c2VjcmV0", approved.auth.pairingSecret)
+
+        val denied = CompanionProtocolParser.parse(
+            """{"type":"auth_response","status":"denied","serverName":"Mac","serverVersion":"1.8.0","reason":"revoked"}"""
+        ) as CompanionServerEvent.Auth
+        assertEquals("revoked", denied.auth.reason)
+
+        val plainPending = CompanionProtocolParser.parse(
+            """{"type":"auth_response","status":"pending","serverName":"Mac","serverVersion":"1.8.0"}"""
+        ) as CompanionServerEvent.Auth
+        assertNull(plainPending.auth.pairingCode)
+        assertNull(plainPending.auth.pairingSecret)
+        assertNull(plainPending.auth.reason)
     }
 
     @Test

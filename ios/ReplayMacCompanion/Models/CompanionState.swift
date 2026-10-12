@@ -4,11 +4,15 @@ import Foundation
 
 public enum CompanionServerEvent: Sendable, Equatable {
     case auth(CompanionAuthResponse)
+    case challenge(CompanionAuthChallenge)
     case snapshot(CompanionStateSnapshot)
     case stateChanged(CompanionStateSnapshot)
     case telemetry(CompanionTelemetryTick)
     case thumbnail(clipId: String, base64: String?)
     case pong
+    /// An `error` message from ReplayCap.
+    case serverError(CompanionErrorMessage)
+    /// A frame this app couldn't read.
     case error(String)
     case unknown(rawType: String, rawJson: String)
 }
@@ -18,7 +22,8 @@ public enum CompanionServerEvent: Sendable, Equatable {
 public enum ConnectionState: Sendable, Equatable {
     case disconnected
     case connecting(host: String, port: Int)
-    case pendingApproval(serverName: String, host: String, port: Int)
+    /// `pairingCode` matches the code on ReplayCap's Allow prompt, when the Mac sends one.
+    case pendingApproval(serverName: String, host: String, port: Int, pairingCode: String? = nil)
     /// Finding a remembered Mac again, on whichever network or cable it is reachable.
     case reconnecting(serverName: String)
     case connected(serverName: String, serverVersion: String, host: String, port: Int, serverId: String? = nil, deviceName: String? = nil)

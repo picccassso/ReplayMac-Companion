@@ -3,7 +3,8 @@ import Combine
 import UIKit
 
 public final class CompanionRepository: @unchecked Sendable {
-    private static let keyDeviceId = "device_id"
+    /// Where builds before Keychain storage kept the device id; cleared on launch.
+    private static let legacyKeyDeviceId = "device_id"
     private static let keyLastHost = "last_host"
     private static let keyLastPort = "last_port"
     private static let keyKeepAwake = "keep_awake"
@@ -17,6 +18,7 @@ public final class CompanionRepository: @unchecked Sendable {
     public let wsClient: CompanionWebSocketClient
     public let rememberedMacStore: RememberedMacStore
     public let reconnector: AutoReconnector
+    private let secretStore: PairingSecretStoring
 
     private var cancellables = Set<AnyCancellable>()
     private let lock = NSLock()
@@ -63,6 +65,10 @@ public final class CompanionRepository: @unchecked Sendable {
         discoveryManager.isDiscovering
     }
 
+    public var localNetworkDenied: AnyPublisher<Bool, Never> {
+        discoveryManager.localNetworkDenied
+    }
+
     private let previouslyConnectedMacsSubject: CurrentValueSubject<[RememberedMac], Never>
     public var previouslyConnectedMacs: AnyPublisher<[RememberedMac], Never> {
         previouslyConnectedMacsSubject.eraseToAnyPublisher()
@@ -90,17 +96,16 @@ public final class CompanionRepository: @unchecked Sendable {
             .eraseToAnyPublisher()
     }
 
-    public init(defaults: UserDefaults = .standard) {
+    public init(
+        defaults: UserDefaults = .standard,
+        secretStore: PairingSecretStoring = KeychainPairingSecretStore(),
+        deviceId: String = DeviceIdentity.loadOrCreate()
+    ) {
         self.defaults = defaults
-
-        // Generate or retrieve persistent deviceId
-        if let storedId = defaults.string(forKey: Self.keyDeviceId), !storedId.isEmpty {
-            self.deviceId = storedId
-        } else {
-            let newId = UUID().uuidString
-            defaults.set(newId, forKey: Self.keyDeviceId)
-            self.deviceId = newId
-        }
+        self.secretStore = secretStore
+        self.deviceId = deviceId
+        // A UserDefaults copy would travel with backups to other phones.
+        defaults.removeObject(forKey: Self.legacyKeyDeviceId)
 
         let deviceName = UIDevice.current.name.trimmingCharacters(in: .whitespacesAndNewlines)
         self.formattedDeviceName = deviceName.isEmpty ? "iOS Device" : deviceName
@@ -108,7 +113,7 @@ public final class CompanionRepository: @unchecked Sendable {
         let disc = BonjourDiscoveryManager()
         self.discoveryManager = disc
 
-        let ws = CompanionWebSocketClient(deviceId: self.deviceId, deviceName: self.formattedDeviceName)
+        let ws = CompanionWebSocketClient(deviceId: self.deviceId, deviceName: self.formattedDeviceName, secretStore: secretStore)
         self.wsClient = ws
 
         let store = RememberedMacStore(defaults: defaults)
@@ -214,6 +219,9 @@ public final class CompanionRepository: @unchecked Sendable {
     }
 
     public func forgetMac(_ mac: RememberedMac) {
+        if let serverId = mac.serverId {
+            secretStore.remove(forServerId: serverId)
+        }
         rememberedMacStore.remove(mac)
         previouslyConnectedMacsSubject.send(rememberedMacStore.loadAll())
     }
@@ -226,6 +234,10 @@ public final class CompanionRepository: @unchecked Sendable {
         lock.lock()
         isForeground = true
         lock.unlock()
+
+        // Picks discovery back up if it failed while the app was away,
+        // e.g. after the user granted Local Network access in Settings.
+        discoveryManager.startDiscovery()
 
         switch wsClient.currentConnectionState {
         case .connected:

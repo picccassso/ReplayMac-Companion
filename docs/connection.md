@@ -8,7 +8,7 @@ This page covers how the apps find your Mac, remember it, and get back to it whe
 | --- | --- | --- |
 | On This Network | The address Bonjour resolves for the Mac | Discovery of `_replaymac._tcp` |
 | Previously Connected | Where discovery sees the Mac now, or else its last network address, or else its USB port | The remembered Macs list |
-| USB Cable (Android) / USB Cable / Localhost (iOS) | `127.0.0.1:7375` | Fixed. On Android, `adb reverse` forwards it to the Mac |
+| USB Cable (Android only) | `127.0.0.1:7375` | Fixed. `adb reverse` forwards it to the Mac. iOS has no equivalent: iPhone can't reach the Mac through `127.0.0.1`, so it uses Personal Hotspot over USB and finds the Mac through discovery instead |
 | Enter Manually | Whatever you type. The port falls back to 7375 if it's blank or outside 1 to 65535 | The form, pre-filled with the last non-USB address |
 
 Any connection to `127.0.0.1` counts as USB.
@@ -63,7 +63,7 @@ It stops when:
 - the app goes to the background;
 - the Mac denies or revokes the phone.
 
-While it runs, the connection screen shows **Reconnecting** with "Looking for “*Mac name*” on this network and over USB."
+While it runs, the connection screen shows **Reconnecting** with "Looking for “*Mac name*” on this network and over USB." on Android, and "Looking for “*Mac name*” on this network." on iOS.
 
 ### The order it tries
 

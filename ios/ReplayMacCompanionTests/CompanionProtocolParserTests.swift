@@ -221,11 +221,40 @@ final class CompanionProtocolParserTests: XCTestCase {
         XCTAssertEqual(pongEvent, .pong)
 
         let errEvent = CompanionProtocolParser.parse("{\"type\":\"error\",\"message\":\"Invalid token\"}")
-        guard case .error(let msg) = errEvent else {
-            XCTFail("Expected .error event")
+        guard case .serverError(let err) = errEvent else {
+            XCTFail("Expected .serverError event")
             return
         }
-        XCTAssertEqual(msg, "Invalid token")
+        XCTAssertEqual(err.message, "Invalid token")
+        XCTAssertFalse(err.endsConnection, "An error without a code doesn't explain a disconnect")
+
+        let busy = CompanionProtocolParser.parse("{\"type\":\"error\",\"message\":\"Busy\",\"code\":\"busy\"}")
+        guard case .serverError(let busyErr) = busy else {
+            XCTFail("Expected .serverError event")
+            return
+        }
+        XCTAssertEqual(busyErr.code, "busy")
+        XCTAssertTrue(busyErr.endsConnection)
+    }
+
+    func testParseAuthChallengeAndPairingFields() {
+        let challenge = CompanionProtocolParser.parse(#"{"type":"auth_challenge","nonce":"n0nce","serverId":"mac-1","serverName":"Studio","serverVersion":"1.8"}"#)
+        XCTAssertEqual(challenge, .challenge(CompanionAuthChallenge(nonce: "n0nce", serverId: "mac-1", serverName: "Studio", serverVersion: "1.8")))
+
+        guard case .auth(let pending) = CompanionProtocolParser.parse(#"{"type":"auth_response","status":"pending","serverName":"Studio","serverVersion":"1.8","pairingCode":"0420"}"#) else {
+            return XCTFail("Expected .auth event")
+        }
+        XCTAssertEqual(pending.pairingCode, "0420")
+
+        guard case .auth(let denied) = CompanionProtocolParser.parse(#"{"type":"auth_response","status":"denied","serverName":"Studio","serverVersion":"1.8","reason":"revoked"}"#) else {
+            return XCTFail("Expected .auth event")
+        }
+        XCTAssertEqual(denied.reason, "revoked")
+    }
+
+    func testHelloAnnouncesProtocolVersion() throws {
+        let json = try CompanionProtocolParser.encodeClientMessage(.hello(deviceId: "d", deviceName: "n"))
+        XCTAssertTrue(json.contains(#""protocolVersion":2"#), json)
     }
 
     func testParseMalformedOrUnknown() {

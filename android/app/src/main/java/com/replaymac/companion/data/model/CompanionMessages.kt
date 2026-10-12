@@ -10,7 +10,9 @@ public data class CompanionClientMessage(
     val deviceName: String? = null,
     val clientVersion: String? = null,
     val action: String? = null,
-    val clipId: String? = null
+    val clipId: String? = null,
+    val protocolVersion: Int? = null,
+    val proof: String? = null
 ) {
     companion object {
         fun hello(deviceId: String, deviceName: String, clientVersion: String = "1.0.0"): CompanionClientMessage {
@@ -18,8 +20,14 @@ public data class CompanionClientMessage(
                 type = "hello",
                 deviceId = deviceId,
                 deviceName = deviceName,
-                clientVersion = clientVersion
+                clientVersion = clientVersion,
+                protocolVersion = CompanionProtocol.VERSION
             )
+        }
+
+        /** The answer to an auth_challenge. A null [proof] asks the Mac to fall back to approval on screen. */
+        fun authProof(proof: String?): CompanionClientMessage {
+            return CompanionClientMessage(type = "auth_proof", proof = proof)
         }
 
         fun action(actionName: String): CompanionClientMessage {
@@ -59,6 +67,10 @@ public data class CompanionClientMessage(
     }
 }
 
+object CompanionProtocol {
+    const val VERSION = 2
+}
+
 object CompanionActions {
     const val SAVE_REPLAY = "saveReplay"
     const val SAVE_EXTENDED_REPLAY = "saveExtendedReplay"
@@ -77,7 +89,23 @@ data class CompanionAuthResponse(
     /** Stable identity of the Mac, the same on every network. Missing from older ReplayMac builds. */
     val serverId: String? = null,
     /** The friendly name of the paired device assigned or confirmed by the Mac. */
-    val deviceName: String? = null
+    val deviceName: String? = null,
+    /** On "pending": the code ReplayCap shows next to Allow, so the user can check it's this phone. */
+    val pairingCode: String? = null,
+    /** On "approved", only right after the user clicked Allow: the secret that proves this phone next time. */
+    val pairingSecret: String? = null,
+    /** On "denied": "user_denied", "revoked" or "invalid_proof". */
+    val reason: String? = null
+)
+
+/** Sent after hello when the Mac already knows this phone; answered with an auth_proof. */
+@Serializable
+data class CompanionAuthChallenge(
+    val type: String = "auth_challenge",
+    val nonce: String,
+    val serverId: String,
+    val serverName: String = "ReplayCap",
+    val serverVersion: String = "1.0"
 )
 
 @Serializable
@@ -157,5 +185,12 @@ data class CompanionPongMessage(
 @Serializable
 data class CompanionErrorMessage(
     val type: String = "error",
-    val message: String
+    val message: String,
+    /** Set when the Mac is turning this connection away; see [CompanionErrorCodes]. */
+    val code: String? = null
 )
+
+object CompanionErrorCodes {
+    /** The only code after which the Mac keeps the socket open. */
+    const val NOT_AUTHORIZED = "not_authorized"
+}

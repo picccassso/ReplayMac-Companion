@@ -62,9 +62,14 @@ class CompanionRepository(
         }
     }
 
+    private val pairingSecrets = PairingSecretStore(
+        context.getSharedPreferences(PairingSecretStore.PREFS_NAME, Context.MODE_PRIVATE)
+    )
+
     private val nsdManager = NsdDiscoveryManager(context, scope)
     private val wsClient = CompanionWebSocketClient(
         deviceId = deviceId,
+        secrets = pairingSecrets,
         deviceName = formattedDeviceName,
         scope = scope
     )
@@ -194,6 +199,7 @@ class CompanionRepository(
 
     fun forgetMac(mac: RememberedMac) {
         rememberedMacStore.remove(mac)
+        mac.serverId?.let(pairingSecrets::remove)
         _previouslyConnectedMacs.value = rememberedMacStore.loadAll()
     }
 

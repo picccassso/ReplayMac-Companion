@@ -55,6 +55,7 @@ struct ReplayCapCompanionApp: App {
                         previouslyConnectedItems: viewModel.previouslyConnectedItems,
                         discoveredMacs: viewModel.filteredDiscoveredMacs,
                         isDiscovering: viewModel.isDiscovering,
+                        isLocalNetworkDenied: viewModel.isLocalNetworkDenied,
                         manualHost: viewModel.manualHost,
                         manualPort: viewModel.manualPort,
                         onManualHostChange: { host in
@@ -72,8 +73,8 @@ struct ReplayCapCompanionApp: App {
                         onForgetMac: { mac in
                             viewModel.forgetMac(mac)
                         },
-                        onConnectWired: {
-                            viewModel.connectWired()
+                        onOpenSettings: {
+                            viewModel.openAppSettings()
                         },
                         onRefreshDiscovery: {
                             viewModel.refreshDiscovery()

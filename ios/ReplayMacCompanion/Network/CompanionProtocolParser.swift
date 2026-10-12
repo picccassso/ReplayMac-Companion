@@ -30,6 +30,9 @@ public enum CompanionProtocolParser {
                 let auth = try decoder.decode(CompanionAuthResponse.self, from: data)
                 return .auth(auth)
 
+            case "auth_challenge":
+                return .challenge(try decoder.decode(CompanionAuthChallenge.self, from: data))
+
             case "state_snapshot":
                 let snapshot = try decoder.decode(CompanionStateSnapshot.self, from: data)
                 return .snapshot(snapshot)
@@ -50,8 +53,7 @@ public enum CompanionProtocolParser {
                 return .pong
 
             case "error":
-                let err = try decoder.decode(CompanionErrorMessage.self, from: data)
-                return .error(err.message)
+                return .serverError(try decoder.decode(CompanionErrorMessage.self, from: data))
 
             default:
                 return .unknown(rawType: type, rawJson: text)

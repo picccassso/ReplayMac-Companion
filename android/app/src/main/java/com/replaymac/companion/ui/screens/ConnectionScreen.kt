@@ -59,7 +59,10 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.replaymac.companion.data.model.ConnectionState
 import com.replaymac.companion.data.model.DiscoveredMac
 import com.replaymac.companion.data.model.PreviouslyConnectedItem
@@ -109,7 +112,11 @@ fun ConnectionScreen(
     GlassBackground(modifier = modifier) {
         when (connectionState) {
             is ConnectionState.PendingApproval -> CenteredStatus {
-                PendingApprovalView(serverName = connectionState.serverName, onCancel = onCancelConnection)
+                PendingApprovalView(
+                    serverName = connectionState.serverName,
+                    pairingCode = connectionState.pairingCode,
+                    onCancel = onCancelConnection
+                )
             }
             is ConnectionState.Connecting -> CenteredStatus {
                 ConnectingProgressView(host = connectionState.host, port = connectionState.port, onCancel = onCancelConnection)
@@ -632,6 +639,7 @@ private fun StatusPanel(
     title: String,
     message: String,
     onCancel: () -> Unit,
+    detail: (@Composable () -> Unit)? = null,
     badge: @Composable () -> Unit
 ) {
     GlassCard(modifier = Modifier.fillMaxWidth()) {
@@ -644,6 +652,10 @@ private fun StatusPanel(
             Text(title, style = MaterialTheme.typography.titleLarge, color = AppColors.TextPrimary, textAlign = TextAlign.Center)
             Spacer(Modifier.height(6.dp))
             Text(message, style = MaterialTheme.typography.bodyMedium, color = AppColors.TextSecondary, textAlign = TextAlign.Center)
+            if (detail != null) {
+                Spacer(Modifier.height(18.dp))
+                detail()
+            }
             Spacer(Modifier.height(24.dp))
             GlassButton(text = "Cancel", onClick = onCancel, modifier = Modifier.fillMaxWidth())
         }
@@ -651,16 +663,41 @@ private fun StatusPanel(
 }
 
 @Composable
-fun PendingApprovalView(serverName: String, onCancel: () -> Unit, modifier: Modifier = Modifier) {
+fun PendingApprovalView(
+    serverName: String,
+    onCancel: () -> Unit,
+    modifier: Modifier = Modifier,
+    pairingCode: String? = null
+) {
     Box(modifier) {
         StatusPanel(
             title = "Waiting for approval",
-            message = "Click Allow in ReplayCap on “$serverName” to pair this phone.",
-            onCancel = onCancel
+            message = if (pairingCode != null) {
+                "Check that ReplayCap on “$serverName” shows this code, then click Allow."
+            } else {
+                "Click Allow in ReplayCap on “$serverName” to pair this phone."
+            },
+            onCancel = onCancel,
+            detail = pairingCode?.let { code -> { PairingCodeText(code) } }
         ) {
             Icon(Icons.Rounded.Lock, contentDescription = null, tint = AppColors.TextSecondary, modifier = Modifier.size(32.dp))
         }
     }
+}
+
+/** The code is read off the Mac and compared digit by digit, so it's large and evenly spaced. */
+@Composable
+private fun PairingCodeText(code: String) {
+    Text(
+        text = code,
+        style = MaterialTheme.typography.displaySmall.copy(
+            fontFamily = FontFamily.Monospace,
+            letterSpacing = 8.sp
+        ),
+        color = AppColors.TextPrimary,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.semantics { contentDescription = "Pairing code ${code.toList().joinToString(" ")}" }
+    )
 }
 
 @Composable
