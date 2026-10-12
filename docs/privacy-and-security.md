@@ -79,7 +79,7 @@ Without TLS, someone who can actively intercept traffic on your network (not jus
 
 **iOS**
 
-- `NSLocalNetworkUsageDescription` supplies the text for the Local Network prompt: "ReplayCap Companion discovers and connects to ReplayCap running on your Mac over the local network or USB."
+- `NSLocalNetworkUsageDescription` supplies the text for the Local Network prompt: "ReplayCap Companion finds and connects to ReplayCap on your Mac over your local network."
 - `NSBonjourServices` lists `_replaymac._tcp` so the app may browse it.
 - `NSAppTransportSecurity` → `NSAllowsLocalNetworking` allows the plain `ws://` socket to LAN addresses and `.local` names.
 - Grant the Local Network prompt, and the app can find your Mac on the LAN. If it's turned off, the connection screen says so and offers a button to Settings.

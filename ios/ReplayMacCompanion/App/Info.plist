@@ -19,7 +19,7 @@
     <key>CFBundleShortVersionString</key>
     <string>1.0.0</string>
     <key>CFBundleVersion</key>
-    <string>2</string>
+    <string>3</string>
     <key>LSRequiresIPhoneOS</key>
     <true/>
     <key>ITSAppUsesNonExemptEncryption</key>
@@ -35,7 +35,7 @@
         <string>_replaymac._tcp</string>
     </array>
     <key>NSLocalNetworkUsageDescription</key>
-    <string>ReplayCap Companion discovers and connects to ReplayCap running on your Mac over the local network or USB.</string>
+    <string>ReplayCap Companion finds and connects to ReplayCap on your Mac over your local network.</string>
     <key>UIApplicationSceneManifest</key>
     <dict>
         <key>UIApplicationSupportsMultipleScenes</key>
