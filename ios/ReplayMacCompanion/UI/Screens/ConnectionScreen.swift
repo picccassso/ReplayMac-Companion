@@ -20,7 +20,6 @@ public struct ConnectionScreen: View {
     public var onDismissError: () -> Void
     public var onOpenTutorial: () -> Void
 
-    @State private var showUsbHelp: Bool = false
     @State private var macToForget: RememberedMac? = nil
 
     public init(
@@ -142,7 +141,6 @@ public struct ConnectionScreen: View {
                                     previouslyConnectedSection
                                 }
                                 networkSection
-                                usbHelpSection
                             }
                             .frame(maxWidth: .infinity)
 
@@ -157,7 +155,6 @@ public struct ConnectionScreen: View {
                                 previouslyConnectedSection
                             }
                             networkSection
-                            usbHelpSection
                             manualSection
                         }
                     }
@@ -244,62 +241,6 @@ public struct ConnectionScreen: View {
                                 RowSeparator(startIndent: 56)
                             }
                         }
-                    }
-                }
-            }
-        }
-    }
-
-    /// iPhone can't reach the Mac through a plain USB cable, but Personal
-    /// Hotspot over USB puts both on one network, where discovery finds the Mac.
-    private var usbHelpSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            SectionHeader(title: "USB Cable")
-
-            GlassCard(cornerRadius: AppRadii.large) {
-                VStack(spacing: 0) {
-                    Button(action: {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            showUsbHelp.toggle()
-                        }
-                    }) {
-                        HStack(spacing: 14) {
-                            Image(systemName: "cable.connector")
-                                .font(.system(size: 24))
-                                .foregroundColor(AppColors.textSecondary)
-
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("Connect with a cable")
-                                    .font(.system(size: 15, weight: .semibold))
-                                    .foregroundColor(AppColors.textPrimary)
-
-                                Text("Uses Personal Hotspot over USB")
-                                    .font(.system(size: 13))
-                                    .foregroundColor(AppColors.textSecondary)
-                            }
-
-                            Spacer()
-
-                            Image(systemName: showUsbHelp ? "chevron.up" : "chevron.down")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(AppColors.textTertiary)
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 12)
-                        .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityHint(showUsbHelp ? "Hides the steps" : "Shows the steps")
-
-                    if showUsbHelp {
-                        RowSeparator(startIndent: 16)
-
-                        Text("1. Connect your iPhone to your Mac with a USB cable.\n2. On iPhone, turn on Settings > Personal Hotspot.\n3. Your Mac appears under On This Network. Tap Connect.")
-                            .font(.system(size: 12))
-                            .foregroundColor(AppColors.textSecondary)
-                            .lineSpacing(3)
-                            .padding(16)
-                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
             }

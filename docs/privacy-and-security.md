@@ -42,7 +42,7 @@ The phone talks to ReplayCap's Companion server over a WebSocket at `ws://<host>
 Two routes reach the Mac:
 
 - **Local network.** Over Wi-Fi, using the address Bonjour resolves for the Mac.
-- **USB.** On Android, `adb reverse tcp:7375 tcp:7375` forwards `127.0.0.1:7375` on the phone to the Mac. On iOS, you can connect over USB using Personal Hotspot, Internet Sharing, or `iproxy 7375 7375`. Any connection to `127.0.0.1` counts as USB.
+- **USB.** On Android, `adb reverse tcp:7375 tcp:7375` forwards `127.0.0.1:7375` on the phone to the Mac. iOS has no USB route and connects over Wi-Fi only. Any connection to `127.0.0.1` counts as USB.
 
 ReplayCap advertises itself over Bonjour as `_replaymac._tcp`, with its stable server ID in the TXT record under `id`. The phone browses that service with `NsdManager` on Android and `NWBrowser` on iOS.
 
@@ -73,7 +73,7 @@ Forgetting a Mac from the phone's Previously Connected list deletes the phone's 
 
 ### What this doesn't cover
 
-Without TLS, someone who can actively intercept traffic on your network (not just read it) could in principle tamper with a session after it has signed in. That takes control of the network itself. If you're on Wi-Fi you don't trust, use a cable instead (`adb reverse` on Android, Personal Hotspot over USB on iPhone).
+Without TLS, someone who can actively intercept traffic on your network (not just read it) could in principle tamper with a session after it has signed in. That takes control of the network itself. If you're on Wi-Fi you don't trust, use a cable instead on Android (`adb reverse`), or wait until you're back on a network you control.
 
 ## Network permissions
 
@@ -99,5 +99,5 @@ A few habits keep it tight:
 
 - Check that the code on the Mac's Allow prompt matches the one on your phone before you click. That prompt is the one moment that decides access.
 - Revoke phones you no longer use in ReplayCap's Paired Devices list, so their secrets stop working.
-- Prefer a cable on public or untrusted Wi-Fi. The frames are unencrypted, and a cable keeps them off the shared network.
+- Avoid public or untrusted Wi-Fi. The frames are unencrypted. On Android, a USB cable with `adb reverse` keeps them off the shared network.
 - Keep ReplayCap updated so the Mac side has the latest pairing behaviour.

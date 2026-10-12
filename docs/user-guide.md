@@ -44,15 +44,9 @@ On iOS, the first launch asks for permission to find devices on your local netwo
 
 If you changed the server's port on the Mac, use that port in the command instead (the Mac's Companion page shows the exact command).
 
-### USB Cable (iOS)
+### iPhone and iPad
 
-An iPhone can't reach the Mac over a plain USB cable, but Personal Hotspot over USB puts the two on their own wired network:
-
-1. Connect your iPhone to your Mac with a USB cable.
-2. On the iPhone, turn on Settings > Personal Hotspot.
-3. Your Mac appears under **On This Network**. Tap **Connect**.
-
-The **USB Cable** card on the connection screen shows these steps. iPads without cellular don't have Personal Hotspot, so they connect over Wi-Fi.
+The iOS app connects over Wi-Fi only. iOS gives apps no way to reach a Mac through a plain USB cable, so there's no USB option like Android's. If your Mac doesn't show up under **On This Network**, use **Enter Manually** below.
 
 ### Enter Manually
 
