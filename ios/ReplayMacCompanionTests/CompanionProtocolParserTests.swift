@@ -291,4 +291,42 @@ final class CompanionProtocolParserTests: XCTestCase {
         }
         XCTAssertNil(authWithoutId.serverId)
     }
+
+    func testParseExtendedStateSnapshotWithAudioAppsDisplaysAndProfiles() {
+        let json = """
+        {
+            "type": "state_snapshot",
+            "isRecording": true,
+            "isSessionRecording": false,
+            "saveStatus": "idle",
+            "microphoneVolume": 0.65,
+            "systemAudioVolume": 0.85,
+            "perAppAudioEnabled": false,
+            "audioApps": [
+                {"bundleId": "com.hnc.Discord", "name": "Discord", "isMuted": true, "isRunning": true}
+            ],
+            "displays": [
+                {"id": "builtin:main", "name": "Built-in Retina Display", "isActive": true, "isConnected": true}
+            ],
+            "profiles": [
+                {"id": "prof-1", "name": "Gaming", "summary": "120 fps · 35 Mbps", "isActive": true}
+            ],
+            "recentClips": []
+        }
+        """
+
+        guard case .snapshot(let snapshot) = CompanionProtocolParser.parse(json) else {
+            return XCTFail("Expected .snapshot event")
+        }
+        XCTAssertEqual(snapshot.microphoneVolume, 0.65, accuracy: 0.001)
+        XCTAssertEqual(snapshot.systemAudioVolume, 0.85, accuracy: 0.001)
+        XCTAssertFalse(snapshot.perAppAudioEnabled)
+        XCTAssertEqual(snapshot.audioApps, [CompanionAudioApp(bundleId: "com.hnc.Discord", name: "Discord", isMuted: true, isRunning: true)])
+        XCTAssertEqual(snapshot.displays, [CompanionDisplayInfo(id: "builtin:main", name: "Built-in Retina Display", isActive: true, isConnected: true)])
+        XCTAssertEqual(snapshot.profiles, [CompanionProfileSummary(id: "prof-1", name: "Gaming", summary: "120 fps · 35 Mbps", isActive: true)])
+        XCTAssertEqual(snapshot.mutedAudioAppsCount, 1)
+        XCTAssertEqual(snapshot.activeDisplayName, "Built-in Retina Display")
+        XCTAssertEqual(snapshot.activeProfileName, "Gaming")
+        XCTAssertTrue(snapshot.hasCaptureSetupOptions)
+    }
 }

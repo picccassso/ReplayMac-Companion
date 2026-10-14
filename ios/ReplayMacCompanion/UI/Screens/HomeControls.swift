@@ -18,6 +18,7 @@ public struct ControlTileSpec: Sendable, Equatable {
     public let isEnabled: Bool
     public let isLoading: Bool
     public let compactTitle: String?
+    public let hasSecondaryAction: Bool
 
     public init(
         control: HomeControl,
@@ -26,7 +27,8 @@ public struct ControlTileSpec: Sendable, Equatable {
         tone: TileTone,
         isEnabled: Bool,
         isLoading: Bool = false,
-        compactTitle: String? = nil
+        compactTitle: String? = nil,
+        hasSecondaryAction: Bool = false
     ) {
         self.control = control
         self.title = title
@@ -35,6 +37,7 @@ public struct ControlTileSpec: Sendable, Equatable {
         self.isEnabled = isEnabled
         self.isLoading = isLoading
         self.compactTitle = compactTitle
+        self.hasSecondaryAction = hasSecondaryAction
     }
 }
 
@@ -52,11 +55,25 @@ public enum HomeControlLabels {
         }
     }
 
+    /// Recording time shown to the user, capped at the largest configured
+    /// replay window — matching the desktop's MenuBarState.displayedRecordingSeconds.
+    /// Session recording shows uncapped elapsed time instead.
+    public static func displayedRecordingSeconds(_ snapshot: CompanionStateSnapshot) -> Double {
+        if snapshot.isSessionRecording {
+            return snapshot.sessionElapsedSeconds
+        }
+        let quickCap = Double(snapshot.bufferDurationSeconds)
+        let cap = snapshot.longBufferEnabled
+            ? max(quickCap, Double(snapshot.longBufferDurationSeconds))
+            : quickCap
+        return min(snapshot.recordingElapsedSeconds, cap)
+    }
+
     public static func subheadline(_ snapshot: CompanionStateSnapshot) -> String {
         if !snapshot.isRecording && !snapshot.isSessionRecording {
             return "Start the replay buffer to keep your last \(snapshot.bufferDurationSeconds) seconds ready to save."
         }
-        let elapsed = snapshot.isSessionRecording ? snapshot.sessionElapsedSeconds : snapshot.recordingElapsedSeconds
+        let elapsed = displayedRecordingSeconds(snapshot)
         let display: String?
         if let d = snapshot.capturedDisplayName {
             display = snapshot.isUsingFallbackDisplay ? "\(d) (Fallback)" : d
@@ -91,9 +108,27 @@ public enum HomeControlLabels {
             saveExtendedReplay(snapshot),
             replayBuffer(snapshot),
             session(snapshot),
-            audioSource(control: .microphone, title: "Microphone", isEnabled: snapshot.isMicrophoneEnabled, isMuted: snapshot.isMicrophoneMuted),
-            audioSource(control: .systemAudio, title: "System Audio", isEnabled: snapshot.isSystemAudioEnabled, isMuted: snapshot.isSystemAudioMuted)
+            audioSource(
+                control: .microphone,
+                title: "Microphone",
+                isEnabled: snapshot.isMicrophoneEnabled,
+                isMuted: snapshot.isMicrophoneMuted
+            ),
+            systemAudioSource(snapshot)
         ]
+    }
+
+    public static func setupPillLabel(_ snapshot: CompanionStateSnapshot) -> String? {
+        guard snapshot.hasCaptureSetupOptions else { return nil }
+        let parts = [snapshot.activeDisplayName, snapshot.activeProfileName]
+            .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+        return parts.isEmpty ? "Display & Profiles" : parts.joined(separator: " · ")
+    }
+
+    public static func volumePercentageLabel(_ volume: Double) -> String {
+        let clamped = min(max(volume, 0.0), 1.0)
+        return "\(Int((clamped * 100.0).rounded()))%"
     }
 
     public static func iconFor(_ control: HomeControl, snapshot: CompanionStateSnapshot) -> String {
@@ -208,7 +243,38 @@ public enum HomeControlLabels {
             title: title,
             subtitle: subtitle,
             tone: tone,
-            isEnabled: true
+            isEnabled: true,
+            hasSecondaryAction: true
+        )
+    }
+
+    private static func systemAudioSource(_ snapshot: CompanionStateSnapshot) -> ControlTileSpec {
+        let subtitle: String
+        let tone: TileTone
+        if !snapshot.isSystemAudioEnabled {
+            subtitle = "Off"
+            tone = .off
+        } else if snapshot.isSystemAudioMuted {
+            subtitle = "Muted"
+            tone = .muted
+        } else if snapshot.perAppAudioEnabled {
+            subtitle = "Selected app"
+            tone = .normal
+        } else if snapshot.mutedAudioAppsCount > 0 {
+            subtitle = "On · \(snapshot.mutedAudioAppsCount) muted"
+            tone = .normal
+        } else {
+            subtitle = "On"
+            tone = .normal
+        }
+
+        return ControlTileSpec(
+            control: .systemAudio,
+            title: "System Audio",
+            subtitle: subtitle,
+            tone: tone,
+            isEnabled: true,
+            hasSecondaryAction: true
         )
     }
 }

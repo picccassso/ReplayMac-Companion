@@ -1,11 +1,12 @@
 package com.replaymac.companion.ui.components
 
-import android.view.HapticFeedbackConstants
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -45,13 +46,15 @@ import com.replaymac.companion.ui.theme.AppRadii
  * Click handling shared by every glass control: a light haptic tick, a
  * spring press-in (like a macOS glass button), and dimming when disabled.
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Modifier.glassPressable(
     onClick: () -> Unit,
     enabled: Boolean = true,
     shape: Shape,
     haptic: Boolean = true,
-    role: Role = Role.Button
+    role: Role = Role.Button,
+    onLongClick: (() -> Unit)? = null
 ): Modifier {
     val view = LocalView.current
     val interaction = remember { MutableInteractionSource() }
@@ -68,15 +71,34 @@ fun Modifier.glassPressable(
         }
         .alpha(if (enabled) 1f else 0.4f)
         .clip(shape)
-        .clickable(
-            interactionSource = interaction,
-            indication = ripple(color = Color.White),
-            enabled = enabled,
-            role = role
-        ) {
-            if (haptic) view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-            onClick()
-        }
+        .then(
+            if (onLongClick != null) {
+                Modifier.combinedClickable(
+                    interactionSource = interaction,
+                    indication = ripple(color = Color.White),
+                    enabled = enabled,
+                    role = role,
+                    onClick = {
+                        if (haptic) CompanionHaptics.performTap(view)
+                        onClick()
+                    },
+                    onLongClick = {
+                        if (haptic) CompanionHaptics.performTap(view)
+                        onLongClick()
+                    }
+                )
+            } else {
+                Modifier.clickable(
+                    interactionSource = interaction,
+                    indication = ripple(color = Color.White),
+                    enabled = enabled,
+                    role = role
+                ) {
+                    if (haptic) CompanionHaptics.performTap(view)
+                    onClick()
+                }
+            }
+        )
 }
 
 private val ButtonShape = RoundedCornerShape(AppRadii.Small.dp)

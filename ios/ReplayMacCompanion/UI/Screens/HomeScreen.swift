@@ -13,6 +13,8 @@ public struct HomeScreen: View {
     public var onToggleSession: () -> Void
     public var onToggleMicrophone: () -> Void
     public var onToggleSystemAudio: () -> Void
+    public var onOpenAudioMixer: () -> Void
+    public var onOpenCaptureSetup: () -> Void
     public var onClipSelected: (CompanionClipSummary) -> Void
     public var onOpenTutorial: () -> Void
 
@@ -29,6 +31,8 @@ public struct HomeScreen: View {
         onToggleSession: @escaping () -> Void,
         onToggleMicrophone: @escaping () -> Void,
         onToggleSystemAudio: @escaping () -> Void,
+        onOpenAudioMixer: @escaping () -> Void = {},
+        onOpenCaptureSetup: @escaping () -> Void = {},
         onClipSelected: @escaping (CompanionClipSummary) -> Void,
         onOpenTutorial: @escaping () -> Void = {}
     ) {
@@ -44,6 +48,8 @@ public struct HomeScreen: View {
         self.onToggleSession = onToggleSession
         self.onToggleMicrophone = onToggleMicrophone
         self.onToggleSystemAudio = onToggleSystemAudio
+        self.onOpenAudioMixer = onOpenAudioMixer
+        self.onOpenCaptureSetup = onOpenCaptureSetup
         self.onClipSelected = onClipSelected
         self.onOpenTutorial = onOpenTutorial
     }
@@ -105,26 +111,36 @@ public struct HomeScreen: View {
                                 : max(300, min(420, availableWidth * 0.38))
 
                             HStack(alignment: .top, spacing: 16) {
-                                StatusCard(snapshot: snapshot, onToggleBuffer: onToggleBuffer)
-                                    .frame(width: statusWidth)
+                                StatusCard(
+                                    snapshot: snapshot,
+                                    onToggleBuffer: onToggleBuffer,
+                                    onOpenCaptureSetup: onOpenCaptureSetup
+                                )
+                                .frame(width: statusWidth)
 
                                 ControlGrid(
                                     snapshot: snapshot,
                                     columns: isCompactLandscape ? 2 : 3,
                                     isCompact: isCompact,
-                                    onControl: handleControl
+                                    onControl: handleControl,
+                                    onOpenAudioMixer: onOpenAudioMixer
                                 )
                                 .frame(maxWidth: .infinity)
                             }
                         } else {
                             VStack(spacing: 16) {
-                                StatusCard(snapshot: snapshot, onToggleBuffer: onToggleBuffer)
+                                StatusCard(
+                                    snapshot: snapshot,
+                                    onToggleBuffer: onToggleBuffer,
+                                    onOpenCaptureSetup: onOpenCaptureSetup
+                                )
 
                                 ControlGrid(
                                     snapshot: snapshot,
                                     columns: 2,
                                     isCompact: isCompact,
-                                    onControl: handleControl
+                                    onControl: handleControl,
+                                    onOpenAudioMixer: onOpenAudioMixer
                                 )
                             }
                         }
@@ -217,6 +233,7 @@ private struct HomeTopBar: View {
 private struct StatusCard: View {
     let snapshot: CompanionStateSnapshot
     let onToggleBuffer: () -> Void
+    let onOpenCaptureSetup: () -> Void
 
     var body: some View {
         GlassCard(cornerRadius: AppRadii.large) {
@@ -242,8 +259,11 @@ private struct StatusCard: View {
 
                     Spacer(minLength: 4)
 
-                    BufferToggleButton(isRunning: snapshot.isRecording, onClick: onToggleBuffer)
-                        .padding(.top, 1)
+                    BufferToggleButton(isRunning: snapshot.isRecording, onClick: {
+                        CompanionHaptics.tap()
+                        onToggleBuffer()
+                    })
+                    .padding(.top, 1)
                 }
 
                 if snapshot.isRecording {
@@ -256,6 +276,35 @@ private struct StatusCard: View {
                         longBufferDurationSeconds: snapshot.longBufferDurationSeconds
                     )
                     .transition(.opacity.combined(with: .move(edge: .top)))
+                }
+
+                if let setupLabel = HomeControlLabels.setupPillLabel(snapshot) {
+                    Button(action: {
+                        CompanionHaptics.tap()
+                        onOpenCaptureSetup()
+                    }) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "display")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(AppColors.accent)
+
+                            Text(setupLabel)
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(AppColors.textPrimary)
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+
+                            Spacer(minLength: 2)
+
+                            Image(systemName: "chevron.up.chevron.down")
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundColor(AppColors.textSecondary)
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(Color.white.opacity(0.06), in: Capsule())
+                    }
+                    .buttonStyle(GlassPressableStyle())
                 }
             }
             .padding(18)
@@ -296,6 +345,7 @@ private struct ControlGrid: View {
     let columns: Int
     var isCompact: Bool = false
     let onControl: (HomeControl) -> Void
+    let onOpenAudioMixer: () -> Void
 
     var body: some View {
         let tiles = HomeControlLabels.tiles(snapshot)
@@ -318,6 +368,7 @@ private struct ControlGrid: View {
                     minHeight: isCompact ? 54 : 64,
                     isCompact: isCompact,
                     compactTitle: spec.compactTitle,
+                    onSecondaryClick: spec.hasSecondaryAction ? onOpenAudioMixer : nil,
                     onClick: { onControl(spec.control) }
                 )
             }

@@ -19,6 +19,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.ContentCopy
+import androidx.compose.material.icons.rounded.ContentCut
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.Movie
@@ -58,10 +61,13 @@ fun ClipDetailsBottomSheet(
     thumbnailBase64: String?,
     onRevealInFinder: (String) -> Unit,
     onDeleteClip: (String) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onTrimClip: (String) -> Unit = {},
+    onCopyClip: (String) -> Unit = {}
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showDeleteConfirmation by remember { mutableStateOf(false) }
+    var copiedToMac by remember(clip.id) { mutableStateOf(false) }
 
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
@@ -120,8 +126,13 @@ fun ClipDetailsBottomSheet(
 
                     ClipActions(
                         clip = clip,
-                        isLandscape = true,
+                        copiedToMac = copiedToMac,
                         onRevealInFinder = onRevealInFinder,
+                        onTrimClip = onTrimClip,
+                        onCopyClip = { clipId ->
+                            onCopyClip(clipId)
+                            copiedToMac = true
+                        },
                         onDeleteRequested = { showDeleteConfirmation = true },
                         onDismiss = onDismiss,
                         modifier = Modifier.fillMaxWidth()
@@ -148,8 +159,13 @@ fun ClipDetailsBottomSheet(
 
                 ClipActions(
                     clip = clip,
-                    isLandscape = false,
+                    copiedToMac = copiedToMac,
                     onRevealInFinder = onRevealInFinder,
+                    onTrimClip = onTrimClip,
+                    onCopyClip = { clipId ->
+                        onCopyClip(clipId)
+                        copiedToMac = true
+                    },
                     onDeleteRequested = { showDeleteConfirmation = true },
                     onDismiss = onDismiss,
                     modifier = Modifier.fillMaxWidth()
@@ -246,38 +262,20 @@ private fun ClipInfo(
 @Composable
 private fun ClipActions(
     clip: CompanionClipSummary,
-    isLandscape: Boolean,
+    copiedToMac: Boolean,
     onRevealInFinder: (String) -> Unit,
+    onTrimClip: (String) -> Unit,
+    onCopyClip: (String) -> Unit,
     onDeleteRequested: () -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    if (isLandscape) {
-        Column(
-            modifier = modifier,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            AccentButton(
-                text = "Show in Finder",
-                icon = Icons.Rounded.Folder,
-                onClick = {
-                    onRevealInFinder(clip.id)
-                    onDismiss()
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
-            GlassButton(
-                text = "Delete",
-                icon = Icons.Rounded.Delete,
-                contentColor = AppColors.Danger,
-                tint = AppColors.Danger.copy(alpha = 0.12f),
-                onClick = onDeleteRequested,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-    } else {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
         Row(
-            modifier = modifier,
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             AccentButton(
@@ -290,11 +288,34 @@ private fun ClipActions(
                 modifier = Modifier.weight(1f)
             )
             GlassButton(
+                text = "Trim on Mac",
+                icon = Icons.Rounded.ContentCut,
+                onClick = {
+                    onTrimClip(clip.id)
+                    onDismiss()
+                },
+                modifier = Modifier.weight(1f)
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            GlassButton(
+                text = if (copiedToMac) "Copied to Mac" else "Copy to Mac",
+                icon = if (copiedToMac) Icons.Rounded.Check else Icons.Rounded.ContentCopy,
+                contentColor = if (copiedToMac) AppColors.Success else AppColors.TextPrimary,
+                tint = if (copiedToMac) AppColors.SuccessContainer else AppColors.SurfaceGlass,
+                onClick = { onCopyClip(clip.id) },
+                modifier = Modifier.weight(1f)
+            )
+            GlassButton(
                 text = "Delete",
                 icon = Icons.Rounded.Delete,
                 contentColor = AppColors.Danger,
                 tint = AppColors.Danger.copy(alpha = 0.12f),
-                onClick = onDeleteRequested
+                onClick = onDeleteRequested,
+                modifier = Modifier.weight(1f)
             )
         }
     }

@@ -11,13 +11,14 @@ The phone finds your Mac on the local network, asks ReplayMac for permission onc
 ### Controls
 - **Save replays**: Save the last N seconds of your replay buffer, or the longer extended replay when it's turned on in ReplayMac.
 - **Replay buffer and sessions**: Start or stop the replay buffer, and record a full session that saves when you stop it.
-- **Audio**: Mute or unmute the microphone and system audio.
-- **Deck mode**: Keep the phone's screen on while it sits next to you, so the controls are always one tap away.
+- **Audio & Mixer**: Mute or unmute the microphone and system audio with one tap, or open the **Audio Mixer** to adjust microphone/system audio volume and mute individual running Mac apps (like Discord or Spotify).
+- **Display & Profile switcher**: Switch the active Mac display or apply saved ReplayMac capture profiles directly from the status card.
+- **Deck mode & haptics**: Keep the phone's screen on while it sits next to you, with tactile haptic feedback on controls and when a replay finishes saving.
 
 ### Live status
 - **Status card**: See whether the replay buffer or a session is running, how long it's been going and which display is being recorded, including when ReplayMac has fallen back to another display.
 - **Buffer meters**: Watch the quick replay buffer fill up in memory and the extended replay fill up on disk, with a "Ready" mark once each is full.
-- **This Session**: Every clip you save shows up on the phone with a thumbnail, its type, length, size and save time. Open one to reveal it in Finder or move it to the Trash on your Mac.
+- **This Session**: Every clip you save shows up on the phone with a thumbnail, its type, length, size and save time. Open one to reveal it in Finder, open it in ReplayMac's Trim & Export editor, copy it to your Mac's clipboard, or move it to the Trash on your Mac.
 
 ### Connecting
 - **Automatic discovery**: Your Mac appears on its own when both devices are on the same Wi-Fi.

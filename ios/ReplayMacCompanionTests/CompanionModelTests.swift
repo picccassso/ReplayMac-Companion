@@ -39,6 +39,43 @@ final class CompanionModelTests: XCTestCase {
         XCTAssertTrue(deleteEncoded.contains("\"type\":\"delete_clip\""))
         XCTAssertTrue(deleteEncoded.contains("\"action\":\"delete_clip\""))
         XCTAssertTrue(deleteEncoded.contains("\"clipId\":\"clip-456\""))
+
+        let trimMsg = CompanionClientMessage.trimClip("clip-456")
+        let trimEncoded = try CompanionProtocolParser.encodeClientMessage(trimMsg)
+        XCTAssertTrue(trimEncoded.contains("\"type\":\"trim_clip\""))
+        XCTAssertTrue(trimEncoded.contains("\"action\":\"trim_clip\""))
+        XCTAssertTrue(trimEncoded.contains("\"clipId\":\"clip-456\""))
+
+        let copyMsg = CompanionClientMessage.copyClip("clip-456")
+        let copyEncoded = try CompanionProtocolParser.encodeClientMessage(copyMsg)
+        XCTAssertTrue(copyEncoded.contains("\"type\":\"copy_clip\""))
+        XCTAssertTrue(copyEncoded.contains("\"action\":\"copy_clip\""))
+        XCTAssertTrue(copyEncoded.contains("\"clipId\":\"clip-456\""))
+
+        let volMsg = CompanionClientMessage.setVolume(target: "microphone", volume: 0.75)
+        let volEncoded = try CompanionProtocolParser.encodeClientMessage(volMsg)
+        XCTAssertTrue(volEncoded.contains("\"type\":\"set_volume\""))
+        XCTAssertTrue(volEncoded.contains("\"target\":\"microphone\""))
+        XCTAssertTrue(volEncoded.contains("\"volume\":0.75"))
+
+        let muteAppMsg = CompanionClientMessage.toggleAppMute("com.hnc.Discord")
+        let muteAppEncoded = try CompanionProtocolParser.encodeClientMessage(muteAppMsg)
+        XCTAssertTrue(muteAppEncoded.contains("\"type\":\"toggle_app_mute\""))
+        XCTAssertTrue(muteAppEncoded.contains("\"bundleId\":\"com.hnc.Discord\""))
+
+        let unmuteAllMsg = CompanionClientMessage.unmuteAllApps()
+        let unmuteAllEncoded = try CompanionProtocolParser.encodeClientMessage(unmuteAllMsg)
+        XCTAssertTrue(unmuteAllEncoded.contains("\"type\":\"unmute_all_apps\""))
+
+        let displayMsg = CompanionClientMessage.selectDisplay("builtin:main")
+        let displayEncoded = try CompanionProtocolParser.encodeClientMessage(displayMsg)
+        XCTAssertTrue(displayEncoded.contains("\"type\":\"select_display\""))
+        XCTAssertTrue(displayEncoded.contains("\"displayId\":\"builtin:main\""))
+
+        let profileMsg = CompanionClientMessage.applyProfile("prof-123")
+        let profileEncoded = try CompanionProtocolParser.encodeClientMessage(profileMsg)
+        XCTAssertTrue(profileEncoded.contains("\"type\":\"apply_profile\""))
+        XCTAssertTrue(profileEncoded.contains("\"profileId\":\"prof-123\""))
     }
 
     func testSnapshotPreflightLogic() {

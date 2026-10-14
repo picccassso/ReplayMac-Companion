@@ -302,4 +302,123 @@ class CompanionStateParserTest {
         assertTrue(withNullDevice is CompanionServerEvent.Auth)
         assertEquals(null, (withNullDevice as CompanionServerEvent.Auth).auth.deviceName)
     }
+
+    @Test
+    fun parsesExtendedSnapshotWithAudioMixerDisplaysAndProfiles() {
+        val json = """
+            {
+                "type": "state_snapshot",
+                "isRecording": true,
+                "isSessionRecording": false,
+                "saveStatus": "idle",
+                "recordingElapsedSeconds": 30.0,
+                "bufferedSeconds": 30.0,
+                "bufferDurationSeconds": 30,
+                "capturedDisplayName": "Studio Display",
+                "isMicrophoneEnabled": true,
+                "isMicrophoneMuted": false,
+                "isSystemAudioEnabled": true,
+                "isSystemAudioMuted": false,
+                "microphoneVolume": 0.85,
+                "systemAudioVolume": 0.6,
+                "perAppAudioEnabled": false,
+                "audioApps": [
+                    {
+                        "bundleId": "com.spotify.client",
+                        "name": "Spotify",
+                        "isMuted": true,
+                        "isRunning": true,
+                        "iconBase64": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+                    },
+                    {
+                        "bundleId": "com.hnc.Discord",
+                        "name": "Discord",
+                        "isMuted": false,
+                        "isRunning": false
+                    }
+                ],
+                "displays": [
+                    {
+                        "id": "display-1",
+                        "name": "Built-in Retina Display",
+                        "isActive": false,
+                        "isConnected": true
+                    },
+                    {
+                        "id": "display-2",
+                        "name": "Studio Display",
+                        "isActive": true,
+                        "isConnected": true
+                    }
+                ],
+                "profiles": [
+                    {
+                        "id": "profile-1",
+                        "name": "Competitive 120fps",
+                        "summary": "1440p · 120 FPS · HEVC",
+                        "isActive": true
+                    },
+                    {
+                        "id": "profile-2",
+                        "name": "Desktop Review",
+                        "summary": "4K · 60 FPS",
+                        "isActive": false
+                    }
+                ],
+                "recentClips": []
+            }
+        """.trimIndent()
+
+        val event = CompanionProtocolParser.parse(json)
+        assertTrue(event is CompanionServerEvent.Snapshot)
+        val snapshot = (event as CompanionServerEvent.Snapshot).snapshot
+
+        assertEquals(0.85, snapshot.microphoneVolume, 0.001)
+        assertEquals(0.6, snapshot.systemAudioVolume, 0.001)
+        assertFalse(snapshot.perAppAudioEnabled)
+
+        assertEquals(2, snapshot.audioApps.size)
+        assertEquals("com.spotify.client", snapshot.audioApps[0].bundleId)
+        assertEquals("Spotify", snapshot.audioApps[0].name)
+        assertTrue(snapshot.audioApps[0].isMuted)
+        assertTrue(snapshot.audioApps[0].isRunning)
+        assertTrue(snapshot.audioApps[0].iconBase64?.startsWith("iVBORw0") == true)
+        assertFalse(snapshot.audioApps[1].isMuted)
+        assertFalse(snapshot.audioApps[1].isRunning)
+        assertNull(snapshot.audioApps[1].iconBase64)
+        assertEquals(1, snapshot.mutedAudioAppsCount)
+
+        assertEquals(2, snapshot.displays.size)
+        assertEquals("Studio Display", snapshot.activeDisplayName)
+        assertTrue(snapshot.displays[1].isActive)
+
+        assertEquals(2, snapshot.profiles.size)
+        assertEquals("Competitive 120fps", snapshot.activeProfileName)
+        assertEquals("1440p · 120 FPS · HEVC", snapshot.profiles[0].summary)
+        assertTrue(snapshot.hasCaptureSetupOptions)
+    }
+
+    @Test
+    fun legacySnapshotDefaultsNewAudioAndSetupFieldsCleanly() {
+        val legacyJson = """
+            {
+                "type": "state_snapshot",
+                "isRecording": false,
+                "saveStatus": "idle"
+            }
+        """.trimIndent()
+
+        val event = CompanionProtocolParser.parse(legacyJson)
+        assertTrue(event is CompanionServerEvent.Snapshot)
+        val snapshot = (event as CompanionServerEvent.Snapshot).snapshot
+
+        assertEquals(1.0, snapshot.microphoneVolume, 0.001)
+        assertEquals(1.0, snapshot.systemAudioVolume, 0.001)
+        assertFalse(snapshot.perAppAudioEnabled)
+        assertTrue(snapshot.audioApps.isEmpty())
+        assertTrue(snapshot.displays.isEmpty())
+        assertTrue(snapshot.profiles.isEmpty())
+        assertEquals(0, snapshot.mutedAudioAppsCount)
+        assertFalse(snapshot.hasCaptureSetupOptions)
+    }
 }

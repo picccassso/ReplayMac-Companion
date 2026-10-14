@@ -1,6 +1,9 @@
 package com.replaymac.companion
 
+import com.replaymac.companion.data.model.CompanionAudioApp
 import com.replaymac.companion.data.model.CompanionClipSummary
+import com.replaymac.companion.data.model.CompanionDisplayInfo
+import com.replaymac.companion.data.model.CompanionProfileSummary
 import com.replaymac.companion.data.model.CompanionStateSnapshot
 import com.replaymac.companion.ui.components.TileTone
 import com.replaymac.companion.ui.components.clipDetailLine
@@ -10,6 +13,7 @@ import com.replaymac.companion.ui.screens.HomeControl
 import com.replaymac.companion.ui.screens.HomeControlLabels
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -120,13 +124,23 @@ class HomeControlLabelsTest {
         assertEquals("Not recording", HomeControlLabels.headline(idle))
         assertTrue(HomeControlLabels.subheadline(idle).contains("last 30 seconds"))
 
-        val running = buffering.copy(recordingElapsedSeconds = 65.0, capturedDisplayName = "Studio Display")
-        assertEquals("Replay buffer running", HomeControlLabels.headline(running))
-        assertEquals("01:05 · Studio Display", HomeControlLabels.subheadline(running))
+        // Quick buffer only (longBufferEnabled = false): caps at bufferDurationSeconds (30s)
+        val runningQuick = buffering.copy(recordingElapsedSeconds = 65.0, capturedDisplayName = "Studio Display")
+        assertEquals("Replay buffer running", HomeControlLabels.headline(runningQuick))
+        assertEquals("00:30 · Studio Display", HomeControlLabels.subheadline(runningQuick))
 
-        val both = running.copy(isSessionRecording = true, sessionElapsedSeconds = 5.0)
+        // Extended buffer enabled (longBufferDurationSeconds = 300s): continues past 30s and caps at 5:00
+        val runningExtended = runningQuick.copy(longBufferEnabled = true, longBufferDurationSeconds = 300)
+        assertEquals("01:05 · Studio Display", HomeControlLabels.subheadline(runningExtended))
+        assertEquals(
+            "05:00 · Studio Display",
+            HomeControlLabels.subheadline(runningExtended.copy(recordingElapsedSeconds = 400.0))
+        )
+
+        // Session recording remains uncapped
+        val both = runningQuick.copy(isSessionRecording = true, sessionElapsedSeconds = 95.0)
         assertEquals("Session recording", HomeControlLabels.headline(both))
-        assertEquals("00:05 · Studio Display", HomeControlLabels.subheadline(both))
+        assertEquals("01:35 · Studio Display", HomeControlLabels.subheadline(both))
     }
 
     @Test
@@ -152,5 +166,70 @@ class HomeControlLabelsTest {
 
         val full = bare.copy(kind = "replay", duration = 30.0, fileSize = 5L * 1024 * 1024)
         assertEquals("Replay · 00:30 · 5.0 MB", clipDetailLine(full))
+    }
+
+    @Test
+    fun audioTilesDeclareSecondaryMixerActionAndReflectAppMuteSubtitles() {
+        val tiles = HomeControlLabels.tiles(idle)
+        assertFalse(tiles.single { it.control == HomeControl.SaveReplay }.hasSecondaryAction)
+        assertFalse(tiles.single { it.control == HomeControl.SaveExtendedReplay }.hasSecondaryAction)
+        assertFalse(tiles.single { it.control == HomeControl.ReplayBuffer }.hasSecondaryAction)
+        assertFalse(tiles.single { it.control == HomeControl.Session }.hasSecondaryAction)
+        assertTrue(tiles.single { it.control == HomeControl.Microphone }.hasSecondaryAction)
+        assertTrue(tiles.single { it.control == HomeControl.SystemAudio }.hasSecondaryAction)
+
+        val withMutedApps = idle.copy(
+            isSystemAudioEnabled = true,
+            isSystemAudioMuted = false,
+            perAppAudioEnabled = false,
+            audioApps = listOf(
+                CompanionAudioApp("com.spotify.client", "Spotify", isMuted = true),
+                CompanionAudioApp("com.hnc.Discord", "Discord", isMuted = true),
+                CompanionAudioApp("com.apple.Safari", "Safari", isMuted = false)
+            )
+        )
+        val sysTile = withMutedApps.tile(HomeControl.SystemAudio)
+        assertEquals("On · 2 muted", sysTile.subtitle)
+        assertEquals(TileTone.Normal, sysTile.tone)
+
+        val selectedAppOnly = withMutedApps.copy(perAppAudioEnabled = true)
+        assertEquals("Selected app", selectedAppOnly.tile(HomeControl.SystemAudio).subtitle)
+        assertEquals(TileTone.Normal, selectedAppOnly.tile(HomeControl.SystemAudio).tone)
+    }
+
+    @Test
+    fun setupPillLabelSummarizesActiveDisplayAndProfile() {
+        assertNull(HomeControlLabels.setupPillLabel(idle))
+
+        val withBoth = idle.copy(
+            displays = listOf(CompanionDisplayInfo("d1", "Studio Display", isActive = true)),
+            profiles = listOf(CompanionProfileSummary("p1", "Competitive 120fps", "1440p", isActive = true))
+        )
+        assertEquals("Studio Display · Competitive 120fps", HomeControlLabels.setupPillLabel(withBoth))
+
+        val displayOnly = idle.copy(
+            displays = listOf(CompanionDisplayInfo("d1", "Built-in Retina Display", isActive = true))
+        )
+        assertEquals("Built-in Retina Display", HomeControlLabels.setupPillLabel(displayOnly))
+
+        val profileOnly = idle.copy(
+            profiles = listOf(CompanionProfileSummary("p1", "Streaming", "1080p", isActive = true))
+        )
+        assertEquals("Streaming", HomeControlLabels.setupPillLabel(profileOnly))
+
+        val noneActive = idle.copy(
+            displays = listOf(CompanionDisplayInfo("d1", "Display 1", isActive = false)),
+            capturedDisplayName = null
+        )
+        assertEquals("Display & Profiles", HomeControlLabels.setupPillLabel(noneActive))
+    }
+
+    @Test
+    fun volumePercentageLabelRoundsAndClampsCleanly() {
+        assertEquals("0%", HomeControlLabels.volumePercentageLabel(0.0))
+        assertEquals("65%", HomeControlLabels.volumePercentageLabel(0.654))
+        assertEquals("100%", HomeControlLabels.volumePercentageLabel(1.0))
+        assertEquals("100%", HomeControlLabels.volumePercentageLabel(1.4))
+        assertEquals("0%", HomeControlLabels.volumePercentageLabel(-0.3))
     }
 }

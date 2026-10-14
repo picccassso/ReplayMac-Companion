@@ -186,6 +186,42 @@ class CompanionWebSocketClient(
         return sendMessage(CompanionClientMessage.deleteClip(clipId))
     }
 
+    fun trimClip(clipId: String): Boolean {
+        return sendMessage(CompanionClientMessage.trimClip(clipId))
+    }
+
+    fun copyClip(clipId: String): Boolean {
+        return sendMessage(CompanionClientMessage.copyClip(clipId))
+    }
+
+    fun setVolume(target: String, volume: Double): Boolean {
+        return sendMessage(CompanionClientMessage.setVolume(target, volume))
+    }
+
+    fun setMicrophoneVolume(volume: Double): Boolean {
+        return setVolume("microphone", volume)
+    }
+
+    fun setSystemAudioVolume(volume: Double): Boolean {
+        return setVolume("systemAudio", volume)
+    }
+
+    fun toggleAppMute(bundleId: String): Boolean {
+        return sendMessage(CompanionClientMessage.toggleAppMute(bundleId))
+    }
+
+    fun unmuteAllApps(): Boolean {
+        return sendMessage(CompanionClientMessage.unmuteAllApps())
+    }
+
+    fun selectDisplay(displayId: String): Boolean {
+        return sendMessage(CompanionClientMessage.selectDisplay(displayId))
+    }
+
+    fun applyProfile(profileId: String): Boolean {
+        return sendMessage(CompanionClientMessage.applyProfile(profileId))
+    }
+
     fun ping(): Boolean {
         return sendMessage(CompanionClientMessage.ping())
     }

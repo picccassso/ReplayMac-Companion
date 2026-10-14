@@ -74,6 +74,12 @@ class CompanionViewModel(
     private val _selectedClip = MutableStateFlow<CompanionClipSummary?>(null)
     val selectedClip: StateFlow<CompanionClipSummary?> = _selectedClip.asStateFlow()
 
+    private val _showAudioMixerSheet = MutableStateFlow(false)
+    val showAudioMixerSheet: StateFlow<Boolean> = _showAudioMixerSheet.asStateFlow()
+
+    private val _showCaptureSetupSheet = MutableStateFlow(false)
+    val showCaptureSetupSheet: StateFlow<Boolean> = _showCaptureSetupSheet.asStateFlow()
+
     private val _manualHost = MutableStateFlow(repository.getLastConnectedHost() ?: "")
     val manualHost: StateFlow<String> = _manualHost.asStateFlow()
 
@@ -87,6 +93,22 @@ class CompanionViewModel(
     fun dismissTutorial() {
         _showTutorialDialog.value = false
         repository.setHasSeenOnboarding(true)
+    }
+
+    fun openAudioMixer() {
+        _showAudioMixerSheet.value = true
+    }
+
+    fun dismissAudioMixer() {
+        _showAudioMixerSheet.value = false
+    }
+
+    fun openCaptureSetup() {
+        _showCaptureSetupSheet.value = true
+    }
+
+    fun dismissCaptureSetup() {
+        _showCaptureSetupSheet.value = false
     }
 
     init {
@@ -152,6 +174,9 @@ class CompanionViewModel(
     }
 
     fun disconnect() {
+        _selectedClip.value = null
+        _showAudioMixerSheet.value = false
+        _showCaptureSetupSheet.value = false
         repository.disconnect()
     }
 
@@ -193,6 +218,38 @@ class CompanionViewModel(
     fun deleteClip(clipId: String) {
         repository.deleteClip(clipId)
         _selectedClip.value = null
+    }
+
+    fun trimClip(clipId: String) {
+        repository.trimClip(clipId)
+    }
+
+    fun copyClip(clipId: String) {
+        repository.copyClip(clipId)
+    }
+
+    fun setMicrophoneVolume(volume: Double) {
+        repository.setMicrophoneVolume(volume)
+    }
+
+    fun setSystemAudioVolume(volume: Double) {
+        repository.setSystemAudioVolume(volume)
+    }
+
+    fun toggleAppMute(bundleId: String) {
+        repository.toggleAppMute(bundleId)
+    }
+
+    fun unmuteAllApps() {
+        repository.unmuteAllApps()
+    }
+
+    fun selectDisplay(displayId: String) {
+        repository.selectDisplay(displayId)
+    }
+
+    fun applyProfile(profileId: String) {
+        repository.applyProfile(profileId)
     }
 
     fun setKeepScreenAwake(enabled: Boolean) {

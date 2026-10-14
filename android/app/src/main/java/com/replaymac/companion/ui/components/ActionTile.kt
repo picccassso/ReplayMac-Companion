@@ -1,19 +1,27 @@
 package com.replaymac.companion.ui.components
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -66,7 +74,8 @@ fun ActionTile(
     isLoading: Boolean = false,
     minHeight: Dp = 64.dp,
     isCompact: Boolean = false,
-    compactTitle: String? = null
+    compactTitle: String? = null,
+    onSecondaryClick: (() -> Unit)? = null
 ) {
     val palette = paletteFor(tone)
     val fill by animateColorAsState(palette.fill, label = "tileFill")
@@ -77,23 +86,27 @@ fun ActionTile(
 
     val displayTitle = (if (isCompact) compactTitle else null) ?: title
     val resolvedMinHeight = if (isCompact && minHeight == 64.dp) 54.dp else minHeight
-    val horizontalPadding = if (isCompact) 10.dp else 14.dp
+    val horizontalPadding = if (isCompact) 10.dp else (if (onSecondaryClick != null) 12.dp else 14.dp)
     val verticalPadding = if (isCompact) 8.dp else 10.dp
-    val contentSpacing = if (isCompact) 8.dp else 12.dp
+    val contentSpacing = if (isCompact) {
+        if (onSecondaryClick != null) 6.dp else 8.dp
+    } else {
+        if (onSecondaryClick != null) 10.dp else 12.dp
+    }
     val iconSize = if (isCompact) 18.dp else 22.dp
     val progressSize = if (isCompact) 18.dp else 20.dp
+    val secondarySize = if (isCompact) 26.dp else 30.dp
+    val secondaryIconSize = if (isCompact) 13.dp else 15.dp
 
-    val titleStyle = if (isCompact) {
-        MaterialTheme.typography.titleSmall.copy(
-            fontSize = 13.sp,
-            lineHeight = 16.sp,
-            fontWeight = FontWeight.SemiBold
-        )
-    } else {
-        MaterialTheme.typography.titleSmall.copy(
-            fontWeight = FontWeight.SemiBold
-        )
+    var scaledTitleFontSize by remember(displayTitle, isCompact) {
+        mutableStateOf(if (isCompact) 13.5.sp else 14.sp)
     }
+
+    val titleStyle = MaterialTheme.typography.titleSmall.copy(
+        fontSize = scaledTitleFontSize,
+        lineHeight = (scaledTitleFontSize.value * 1.2f).sp,
+        fontWeight = FontWeight.SemiBold
+    )
 
     val subtitleStyle = if (isCompact) {
         MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp, lineHeight = 14.sp)
@@ -104,7 +117,12 @@ fun ActionTile(
     Row(
         modifier = modifier
             .heightIn(min = resolvedMinHeight)
-            .glassPressable(onClick = onClick, enabled = isEnabled && !isLoading, shape = shape)
+            .glassPressable(
+                onClick = onClick,
+                enabled = isEnabled && !isLoading,
+                shape = shape,
+                onLongClick = onSecondaryClick
+            )
             .glass(shape, fill, rimAlpha = if (fill.alpha > 0.5f) 0.5f else 1f)
             .padding(horizontal = horizontalPadding, vertical = verticalPadding),
         verticalAlignment = Alignment.CenterVertically,
@@ -120,9 +138,14 @@ fun ActionTile(
                 text = displayTitle,
                 style = titleStyle,
                 color = titleColor,
-                maxLines = 2,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                softWrap = true
+                softWrap = false,
+                onTextLayout = { result ->
+                    if (result.hasVisualOverflow && scaledTitleFontSize > 10.sp) {
+                        scaledTitleFontSize *= 0.92f
+                    }
+                }
             )
             Text(
                 text = subtitle,
@@ -133,6 +156,22 @@ fun ActionTile(
                 softWrap = false,
                 modifier = Modifier.padding(end = 2.dp)
             )
+        }
+        if (onSecondaryClick != null) {
+            Box(
+                modifier = Modifier
+                    .size(secondarySize)
+                    .glassPressable(onClick = onSecondaryClick, shape = CircleShape)
+                    .background(Color.White.copy(alpha = 0.08f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Tune,
+                    contentDescription = "$title mixer options",
+                    tint = subtitleColor,
+                    modifier = Modifier.size(secondaryIconSize)
+                )
+            }
         }
     }
 }

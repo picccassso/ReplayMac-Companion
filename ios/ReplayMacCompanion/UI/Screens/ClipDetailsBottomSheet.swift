@@ -5,21 +5,28 @@ public struct ClipDetailsBottomSheet: View {
     public var clip: CompanionClipSummary
     public var thumbnailBase64: String?
     public var onRevealInFinder: (String) -> Void
+    public var onTrimClip: (String) -> Void
+    public var onCopyClip: (String) -> Void
     public var onDeleteClip: (String) -> Void
     public var onDismiss: () -> Void
 
     @State private var showDeleteConfirmation = false
+    @State private var copiedToMac = false
 
     public init(
         clip: CompanionClipSummary,
         thumbnailBase64: String?,
         onRevealInFinder: @escaping (String) -> Void,
+        onTrimClip: @escaping (String) -> Void = { _ in },
+        onCopyClip: @escaping (String) -> Void = { _ in },
         onDeleteClip: @escaping (String) -> Void,
         onDismiss: @escaping () -> Void
     ) {
         self.clip = clip
         self.thumbnailBase64 = thumbnailBase64
         self.onRevealInFinder = onRevealInFinder
+        self.onTrimClip = onTrimClip
+        self.onCopyClip = onCopyClip
         self.onDeleteClip = onDeleteClip
         self.onDismiss = onDismiss
     }
@@ -141,23 +148,36 @@ public struct ClipDetailsBottomSheet: View {
     }
 
     private var portraitActionButtons: some View {
-        HStack(spacing: 12) {
-            showInFinderButton(fullWidth: true)
-            deleteButton(fullWidth: false)
+        VStack(spacing: 10) {
+            HStack(spacing: 12) {
+                showInFinderButton(fullWidth: true)
+                trimButton(fullWidth: true)
+            }
+            HStack(spacing: 12) {
+                copyButton(fullWidth: true)
+                deleteButton(fullWidth: true)
+            }
         }
         .padding(.top, 4)
     }
 
     private var landscapeActionButtons: some View {
         VStack(spacing: 10) {
-            showInFinderButton(fullWidth: true)
-            deleteButton(fullWidth: true)
+            HStack(spacing: 10) {
+                showInFinderButton(fullWidth: true)
+                trimButton(fullWidth: true)
+            }
+            HStack(spacing: 10) {
+                copyButton(fullWidth: true)
+                deleteButton(fullWidth: true)
+            }
         }
         .padding(.top, 4)
     }
 
     private func showInFinderButton(fullWidth: Bool) -> some View {
         Button(action: {
+            CompanionHaptics.tap()
             onRevealInFinder(clip.id)
             onDismiss()
         }) {
@@ -170,7 +190,7 @@ public struct ClipDetailsBottomSheet: View {
                     .minimumScaleFactor(0.85)
             }
             .foregroundColor(.white)
-            .padding(.horizontal, 18)
+            .padding(.horizontal, 14)
             .padding(.vertical, 12)
             .frame(maxWidth: fullWidth ? .infinity : nil)
             .background(AppColors.accent, in: RoundedRectangle(cornerRadius: AppRadii.small, style: .continuous))
@@ -178,8 +198,58 @@ public struct ClipDetailsBottomSheet: View {
         .buttonStyle(GlassPressableStyle())
     }
 
+    private func trimButton(fullWidth: Bool) -> some View {
+        Button(action: {
+            CompanionHaptics.tap()
+            onTrimClip(clip.id)
+            onDismiss()
+        }) {
+            HStack(spacing: 6) {
+                Image(systemName: "scissors")
+                    .font(.system(size: 15, weight: .semibold))
+                Text("Trim on Mac")
+                    .font(.system(size: 15, weight: .semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
+            }
+            .foregroundColor(AppColors.textPrimary)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .frame(maxWidth: fullWidth ? .infinity : nil)
+            .glass(cornerRadius: AppRadii.small, tint: AppColors.surfaceGlass)
+        }
+        .buttonStyle(GlassPressableStyle())
+    }
+
+    private func copyButton(fullWidth: Bool) -> some View {
+        Button(action: {
+            CompanionHaptics.performOutcome(.success)
+            onCopyClip(clip.id)
+            copiedToMac = true
+        }) {
+            HStack(spacing: 6) {
+                Image(systemName: copiedToMac ? "checkmark.circle.fill" : "doc.on.doc")
+                    .font(.system(size: 15, weight: .medium))
+                Text(copiedToMac ? "Copied to Mac" : "Copy to Mac")
+                    .font(.system(size: 15, weight: .medium))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
+            }
+            .foregroundColor(copiedToMac ? AppColors.success : AppColors.textPrimary)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .frame(maxWidth: fullWidth ? .infinity : nil)
+            .glass(
+                cornerRadius: AppRadii.small,
+                tint: copiedToMac ? AppColors.success.opacity(0.14) : AppColors.surfaceGlass
+            )
+        }
+        .buttonStyle(GlassPressableStyle())
+    }
+
     private func deleteButton(fullWidth: Bool) -> some View {
         Button(action: {
+            CompanionHaptics.tap()
             showDeleteConfirmation = true
         }) {
             HStack(spacing: 6) {
@@ -190,7 +260,7 @@ public struct ClipDetailsBottomSheet: View {
                     .lineLimit(1)
             }
             .foregroundColor(AppColors.danger)
-            .padding(.horizontal, 18)
+            .padding(.horizontal, 14)
             .padding(.vertical, 12)
             .frame(maxWidth: fullWidth ? .infinity : nil)
             .glass(cornerRadius: AppRadii.small, tint: AppColors.danger.opacity(0.12))

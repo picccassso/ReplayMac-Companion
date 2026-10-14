@@ -1,12 +1,18 @@
 package com.replaymac.companion
 
 import com.replaymac.companion.data.model.CompanionActions
+import com.replaymac.companion.data.model.CompanionAudioApp
 import com.replaymac.companion.data.model.CompanionClientMessage
 import com.replaymac.companion.data.model.CompanionClipSummary
+import com.replaymac.companion.data.model.CompanionDisplayInfo
+import com.replaymac.companion.data.model.CompanionProfileSummary
 import com.replaymac.companion.data.model.CompanionStateSnapshot
 import com.replaymac.companion.data.network.CompanionProtocolParser
+import com.replaymac.companion.ui.components.CompanionHaptics
+import com.replaymac.companion.ui.components.SaveHapticOutcome
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -127,5 +133,101 @@ class CompanionModelTest {
         )
         assertTrue(failed.isSaveFailed)
         assertFalse(failed.isSaveInProgress)
+    }
+
+    @Test
+    fun testTrimAndCopyClipEncoding() {
+        val trimEncoded = CompanionProtocolParser.encodeClientMessage(CompanionClientMessage.trimClip("clip-77"))
+        assertTrue(trimEncoded.contains("\"type\":\"trim_clip\""))
+        assertTrue(trimEncoded.contains("\"action\":\"trim_clip\""))
+        assertTrue(trimEncoded.contains("\"clipId\":\"clip-77\""))
+
+        val copyEncoded = CompanionProtocolParser.encodeClientMessage(CompanionClientMessage.copyClip("clip-77"))
+        assertTrue(copyEncoded.contains("\"type\":\"copy_clip\""))
+        assertTrue(copyEncoded.contains("\"action\":\"copy_clip\""))
+        assertTrue(copyEncoded.contains("\"clipId\":\"clip-77\""))
+    }
+
+    @Test
+    fun testAudioMixerAndCaptureSetupMessageEncoding() {
+        val setVol = CompanionProtocolParser.encodeClientMessage(CompanionClientMessage.setVolume("microphone", 0.75))
+        assertTrue(setVol.contains("\"type\":\"set_volume\""))
+        assertTrue(setVol.contains("\"action\":\"set_volume\""))
+        assertTrue(setVol.contains("\"target\":\"microphone\""))
+        assertTrue(setVol.contains("\"volume\":0.75"))
+
+        val clampedHigh = CompanionClientMessage.setVolume("systemAudio", 1.5)
+        assertEquals(1.0, clampedHigh.volume!!, 0.0001)
+        val clampedLow = CompanionClientMessage.setVolume("systemAudio", -0.2)
+        assertEquals(0.0, clampedLow.volume!!, 0.0001)
+
+        val toggleMute = CompanionProtocolParser.encodeClientMessage(CompanionClientMessage.toggleAppMute("com.spotify.client"))
+        assertTrue(toggleMute.contains("\"type\":\"toggle_app_mute\""))
+        assertTrue(toggleMute.contains("\"action\":\"toggle_app_mute\""))
+        assertTrue(toggleMute.contains("\"bundleId\":\"com.spotify.client\""))
+
+        val unmuteAll = CompanionProtocolParser.encodeClientMessage(CompanionClientMessage.unmuteAllApps())
+        assertTrue(unmuteAll.contains("\"type\":\"unmute_all_apps\""))
+        assertTrue(unmuteAll.contains("\"action\":\"unmute_all_apps\""))
+
+        val selectDisplay = CompanionProtocolParser.encodeClientMessage(CompanionClientMessage.selectDisplay("display-2"))
+        assertTrue(selectDisplay.contains("\"type\":\"select_display\""))
+        assertTrue(selectDisplay.contains("\"action\":\"select_display\""))
+        assertTrue(selectDisplay.contains("\"displayId\":\"display-2\""))
+
+        val applyProfile = CompanionProtocolParser.encodeClientMessage(CompanionClientMessage.applyProfile("profile-hdr"))
+        assertTrue(applyProfile.contains("\"type\":\"apply_profile\""))
+        assertTrue(applyProfile.contains("\"action\":\"apply_profile\""))
+        assertTrue(applyProfile.contains("\"profileId\":\"profile-hdr\""))
+    }
+
+    @Test
+    fun testSnapshotAudioAndSetupComputedProperties() {
+        val apps = listOf(
+            CompanionAudioApp(bundleId = "a", name = "App A", isMuted = true),
+            CompanionAudioApp(bundleId = "b", name = "App B", isMuted = true),
+            CompanionAudioApp(bundleId = "c", name = "App C", isMuted = false)
+        )
+        val base = CompanionStateSnapshot(
+            isSystemAudioEnabled = true,
+            perAppAudioEnabled = false,
+            audioApps = apps,
+            capturedDisplayName = "Fallback Display"
+        )
+        assertEquals(2, base.mutedAudioAppsCount)
+        assertEquals("Fallback Display", base.activeDisplayName)
+        assertNull(base.activeProfileName)
+        assertFalse(base.hasCaptureSetupOptions)
+
+        // Muted app count is 0 when system audio is off or per-app audio mode is enabled
+        assertEquals(0, base.copy(isSystemAudioEnabled = false).mutedAudioAppsCount)
+        assertEquals(0, base.copy(perAppAudioEnabled = true).mutedAudioAppsCount)
+
+        val withSetup = base.copy(
+            displays = listOf(
+                CompanionDisplayInfo(id = "d1", name = "Main Display", isActive = false),
+                CompanionDisplayInfo(id = "d2", name = "Studio Display", isActive = true)
+            ),
+            profiles = listOf(
+                CompanionProfileSummary(id = "p1", name = "60fps High", summary = "1080p", isActive = true)
+            )
+        )
+        assertTrue(withSetup.hasCaptureSetupOptions)
+        assertEquals("Studio Display", withSetup.activeDisplayName)
+        assertEquals("60fps High", withSetup.activeProfileName)
+    }
+
+    @Test
+    fun testSaveHapticTransitions() {
+        assertEquals(SaveHapticOutcome.SUCCESS, CompanionHaptics.saveTransitionOutcome("saving", "saved"))
+        assertEquals(SaveHapticOutcome.SUCCESS, CompanionHaptics.saveTransitionOutcome("BUSY", "Saved"))
+        assertEquals(SaveHapticOutcome.FAILURE, CompanionHaptics.saveTransitionOutcome("saving", "failed"))
+        assertEquals(SaveHapticOutcome.FAILURE, CompanionHaptics.saveTransitionOutcome("busy", "FAILED"))
+
+        assertNull(CompanionHaptics.saveTransitionOutcome("idle", "saving"))
+        assertNull(CompanionHaptics.saveTransitionOutcome("idle", "saved"))
+        assertNull(CompanionHaptics.saveTransitionOutcome("saved", "idle"))
+        assertNull(CompanionHaptics.saveTransitionOutcome("saved", "saved"))
+        assertNull(CompanionHaptics.saveTransitionOutcome("saving", "idle"))
     }
 }

@@ -30,6 +30,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.HelpOutline
 import androidx.compose.material.icons.automirrored.rounded.VolumeOff
 import androidx.compose.material.icons.automirrored.rounded.VolumeUp
+import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.material.icons.rounded.DesktopMac
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.FiberManualRecord
 import androidx.compose.material.icons.rounded.History
@@ -87,6 +89,8 @@ fun HomeScreen(
     onToggleSystemAudio: () -> Unit,
     onClipSelected: (CompanionClipSummary) -> Unit,
     onOpenTutorial: () -> Unit = {},
+    onOpenAudioMixer: () -> Unit = {},
+    onOpenCaptureSetup: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val configuration = LocalConfiguration.current
@@ -139,6 +143,7 @@ fun HomeScreen(
                         StatusCard(
                             snapshot = snapshot,
                             onToggleBuffer = onToggleBuffer,
+                            onOpenCaptureSetup = onOpenCaptureSetup,
                             modifier = Modifier.weight(if (isCompactLandscape) 0.88f else 1f)
                         )
                         ControlGrid(
@@ -146,17 +151,23 @@ fun HomeScreen(
                             columns = if (isCompactLandscape) 2 else 3,
                             isCompact = isCompact,
                             onControl = onControl,
+                            onOpenAudioMixer = onOpenAudioMixer,
                             modifier = Modifier.weight(if (isCompactLandscape) 1.12f else 1.5f)
                         )
                     }
                 } else {
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        StatusCard(snapshot, onToggleBuffer)
+                        StatusCard(
+                            snapshot = snapshot,
+                            onToggleBuffer = onToggleBuffer,
+                            onOpenCaptureSetup = onOpenCaptureSetup
+                        )
                         ControlGrid(
                             snapshot = snapshot,
                             columns = 2,
                             isCompact = isCompact,
-                            onControl = onControl
+                            onControl = onControl,
+                            onOpenAudioMixer = onOpenAudioMixer
                         )
                     }
                 }
@@ -243,8 +254,11 @@ private fun HomeTopBar(
 private fun StatusCard(
     snapshot: CompanionStateSnapshot,
     onToggleBuffer: () -> Unit,
+    onOpenCaptureSetup: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    val setupPillLabel = HomeControlLabels.setupPillLabel(snapshot)
+
     GlassCard(modifier = modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(18.dp).animateContentSize()) {
             Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -269,6 +283,40 @@ private fun StatusCard(
                     )
                 }
                 BufferToggleButton(isRunning = snapshot.isRecording, onClick = onToggleBuffer)
+            }
+
+            if (setupPillLabel != null) {
+                Spacer(Modifier.height(14.dp))
+                Row(
+                    modifier = Modifier
+                        .glassPressable(onClick = onOpenCaptureSetup, shape = CircleShape)
+                        .glass(CircleShape, AppColors.SurfaceGlassSubtle)
+                        .padding(horizontal = 12.dp, vertical = 7.dp)
+                        .semantics { contentDescription = "Capture setup: $setupPillLabel" },
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.DesktopMac,
+                        contentDescription = null,
+                        tint = AppColors.Accent,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Text(
+                        text = setupPillLabel,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = AppColors.TextPrimary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false)
+                    )
+                    Icon(
+                        imageVector = Icons.Rounded.ChevronRight,
+                        contentDescription = null,
+                        tint = AppColors.TextSecondary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
             }
 
             AnimatedVisibility(
@@ -336,6 +384,7 @@ private fun ControlGrid(
     columns: Int,
     onControl: (HomeControl) -> Unit,
     modifier: Modifier = Modifier,
+    onOpenAudioMixer: () -> Unit = {},
     isCompact: Boolean = false
 ) {
     val tiles = HomeControlLabels.tiles(snapshot)
@@ -359,6 +408,7 @@ private fun ControlGrid(
                         isLoading = spec.isLoading,
                         isCompact = isCompact,
                         compactTitle = spec.compactTitle,
+                        onSecondaryClick = if (spec.hasSecondaryAction) onOpenAudioMixer else null,
                         modifier = Modifier.weight(1f).fillMaxHeight()
                     )
                 }

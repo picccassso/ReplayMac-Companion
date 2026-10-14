@@ -73,7 +73,14 @@ ReplayMac keeps trusted devices in its `pairedCompanionDevices` default and thei
 | `action` | `action` | Run a control (see below). |
 | `get_thumbnail` | `clipId` | Ask for a clip's thumbnail. |
 | `reveal_clip` | `clipId` | Show the clip in Finder. |
+| `trim_clip` | `clipId` | Open the clip in ReplayMac's Trim & Export editor on the Mac. |
+| `copy_clip` | `clipId` | Copy the clip file to the Mac's clipboard. |
 | `delete_clip` | `clipId` | Move the clip to the Trash on the Mac. |
+| `set_volume` | `target`, `volume` | Set `"microphone"` or `"systemAudio"` volume (`0.0` to `1.0`). |
+| `toggle_app_mute` | `bundleId` | Mute or unmute a specific Mac application's audio. |
+| `unmute_all_apps` | | Unmute all muted Mac applications. |
+| `select_display` | `displayId` | Promote a display to top capture priority. |
+| `apply_profile` | `profileId` | Apply a saved capture profile on the Mac. |
 | `ping` | | Keepalive. |
 
 Actions are `saveReplay`, `saveExtendedReplay`, `toggleBuffer`, `toggleSession`, `toggleMicrophone` and `toggleSystemAudio`. ReplayMac also accepts snake_case spellings.
@@ -135,6 +142,11 @@ The phone updates the names it shows from every `approved` response, which is ho
 | `isUsingFallbackDisplay` | Bool | Recording a fallback display (defaults to false if missing) |
 | `isMicrophoneEnabled`, `isMicrophoneMuted` | Bool | Microphone state |
 | `isSystemAudioEnabled`, `isSystemAudioMuted` | Bool | System audio state |
+| `microphoneVolume`, `systemAudioVolume` | Double | Microphone and system audio volume (`0.0` to `1.0`, defaults to `1.0`) |
+| `perAppAudioEnabled` | Bool | Whether system audio is in single-app capture mode (defaults to `false`) |
+| `audioApps` | Array | Running and muted Mac applications (`bundleId`, `name`, `isMuted`, `isRunning`) |
+| `displays` | Array | Available Mac displays (`id`, `name`, `isActive`, `isConnected`) |
+| `profiles` | Array | Saved capture profiles (`id`, `name`, `summary`, `isActive`) |
 | `recentClips` | Array | Clips saved this session (below) |
 
 Each clip has `id`, `filename`, `kind` (`replay`, `extended replay` or `session`), `savedAt` (Unix seconds), `duration`, `fileSize` and `hasThumbnail`. The phone asks for thumbnails of clips where `hasThumbnail` is true.

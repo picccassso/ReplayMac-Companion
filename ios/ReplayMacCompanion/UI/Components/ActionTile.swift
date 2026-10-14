@@ -64,6 +64,7 @@ public struct ActionTile: View {
     public var subtitle: String
     public var systemImage: String
     public var onClick: () -> Void
+    public var onSecondaryClick: (() -> Void)?
     public var tone: TileTone
     public var isEnabled: Bool
     public var isLoading: Bool
@@ -81,6 +82,7 @@ public struct ActionTile: View {
         minHeight: CGFloat = 64,
         isCompact: Bool = false,
         compactTitle: String? = nil,
+        onSecondaryClick: (() -> Void)? = nil,
         onClick: @escaping () -> Void
     ) {
         self.title = title
@@ -92,6 +94,7 @@ public struct ActionTile: View {
         self.minHeight = minHeight
         self.isCompact = isCompact
         self.compactTitle = compactTitle
+        self.onSecondaryClick = onSecondaryClick
         self.onClick = onClick
     }
 
@@ -108,49 +111,70 @@ public struct ActionTile: View {
         let titleFontSize: CGFloat = isCompact ? 13.5 : 15
         let subtitleFontSize: CGFloat = isCompact ? 11.5 : 13
 
-        Button(action: onClick) {
-            HStack(spacing: spacing) {
-                if isLoading {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: palette.icon))
-                        .frame(width: progressFrame, height: progressFrame)
-                } else {
-                    Image(systemName: systemImage)
-                        .font(.system(size: iconSize, weight: .semibold))
-                        .foregroundColor(palette.icon)
-                        .frame(width: iconFrame, height: iconFrame)
+        HStack(spacing: 0) {
+            Button(action: {
+                CompanionHaptics.tap()
+                onClick()
+            }) {
+                HStack(spacing: spacing) {
+                    if isLoading {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: palette.icon))
+                            .frame(width: progressFrame, height: progressFrame)
+                    } else {
+                        Image(systemName: systemImage)
+                            .font(.system(size: iconSize, weight: .semibold))
+                            .foregroundColor(palette.icon)
+                            .frame(width: iconFrame, height: iconFrame)
+                    }
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(resolvedTitle)
+                            .font(.system(size: titleFontSize, weight: .semibold))
+                            .foregroundColor(palette.title)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.72)
+                            .allowsTightening(true)
+
+                        Text(subtitle)
+                            .font(.system(size: subtitleFontSize))
+                            .foregroundColor(palette.subtitle)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.75)
+                            .allowsTightening(true)
+                    }
+
+                    Spacer(minLength: 0)
                 }
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(resolvedTitle)
-                        .font(.system(size: titleFontSize, weight: .semibold))
-                        .foregroundColor(palette.title)
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.72)
-                        .allowsTightening(true)
-                        .multilineTextAlignment(.leading)
-                        .fixedSize(horizontal: false, vertical: true)
-
-                    Text(subtitle)
-                        .font(.system(size: subtitleFontSize))
-                        .foregroundColor(palette.subtitle)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.75)
-                        .allowsTightening(true)
-                }
-
-                Spacer(minLength: 0)
+                .padding(.leading, hPadding)
+                .padding(.trailing, onSecondaryClick == nil ? hPadding : 4)
+                .padding(.vertical, vPadding)
+                .frame(maxWidth: .infinity, minHeight: resolvedMinHeight, alignment: .leading)
+                .contentShape(Rectangle())
             }
-            .padding(.horizontal, hPadding)
-            .padding(.vertical, vPadding)
-            .frame(maxWidth: .infinity, minHeight: resolvedMinHeight, alignment: .leading)
-            .glass(
-                cornerRadius: AppRadii.medium,
-                tint: palette.fill,
-                rimAlpha: palette.fill == AppColors.surfaceGlass ? 1.0 : 0.4
-            )
+            .disabled(!isEnabled || isLoading)
+            .buttonStyle(GlassPressableStyle(enabled: isEnabled && !isLoading))
+
+            if let onSecondaryClick {
+                Button(action: {
+                    CompanionHaptics.tap()
+                    onSecondaryClick()
+                }) {
+                    Image(systemName: "slider.horizontal.3")
+                        .font(.system(size: isCompact ? 12 : 13, weight: .semibold))
+                        .foregroundColor(AppColors.textSecondary)
+                        .frame(width: isCompact ? 26 : 30, height: isCompact ? 26 : 30)
+                        .background(Color.white.opacity(0.07), in: Circle())
+                }
+                .buttonStyle(GlassPressableStyle())
+                .padding(.trailing, isCompact ? 8 : 10)
+                .accessibilityLabel("\(title) mixer and app audio")
+            }
         }
-        .disabled(!isEnabled || isLoading)
-        .buttonStyle(GlassPressableStyle(enabled: isEnabled && !isLoading))
+        .glass(
+            cornerRadius: AppRadii.medium,
+            tint: palette.fill,
+            rimAlpha: palette.fill == AppColors.surfaceGlass ? 1.0 : 0.4
+        )
     }
 }

@@ -17,11 +17,14 @@ public final class CompanionViewModel: ObservableObject {
     @Published public var keepScreenAwake: Bool = false
     @Published public var hasSeenOnboarding: Bool = false
     @Published public var showTutorialDialog: Bool = false
+    @Published public var showAudioMixerSheet: Bool = false
+    @Published public var showCaptureSetupSheet: Bool = false
     @Published public var selectedClip: CompanionClipSummary? = nil
     @Published public var manualHost: String = ""
     @Published public var manualPort: String = "7375"
 
     private var cancellables = Set<AnyCancellable>()
+    private var previousSaveStatus: String = "idle"
 
     public init(repository: CompanionRepository) {
         self.repository = repository
@@ -45,7 +48,18 @@ public final class CompanionViewModel: ObservableObject {
 
         repository.snapshot
             .receive(on: DispatchQueue.main)
-            .assign(to: &$snapshot)
+            .sink { [weak self] newSnapshot in
+                guard let self = self else { return }
+                if let outcome = CompanionHaptics.saveTransitionOutcome(
+                    previousStatus: self.previousSaveStatus,
+                    newStatus: newSnapshot.saveStatus
+                ) {
+                    CompanionHaptics.performOutcome(outcome)
+                }
+                self.previousSaveStatus = newSnapshot.saveStatus
+                self.snapshot = newSnapshot
+            }
+            .store(in: &cancellables)
 
         repository.thumbnails
             .receive(on: DispatchQueue.main)
@@ -201,6 +215,54 @@ public final class CompanionViewModel: ObservableObject {
         if selectedClip?.id == clipId {
             selectedClip = nil
         }
+    }
+
+    public func trimClip(_ clipId: String) {
+        repository.trimClip(clipId)
+    }
+
+    public func copyClip(_ clipId: String) {
+        repository.copyClip(clipId)
+    }
+
+    public func setMicrophoneVolume(_ volume: Double) {
+        repository.setMicrophoneVolume(volume)
+    }
+
+    public func setSystemAudioVolume(_ volume: Double) {
+        repository.setSystemAudioVolume(volume)
+    }
+
+    public func toggleAppMute(_ bundleId: String) {
+        repository.toggleAppMute(bundleId)
+    }
+
+    public func unmuteAllApps() {
+        repository.unmuteAllApps()
+    }
+
+    public func selectDisplay(_ displayId: String) {
+        repository.selectDisplay(displayId)
+    }
+
+    public func applyProfile(_ profileId: String) {
+        repository.applyProfile(profileId)
+    }
+
+    public func openAudioMixer() {
+        showAudioMixerSheet = true
+    }
+
+    public func dismissAudioMixer() {
+        showAudioMixerSheet = false
+    }
+
+    public func openCaptureSetup() {
+        showCaptureSetupSheet = true
+    }
+
+    public func dismissCaptureSetup() {
+        showCaptureSetupSheet = false
     }
 
     public func setKeepScreenAwake(_ enabled: Bool) {

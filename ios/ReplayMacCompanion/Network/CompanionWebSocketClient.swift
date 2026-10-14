@@ -138,6 +138,34 @@ public final class CompanionWebSocketClient: @unchecked Sendable {
         sendMessage(CompanionClientMessage.deleteClip(clipId))
     }
 
+    public func trimClip(_ clipId: String) -> Bool {
+        sendMessage(CompanionClientMessage.trimClip(clipId))
+    }
+
+    public func copyClip(_ clipId: String) -> Bool {
+        sendMessage(CompanionClientMessage.copyClip(clipId))
+    }
+
+    public func setVolume(target: String, volume: Double) -> Bool {
+        sendMessage(CompanionClientMessage.setVolume(target: target, volume: volume))
+    }
+
+    public func toggleAppMute(_ bundleId: String) -> Bool {
+        sendMessage(CompanionClientMessage.toggleAppMute(bundleId))
+    }
+
+    public func unmuteAllApps() -> Bool {
+        sendMessage(CompanionClientMessage.unmuteAllApps())
+    }
+
+    public func selectDisplay(_ displayId: String) -> Bool {
+        sendMessage(CompanionClientMessage.selectDisplay(displayId))
+    }
+
+    public func applyProfile(_ profileId: String) -> Bool {
+        sendMessage(CompanionClientMessage.applyProfile(profileId))
+    }
+
     public func ping() -> Bool {
         sendMessage(CompanionClientMessage.ping())
     }

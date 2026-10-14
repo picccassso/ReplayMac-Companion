@@ -344,6 +344,38 @@ public final class CompanionRepository: @unchecked Sendable {
         _ = wsClient.deleteClip(clipId)
     }
 
+    public func trimClip(_ clipId: String) {
+        _ = wsClient.trimClip(clipId)
+    }
+
+    public func copyClip(_ clipId: String) {
+        _ = wsClient.copyClip(clipId)
+    }
+
+    public func setMicrophoneVolume(_ volume: Double) {
+        _ = wsClient.setVolume(target: "microphone", volume: volume)
+    }
+
+    public func setSystemAudioVolume(_ volume: Double) {
+        _ = wsClient.setVolume(target: "systemAudio", volume: volume)
+    }
+
+    public func toggleAppMute(_ bundleId: String) {
+        _ = wsClient.toggleAppMute(bundleId)
+    }
+
+    public func unmuteAllApps() {
+        _ = wsClient.unmuteAllApps()
+    }
+
+    public func selectDisplay(_ displayId: String) {
+        _ = wsClient.selectDisplay(displayId)
+    }
+
+    public func applyProfile(_ profileId: String) {
+        _ = wsClient.applyProfile(profileId)
+    }
+
     public func requestThumbnail(_ clipId: String) {
         lock.lock()
         let alreadyHas = thumbnailsSubject.value.keys.contains(clipId)
@@ -384,6 +416,12 @@ public final class CompanionRepository: @unchecked Sendable {
                 isMicrophoneMuted: current.isMicrophoneMuted,
                 isSystemAudioEnabled: current.isSystemAudioEnabled,
                 isSystemAudioMuted: current.isSystemAudioMuted,
+                microphoneVolume: current.microphoneVolume,
+                systemAudioVolume: current.systemAudioVolume,
+                perAppAudioEnabled: current.perAppAudioEnabled,
+                audioApps: current.audioApps,
+                displays: current.displays,
+                profiles: current.profiles,
                 recentClips: current.recentClips
             )
             snapshotSubject.send(current)

@@ -9,6 +9,7 @@ import com.replaymac.companion.data.model.CompanionStateSnapshot
 import com.replaymac.companion.data.model.CompanionTelemetryTick
 import com.replaymac.companion.data.model.CompanionThumbnailResponse
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonObject
@@ -20,6 +21,10 @@ object CompanionProtocolParser {
         isLenient = true
         coerceInputValues = true
         encodeDefaults = true
+    }
+
+    fun parseStateSnapshot(root: JsonObject): CompanionStateSnapshot {
+        return json.decodeFromJsonElement<CompanionStateSnapshot>(root)
     }
 
     fun parse(text: String): CompanionServerEvent {
@@ -37,11 +42,11 @@ object CompanionProtocolParser {
                     CompanionServerEvent.AuthChallenge(challenge)
                 }
                 "state_snapshot" -> {
-                    val snapshot = json.decodeFromJsonElement<CompanionStateSnapshot>(root)
+                    val snapshot = parseStateSnapshot(root)
                     CompanionServerEvent.Snapshot(snapshot)
                 }
                 "state_changed" -> {
-                    val snapshot = json.decodeFromJsonElement<CompanionStateSnapshot>(root)
+                    val snapshot = parseStateSnapshot(root)
                     CompanionServerEvent.StateChanged(snapshot)
                 }
                 "telemetry_tick" -> {

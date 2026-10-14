@@ -143,16 +143,34 @@ final class HomeControlLabelsTests: XCTestCase {
             capturedDisplayName: "Studio Display"
         )
         XCTAssertEqual(HomeControlLabels.headline(running), "Replay buffer running")
-        XCTAssertEqual(HomeControlLabels.subheadline(running), "01:05 · Studio Display")
+        XCTAssertEqual(HomeControlLabels.subheadline(running), "00:30 · Studio Display")
+
+        let runningExtended = CompanionStateSnapshot(
+            isRecording: true,
+            recordingElapsedSeconds: 65.0,
+            longBufferEnabled: true,
+            longBufferDurationSeconds: 300,
+            capturedDisplayName: "Studio Display"
+        )
+        XCTAssertEqual(HomeControlLabels.subheadline(runningExtended), "01:05 · Studio Display")
+
+        let cappedExtended = CompanionStateSnapshot(
+            isRecording: true,
+            recordingElapsedSeconds: 400.0,
+            longBufferEnabled: true,
+            longBufferDurationSeconds: 300,
+            capturedDisplayName: "Studio Display"
+        )
+        XCTAssertEqual(HomeControlLabels.subheadline(cappedExtended), "05:00 · Studio Display")
 
         let both = CompanionStateSnapshot(
             isRecording: true,
             isSessionRecording: true,
-            sessionElapsedSeconds: 5.0,
+            sessionElapsedSeconds: 95.0,
             capturedDisplayName: "Studio Display"
         )
         XCTAssertEqual(HomeControlLabels.headline(both), "Session recording")
-        XCTAssertEqual(HomeControlLabels.subheadline(both), "00:05 · Studio Display")
+        XCTAssertEqual(HomeControlLabels.subheadline(both), "01:35 · Studio Display")
     }
 
     func testStatusCardFlagsAFallbackDisplayLikeTheDesktop() {
@@ -182,5 +200,62 @@ final class HomeControlLabelsTests: XCTestCase {
             fileSize: 5 * 1024 * 1024
         )
         XCTAssertEqual(clipDetailLine(full), "Replay · 00:30 · 5.0 MB")
+    }
+
+    func testAudioTilesExposeSecondaryMixerActionAndMutedAppSubtitles() {
+        let micTile = tile(for: .microphone, in: idle)
+        let sysTile = tile(for: .systemAudio, in: idle)
+        XCTAssertTrue(micTile.hasSecondaryAction)
+        XCTAssertTrue(sysTile.hasSecondaryAction)
+        XCTAssertFalse(tile(for: .saveReplay, in: idle).hasSecondaryAction)
+
+        let withMutedApps = CompanionStateSnapshot(
+            isSystemAudioEnabled: true,
+            isSystemAudioMuted: false,
+            perAppAudioEnabled: false,
+            audioApps: [
+                CompanionAudioApp(bundleId: "com.hnc.Discord", name: "Discord", isMuted: true),
+                CompanionAudioApp(bundleId: "com.spotify.client", name: "Spotify", isMuted: true),
+                CompanionAudioApp(bundleId: "com.apple.Safari", name: "Safari", isMuted: false)
+            ]
+        )
+        XCTAssertEqual(tile(for: .systemAudio, in: withMutedApps).subtitle, "On · 2 muted")
+
+        let perAppMode = CompanionStateSnapshot(
+            isSystemAudioEnabled: true,
+            isSystemAudioMuted: false,
+            perAppAudioEnabled: true,
+            audioApps: [
+                CompanionAudioApp(bundleId: "com.hnc.Discord", name: "Discord", isMuted: true)
+            ]
+        )
+        XCTAssertEqual(tile(for: .systemAudio, in: perAppMode).subtitle, "Selected app")
+    }
+
+    func testSetupPillAndVolumeLabels() {
+        XCTAssertNil(HomeControlLabels.setupPillLabel(idle))
+
+        let withDisplayAndProfile = CompanionStateSnapshot(
+            displays: [CompanionDisplayInfo(id: "d1", name: "Studio Display", isActive: true)],
+            profiles: [CompanionProfileSummary(id: "p1", name: "Competitive", summary: "120 fps", isActive: true)]
+        )
+        XCTAssertEqual(HomeControlLabels.setupPillLabel(withDisplayAndProfile), "Studio Display · Competitive")
+
+        XCTAssertEqual(HomeControlLabels.volumePercentageLabel(0.754), "75%")
+        XCTAssertEqual(HomeControlLabels.volumePercentageLabel(1.5), "100%")
+        XCTAssertEqual(HomeControlLabels.volumePercentageLabel(-0.2), "0%")
+    }
+
+    func testSaveHapticTransitions() {
+        XCTAssertEqual(
+            CompanionHaptics.saveTransitionOutcome(previousStatus: "saving", newStatus: "saved"),
+            .success
+        )
+        XCTAssertEqual(
+            CompanionHaptics.saveTransitionOutcome(previousStatus: "busy", newStatus: "failed"),
+            .failure
+        )
+        XCTAssertNil(CompanionHaptics.saveTransitionOutcome(previousStatus: "idle", newStatus: "saving"))
+        XCTAssertNil(CompanionHaptics.saveTransitionOutcome(previousStatus: "saved", newStatus: "idle"))
     }
 }

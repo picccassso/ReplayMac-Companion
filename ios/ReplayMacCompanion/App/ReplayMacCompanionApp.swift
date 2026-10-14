@@ -42,6 +42,12 @@ struct ReplayCapCompanionApp: App {
                         onToggleSystemAudio: {
                             viewModel.toggleSystemAudio()
                         },
+                        onOpenAudioMixer: {
+                            viewModel.openAudioMixer()
+                        },
+                        onOpenCaptureSetup: {
+                            viewModel.openCaptureSetup()
+                        },
                         onClipSelected: { clip in
                             viewModel.selectClip(clip)
                         },
@@ -106,11 +112,59 @@ struct ReplayCapCompanionApp: App {
                     onRevealInFinder: { clipId in
                         viewModel.revealClip(clipId)
                     },
+                    onTrimClip: { clipId in
+                        viewModel.trimClip(clipId)
+                    },
+                    onCopyClip: { clipId in
+                        viewModel.copyClip(clipId)
+                    },
                     onDeleteClip: { clipId in
                         viewModel.deleteClip(clipId)
                     },
                     onDismiss: {
                         viewModel.selectClip(nil)
+                    }
+                )
+                .preferredColorScheme(.dark)
+            }
+            .sheet(isPresented: $viewModel.showAudioMixerSheet) {
+                AudioMixerBottomSheet(
+                    snapshot: viewModel.snapshot,
+                    onToggleMicrophone: {
+                        viewModel.toggleMicrophone()
+                    },
+                    onToggleSystemAudio: {
+                        viewModel.toggleSystemAudio()
+                    },
+                    onSetMicrophoneVolume: { volume in
+                        viewModel.setMicrophoneVolume(volume)
+                    },
+                    onSetSystemAudioVolume: { volume in
+                        viewModel.setSystemAudioVolume(volume)
+                    },
+                    onToggleAppMute: { bundleId in
+                        viewModel.toggleAppMute(bundleId)
+                    },
+                    onUnmuteAllApps: {
+                        viewModel.unmuteAllApps()
+                    },
+                    onDismiss: {
+                        viewModel.dismissAudioMixer()
+                    }
+                )
+                .preferredColorScheme(.dark)
+            }
+            .sheet(isPresented: $viewModel.showCaptureSetupSheet) {
+                CaptureSetupBottomSheet(
+                    snapshot: viewModel.snapshot,
+                    onSelectDisplay: { displayId in
+                        viewModel.selectDisplay(displayId)
+                    },
+                    onApplyProfile: { profileId in
+                        viewModel.applyProfile(profileId)
+                    },
+                    onDismiss: {
+                        viewModel.dismissCaptureSetup()
                     }
                 )
                 .preferredColorScheme(.dark)

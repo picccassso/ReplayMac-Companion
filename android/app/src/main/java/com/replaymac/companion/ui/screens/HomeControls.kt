@@ -3,6 +3,7 @@ package com.replaymac.companion.ui.screens
 import com.replaymac.companion.data.model.CompanionStateSnapshot
 import com.replaymac.companion.ui.components.TileTone
 import com.replaymac.companion.ui.components.formatDurationSeconds
+import kotlin.math.roundToInt
 
 /** The six actions on the Home grid, in the desktop Home page's order. */
 enum class HomeControl { SaveReplay, SaveExtendedReplay, ReplayBuffer, Session, Microphone, SystemAudio }
@@ -14,7 +15,8 @@ data class ControlTileSpec(
     val tone: TileTone,
     val isEnabled: Boolean,
     val isLoading: Boolean = false,
-    val compactTitle: String? = null
+    val compactTitle: String? = null,
+    val hasSecondaryAction: Boolean = false
 )
 
 /**
@@ -29,13 +31,38 @@ object HomeControlLabels {
         else -> "Not recording"
     }
 
+    fun displayedRecordingSeconds(snapshot: CompanionStateSnapshot): Double {
+        if (snapshot.isSessionRecording) {
+            return snapshot.sessionElapsedSeconds
+        }
+        val quickCap = snapshot.bufferDurationSeconds.toDouble()
+        val cap = if (snapshot.longBufferEnabled) {
+            maxOf(quickCap, snapshot.longBufferDurationSeconds.toDouble())
+        } else {
+            quickCap
+        }
+        return minOf(snapshot.recordingElapsedSeconds, cap)
+    }
+
     fun subheadline(snapshot: CompanionStateSnapshot): String {
         if (!snapshot.isRecording && !snapshot.isSessionRecording) {
             return "Start the replay buffer to keep your last ${snapshot.bufferDurationSeconds} seconds ready to save."
         }
-        val elapsed = if (snapshot.isSessionRecording) snapshot.sessionElapsedSeconds else snapshot.recordingElapsedSeconds
+        val elapsed = displayedRecordingSeconds(snapshot)
         val display = snapshot.capturedDisplayName?.let { if (snapshot.isUsingFallbackDisplay) "$it (Fallback)" else it }
         return listOfNotNull(formatDurationSeconds(elapsed), display).joinToString(" · ")
+    }
+
+    fun volumePercentageLabel(volume: Double): String =
+        "${(volume.coerceIn(0.0, 1.0) * 100.0).roundToInt()}%"
+
+    fun setupPillLabel(snapshot: CompanionStateSnapshot): String? {
+        if (!snapshot.hasCaptureSetupOptions) return null
+        val parts = listOfNotNull(
+            snapshot.activeDisplayName?.takeIf { it.isNotBlank() },
+            snapshot.activeProfileName?.takeIf { it.isNotBlank() }
+        )
+        return if (parts.isNotEmpty()) parts.joinToString(" · ") else "Display & Profiles"
     }
 
     /** "Save Last 5m" for whole minutes, otherwise "Save Last 90s". */
@@ -51,8 +78,8 @@ object HomeControlLabels {
         saveExtendedReplay(snapshot),
         replayBuffer(snapshot),
         session(snapshot),
-        audioSource(HomeControl.Microphone, "Microphone", snapshot.isMicrophoneEnabled, snapshot.isMicrophoneMuted),
-        audioSource(HomeControl.SystemAudio, "System Audio", snapshot.isSystemAudioEnabled, snapshot.isSystemAudioMuted)
+        microphone(snapshot),
+        systemAudio(snapshot)
     )
 
     private fun saveReplay(snapshot: CompanionStateSnapshot) = ControlTileSpec(
@@ -110,20 +137,39 @@ object HomeControlLabels {
 
     // The Mac enables and unmutes a switched-off source when toggled, so the
     // tile stays tappable in every state.
-    private fun audioSource(control: HomeControl, title: String, isEnabled: Boolean, isMuted: Boolean) =
-        ControlTileSpec(
-            control = control,
-            title = title,
-            subtitle = when {
-                !isEnabled -> "Off"
-                isMuted -> "Muted"
-                else -> "On"
-            },
-            tone = when {
-                !isEnabled -> TileTone.Off
-                isMuted -> TileTone.Muted
-                else -> TileTone.Normal
-            },
-            isEnabled = true
-        )
+    private fun microphone(snapshot: CompanionStateSnapshot) = ControlTileSpec(
+        control = HomeControl.Microphone,
+        title = "Microphone",
+        subtitle = when {
+            !snapshot.isMicrophoneEnabled -> "Off"
+            snapshot.isMicrophoneMuted -> "Muted"
+            else -> "On"
+        },
+        tone = when {
+            !snapshot.isMicrophoneEnabled -> TileTone.Off
+            snapshot.isMicrophoneMuted -> TileTone.Muted
+            else -> TileTone.Normal
+        },
+        isEnabled = true,
+        hasSecondaryAction = true
+    )
+
+    private fun systemAudio(snapshot: CompanionStateSnapshot) = ControlTileSpec(
+        control = HomeControl.SystemAudio,
+        title = "System Audio",
+        subtitle = when {
+            !snapshot.isSystemAudioEnabled -> "Off"
+            snapshot.isSystemAudioMuted -> "Muted"
+            snapshot.perAppAudioEnabled -> "Selected app"
+            snapshot.mutedAudioAppsCount > 0 -> "On · ${snapshot.mutedAudioAppsCount} muted"
+            else -> "On"
+        },
+        tone = when {
+            !snapshot.isSystemAudioEnabled -> TileTone.Off
+            snapshot.isSystemAudioMuted -> TileTone.Muted
+            else -> TileTone.Normal
+        },
+        isEnabled = true,
+        hasSecondaryAction = true
+    )
 }

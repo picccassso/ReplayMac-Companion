@@ -97,6 +97,8 @@ While the buffer runs, two meters show how much replay is ready to save:
 
 Each meter reads "Filling…" until it's full and then "Ready".
 
+At the bottom of the status card, a **Capture Setup** pill shows the active display and capture profile. Tap it to switch which Mac display is recorded or apply any saved ReplayMac capture profile without leaving your game.
+
 ### Controls
 
 | Tile | What it does | What the subtitle tells you |
@@ -105,10 +107,10 @@ Each meter reads "Filling…" until it's full and then "Ready".
 | **Save Last 5m** | Saves the extended replay. | "Extended replay" when available, "Turned off" when extended replay is off in ReplayMac. |
 | **Start Buffer / Stop Buffer** | Starts or stops the replay buffer. | "Running" or "Stopped". |
 | **Record Session / Stop & Save Session** | Starts a full session recording, or stops and saves it. | The session's elapsed time while it records, "Full recording" otherwise. |
-| **Microphone** | Mutes or unmutes the microphone. | "On", "Muted" or "Off". |
-| **System Audio** | Mutes or unmutes system audio. | "On", "Muted" or "Off". |
+| **Microphone** | Mutes or unmutes the microphone. Tap the slider button on the tile to open the Audio Mixer. | "On", "Muted" or "Off". |
+| **System Audio** | Mutes or unmutes system audio. Tap the slider button on the tile to open the Audio Mixer. | "On", "On · N muted", "Selected app", "Muted" or "Off". |
 
-The audio tiles stay tappable when an input is switched off, because ReplayMac turns it on and unmutes it when toggled. Saving is blocked while another save is in progress.
+The audio tiles stay tappable when an input is switched off, because ReplayMac turns it on and unmutes it when toggled. Tapping the slider icon on either audio tile (or long-pressing on Android) opens the **Audio Mixer**, where you can adjust microphone and system audio volume (`0–100%`) and mute or unmute individual running Mac applications. Saving is blocked while another save is in progress.
 
 On small phones and in short landscape windows the tiles use shorter titles, such as "Save 30s" and "Stop Session".
 
@@ -119,6 +121,8 @@ Clips you save while ReplayMac is open appear under **This Session**, newest fir
 Tap a clip to open its details:
 
 - **Show in Finder** reveals the clip on your Mac.
+- **Trim on Mac** opens the clip directly in ReplayMac's Trim & Export window.
+- **Copy to Mac** copies the clip file to your Mac's clipboard so you can immediately paste (`Cmd+V`) it into Discord, Messages or Slack.
 - **Delete** moves the clip to the Trash on your Mac after you confirm. To get it back, restore it from the Trash on the Mac.
 
 ### Deck mode

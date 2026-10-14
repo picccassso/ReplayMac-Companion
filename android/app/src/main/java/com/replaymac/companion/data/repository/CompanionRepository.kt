@@ -275,6 +275,42 @@ class CompanionRepository(
         wsClient.deleteClip(clipId)
     }
 
+    fun trimClip(clipId: String) {
+        wsClient.trimClip(clipId)
+    }
+
+    fun copyClip(clipId: String) {
+        wsClient.copyClip(clipId)
+    }
+
+    fun setMicrophoneVolume(volume: Double) {
+        val clamped = volume.coerceIn(0.0, 1.0)
+        _snapshot.update { it.copy(microphoneVolume = clamped) }
+        wsClient.setMicrophoneVolume(clamped)
+    }
+
+    fun setSystemAudioVolume(volume: Double) {
+        val clamped = volume.coerceIn(0.0, 1.0)
+        _snapshot.update { it.copy(systemAudioVolume = clamped) }
+        wsClient.setSystemAudioVolume(clamped)
+    }
+
+    fun toggleAppMute(bundleId: String) {
+        wsClient.toggleAppMute(bundleId)
+    }
+
+    fun unmuteAllApps() {
+        wsClient.unmuteAllApps()
+    }
+
+    fun selectDisplay(displayId: String) {
+        wsClient.selectDisplay(displayId)
+    }
+
+    fun applyProfile(profileId: String) {
+        wsClient.applyProfile(profileId)
+    }
+
     fun requestThumbnail(clipId: String) {
         if (!_thumbnails.value.containsKey(clipId) && pendingThumbnailRequests.add(clipId)) {
             wsClient.getThumbnail(clipId)

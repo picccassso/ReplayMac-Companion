@@ -12,7 +12,12 @@ public data class CompanionClientMessage(
     val action: String? = null,
     val clipId: String? = null,
     val protocolVersion: Int? = null,
-    val proof: String? = null
+    val proof: String? = null,
+    val bundleId: String? = null,
+    val target: String? = null,
+    val volume: Double? = null,
+    val displayId: String? = null,
+    val profileId: String? = null
 ) {
     companion object {
         fun hello(deviceId: String, deviceName: String, clientVersion: String = "1.0.0"): CompanionClientMessage {
@@ -58,6 +63,62 @@ public data class CompanionClientMessage(
                 type = "delete_clip",
                 action = "delete_clip",
                 clipId = clipId
+            )
+        }
+
+        fun trimClip(clipId: String): CompanionClientMessage {
+            return CompanionClientMessage(
+                type = "trim_clip",
+                action = "trim_clip",
+                clipId = clipId
+            )
+        }
+
+        fun copyClip(clipId: String): CompanionClientMessage {
+            return CompanionClientMessage(
+                type = "copy_clip",
+                action = "copy_clip",
+                clipId = clipId
+            )
+        }
+
+        fun setVolume(target: String, volume: Double): CompanionClientMessage {
+            return CompanionClientMessage(
+                type = "set_volume",
+                action = "set_volume",
+                target = target,
+                volume = volume.coerceIn(0.0, 1.0)
+            )
+        }
+
+        fun toggleAppMute(bundleId: String): CompanionClientMessage {
+            return CompanionClientMessage(
+                type = "toggle_app_mute",
+                action = "toggle_app_mute",
+                bundleId = bundleId
+            )
+        }
+
+        fun unmuteAllApps(): CompanionClientMessage {
+            return CompanionClientMessage(
+                type = "unmute_all_apps",
+                action = "unmute_all_apps"
+            )
+        }
+
+        fun selectDisplay(displayId: String): CompanionClientMessage {
+            return CompanionClientMessage(
+                type = "select_display",
+                action = "select_display",
+                displayId = displayId
+            )
+        }
+
+        fun applyProfile(profileId: String): CompanionClientMessage {
+            return CompanionClientMessage(
+                type = "apply_profile",
+                action = "apply_profile",
+                profileId = profileId
             )
         }
 
@@ -120,6 +181,31 @@ data class CompanionClipSummary(
 )
 
 @Serializable
+data class CompanionAudioApp(
+    val bundleId: String,
+    val name: String,
+    val isMuted: Boolean = false,
+    val isRunning: Boolean = true,
+    val iconBase64: String? = null
+)
+
+@Serializable
+data class CompanionDisplayInfo(
+    val id: String,
+    val name: String,
+    val isActive: Boolean = false,
+    val isConnected: Boolean = true
+)
+
+@Serializable
+data class CompanionProfileSummary(
+    val id: String,
+    val name: String,
+    val summary: String = "",
+    val isActive: Boolean = false
+)
+
+@Serializable
 data class CompanionStateSnapshot(
     val type: String = "state_snapshot",
     val isRecording: Boolean = false,
@@ -141,6 +227,12 @@ data class CompanionStateSnapshot(
     val isMicrophoneMuted: Boolean = false,
     val isSystemAudioEnabled: Boolean = true,
     val isSystemAudioMuted: Boolean = false,
+    val microphoneVolume: Double = 1.0,
+    val systemAudioVolume: Double = 1.0,
+    val perAppAudioEnabled: Boolean = false,
+    val audioApps: List<CompanionAudioApp> = emptyList(),
+    val displays: List<CompanionDisplayInfo> = emptyList(),
+    val profiles: List<CompanionProfileSummary> = emptyList(),
     val recentClips: List<CompanionClipSummary> = emptyList()
 ) {
     val isSaveInProgress: Boolean
@@ -157,6 +249,18 @@ data class CompanionStateSnapshot(
 
     val canSaveExtendedReplay: Boolean
         get() = isRecording && longBufferEnabled && !isSaveInProgress
+
+    val mutedAudioAppsCount: Int
+        get() = if (isSystemAudioEnabled && !perAppAudioEnabled) audioApps.count { it.isMuted } else 0
+
+    val activeDisplayName: String?
+        get() = displays.firstOrNull { it.isActive }?.name ?: capturedDisplayName
+
+    val activeProfileName: String?
+        get() = profiles.firstOrNull { it.isActive }?.name
+
+    val hasCaptureSetupOptions: Boolean
+        get() = displays.isNotEmpty() || profiles.isNotEmpty()
 }
 
 @Serializable

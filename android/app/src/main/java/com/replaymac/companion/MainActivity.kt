@@ -15,9 +15,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import com.replaymac.companion.data.model.ConnectionState
+import com.replaymac.companion.ui.components.CompanionHaptics
 import com.replaymac.companion.ui.components.OnboardingDialog
+import com.replaymac.companion.ui.screens.AudioMixerBottomSheet
+import com.replaymac.companion.ui.screens.CaptureSetupBottomSheet
 import com.replaymac.companion.ui.screens.ClipDetailsBottomSheet
 import com.replaymac.companion.ui.screens.ConnectionScreen
 import com.replaymac.companion.ui.screens.HomeScreen
@@ -86,11 +93,24 @@ fun CompanionAppContent(viewModel: CompanionViewModel) {
     val isDiscovering by viewModel.isDiscovering.collectAsState()
     val keepScreenAwake by viewModel.keepScreenAwake.collectAsState()
     val selectedClip by viewModel.selectedClip.collectAsState()
+    val showAudioMixerSheet by viewModel.showAudioMixerSheet.collectAsState()
+    val showCaptureSetupSheet by viewModel.showCaptureSetupSheet.collectAsState()
     val manualHost by viewModel.manualHost.collectAsState()
     val manualPort by viewModel.manualPort.collectAsState()
     val showTutorialDialog by viewModel.showTutorialDialog.collectAsState()
 
-    BackHandler(enabled = connectionState is ConnectionState.Connected && selectedClip == null) {
+    val view = LocalView.current
+    var previousSaveStatus by remember { mutableStateOf(snapshot.saveStatus) }
+    LaunchedEffect(snapshot.saveStatus) {
+        val outcome = CompanionHaptics.saveTransitionOutcome(previousSaveStatus, snapshot.saveStatus)
+        previousSaveStatus = snapshot.saveStatus
+        if (outcome != null) {
+            CompanionHaptics.performOutcome(view, outcome)
+        }
+    }
+
+    val anySheetOpen = selectedClip != null || showAudioMixerSheet || showCaptureSetupSheet
+    BackHandler(enabled = connectionState is ConnectionState.Connected && !anySheetOpen) {
         viewModel.disconnect()
     }
 
@@ -109,7 +129,9 @@ fun CompanionAppContent(viewModel: CompanionViewModel) {
             onToggleMicrophone = { viewModel.toggleMicrophone() },
             onToggleSystemAudio = { viewModel.toggleSystemAudio() },
             onClipSelected = { clip -> viewModel.selectClip(clip) },
-            onOpenTutorial = { viewModel.openTutorial() }
+            onOpenTutorial = { viewModel.openTutorial() },
+            onOpenAudioMixer = { viewModel.openAudioMixer() },
+            onOpenCaptureSetup = { viewModel.openCaptureSetup() }
         )
     } else {
         ConnectionScreen(
@@ -144,7 +166,31 @@ fun CompanionAppContent(viewModel: CompanionViewModel) {
             thumbnailBase64 = thumbnails[clip.id],
             onRevealInFinder = { clipId -> viewModel.revealClip(clipId) },
             onDeleteClip = { clipId -> viewModel.deleteClip(clipId) },
+            onTrimClip = { clipId -> viewModel.trimClip(clipId) },
+            onCopyClip = { clipId -> viewModel.copyClip(clipId) },
             onDismiss = { viewModel.selectClip(null) }
+        )
+    }
+
+    if (showAudioMixerSheet && connectionState is ConnectionState.Connected) {
+        AudioMixerBottomSheet(
+            snapshot = snapshot,
+            onToggleMicrophone = { viewModel.toggleMicrophone() },
+            onToggleSystemAudio = { viewModel.toggleSystemAudio() },
+            onMicrophoneVolumeChange = { volume -> viewModel.setMicrophoneVolume(volume) },
+            onSystemAudioVolumeChange = { volume -> viewModel.setSystemAudioVolume(volume) },
+            onToggleAppMute = { bundleId -> viewModel.toggleAppMute(bundleId) },
+            onUnmuteAllApps = { viewModel.unmuteAllApps() },
+            onDismiss = { viewModel.dismissAudioMixer() }
+        )
+    }
+
+    if (showCaptureSetupSheet && connectionState is ConnectionState.Connected) {
+        CaptureSetupBottomSheet(
+            snapshot = snapshot,
+            onSelectDisplay = { displayId -> viewModel.selectDisplay(displayId) },
+            onApplyProfile = { profileId -> viewModel.applyProfile(profileId) },
+            onDismiss = { viewModel.dismissCaptureSetup() }
         )
     }
 }
