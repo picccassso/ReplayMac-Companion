@@ -79,6 +79,7 @@ import com.replaymac.companion.ui.components.GroupIconButton
 import com.replaymac.companion.ui.components.RowSeparator
 import com.replaymac.companion.ui.components.SectionHeader
 import com.replaymac.companion.ui.components.StatusDot
+import com.replaymac.companion.ui.components.TryDemoEntry
 import com.replaymac.companion.ui.components.glass
 import com.replaymac.companion.ui.components.glassPressable
 import com.replaymac.companion.ui.components.safeContentPadding
@@ -105,6 +106,7 @@ fun ConnectionScreen(
     previouslyConnectedItems: List<PreviouslyConnectedItem> = emptyList(),
     onConnectRemembered: (PreviouslyConnectedItem) -> Unit = {},
     onForgetMac: (RememberedMac) -> Unit = {},
+    onTryDemo: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
@@ -184,7 +186,8 @@ fun ConnectionScreen(
                         item { sections.Usb() }
                         item { sections.Manual() }
                     }
-                    item { AppInfoFooter(modifier = Modifier.padding(top = 10.dp)) }
+                    item { TryDemoEntry(onTryDemo = onTryDemo, modifier = Modifier.padding(top = 10.dp)) }
+                    item { AppInfoFooter() }
                 }
 
                 macToForget?.let { targetMac ->

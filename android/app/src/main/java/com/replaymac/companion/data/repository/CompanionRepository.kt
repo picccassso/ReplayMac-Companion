@@ -5,13 +5,16 @@ import android.content.SharedPreferences
 import android.os.Build
 import android.util.Log
 import com.replaymac.companion.data.connection.AutoReconnector
+import com.replaymac.companion.data.demo.DemoCompanionSession
 import com.replaymac.companion.data.model.CompanionActions
 import com.replaymac.companion.data.model.CompanionServerEvent
 import com.replaymac.companion.data.model.CompanionStateSnapshot
+import com.replaymac.companion.data.model.CompanionVolumeTargets
 import com.replaymac.companion.data.model.ConnectionState
 import com.replaymac.companion.data.model.DiscoveredMac
 import com.replaymac.companion.data.model.MacEndpoint
 import com.replaymac.companion.data.model.RememberedMac
+import com.replaymac.companion.data.network.CompanionLink
 import com.replaymac.companion.data.network.CompanionWebSocketClient
 import com.replaymac.companion.data.network.NsdDiscoveryManager
 import kotlinx.coroutines.CoroutineScope
@@ -22,6 +25,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -74,6 +78,21 @@ class CompanionRepository(
         scope = scope
     )
 
+    /**
+     * A pretend Mac with sample data, for trying the app without one. It never
+     * opens a socket, and the remembered-Mac, pairing and last-host logic below
+     * is wired to [wsClient] only, so the demo leaves all of that untouched.
+     */
+    private val demo = DemoCompanionSession(scope)
+
+    /** Where commands go: the demo while it runs, otherwise the Mac's socket. */
+    private val activeLink: CompanionLink
+        get() = if (demo.isRunning) demo else wsClient
+
+    val isDemoActive: StateFlow<Boolean> =
+        demo.connectionState.map { it is ConnectionState.Connected }
+            .stateIn(scope, SharingStarted.Eagerly, demo.isRunning)
+
     val discoveredMacs: StateFlow<List<DiscoveredMac>> = nsdManager.discoveredMacs
     val isDiscovering: StateFlow<Boolean> = nsdManager.isDiscovering
     private val rememberedMacStore = RememberedMacStore(prefs)
@@ -95,11 +114,18 @@ class CompanionRepository(
     /** Only look for the Mac while the app is on screen; it's cheap then and pointless otherwise. */
     @Volatile private var isForeground = false
 
-    /** The socket's state, shown as [ConnectionState.Reconnecting] while the remembered Mac is being found. */
+    /**
+     * The demo's Connected state while it runs. Otherwise the socket's, shown as
+     * [ConnectionState.Reconnecting] while the remembered Mac is being found.
+     */
     val connectionState: StateFlow<ConnectionState> =
-        combine(wsClient.connectionState, reconnector.target) { state, target ->
+        combine(wsClient.connectionState, reconnector.target, demo.connectionState) { state, target, demoState ->
             val settled = state is ConnectionState.Connected || state is ConnectionState.PendingApproval
-            if (target != null && !settled) ConnectionState.Reconnecting(target.name) else state
+            when {
+                demoState is ConnectionState.Connected -> demoState
+                target != null && !settled -> ConnectionState.Reconnecting(target.name)
+                else -> state
+            }
         }.stateIn(scope, SharingStarted.Eagerly, wsClient.connectionState.value)
 
     private val _snapshot = MutableStateFlow(CompanionStateSnapshot())
@@ -120,6 +146,12 @@ class CompanionRepository(
         scope.launch {
             wsClient.events.collect { event ->
                 handleServerEvent(event)
+            }
+        }
+        scope.launch {
+            // Events still queued when the demo stops must not refill the cleared state.
+            demo.events.collect { event ->
+                if (demo.isRunning) handleServerEvent(event)
             }
         }
         scope.launch {
@@ -162,9 +194,27 @@ class CompanionRepository(
         openSocket(MacEndpoint(host, port))
     }
 
+    /** Leaves the Mac, or the demo, for the Connect screen. */
     fun disconnect() {
+        val wasDemo = demo.isRunning
+        demo.stop()
         reconnector.stop()
         wsClient.disconnect()
+        clearMacState()
+        // The demo paused discovery; the Connect screen needs it again.
+        if (wasDemo) nsdManager.startDiscovery()
+    }
+
+    /** Swaps any Mac connection for the demo Mac, without touching the network. */
+    fun startDemo() {
+        reconnector.stop()
+        wsClient.disconnect()
+        clearMacState()
+        nsdManager.stopDiscovery()
+        demo.start()
+    }
+
+    private fun clearMacState() {
         _snapshot.value = CompanionStateSnapshot()
         _thumbnails.value = emptyMap()
         pendingThumbnailRequests.clear()
@@ -180,6 +230,10 @@ class CompanionRepository(
      */
     fun onAppForegrounded() {
         isForeground = true
+        if (demo.isRunning) {
+            demo.resync()
+            return
+        }
         _previouslyConnectedMacs.value = rememberedMacStore.loadAll()
         when (wsClient.connectionState.value) {
             is ConnectionState.Connected -> wsClient.resync()
@@ -204,6 +258,7 @@ class CompanionRepository(
     }
 
     private fun reconnectToRememberedMac() {
+        if (demo.isRunning) return
         val mac = rememberedMacStore.load() ?: return
         if (isForeground) reconnector.start(mac)
     }
@@ -244,76 +299,76 @@ class CompanionRepository(
     }
 
     fun saveReplay() {
-        wsClient.sendAction(CompanionActions.SAVE_REPLAY)
+        activeLink.sendAction(CompanionActions.SAVE_REPLAY)
     }
 
     fun saveExtendedReplay() {
-        wsClient.sendAction(CompanionActions.SAVE_EXTENDED_REPLAY)
+        activeLink.sendAction(CompanionActions.SAVE_EXTENDED_REPLAY)
     }
 
     fun toggleBuffer() {
-        wsClient.sendAction(CompanionActions.TOGGLE_BUFFER)
+        activeLink.sendAction(CompanionActions.TOGGLE_BUFFER)
     }
 
     fun toggleSession() {
-        wsClient.sendAction(CompanionActions.TOGGLE_SESSION)
+        activeLink.sendAction(CompanionActions.TOGGLE_SESSION)
     }
 
     fun toggleMicrophone() {
-        wsClient.sendAction(CompanionActions.TOGGLE_MICROPHONE)
+        activeLink.sendAction(CompanionActions.TOGGLE_MICROPHONE)
     }
 
     fun toggleSystemAudio() {
-        wsClient.sendAction(CompanionActions.TOGGLE_SYSTEM_AUDIO)
+        activeLink.sendAction(CompanionActions.TOGGLE_SYSTEM_AUDIO)
     }
 
     fun revealClip(clipId: String) {
-        wsClient.revealClip(clipId)
+        activeLink.revealClip(clipId)
     }
 
     fun deleteClip(clipId: String) {
-        wsClient.deleteClip(clipId)
+        activeLink.deleteClip(clipId)
     }
 
     fun trimClip(clipId: String) {
-        wsClient.trimClip(clipId)
+        activeLink.trimClip(clipId)
     }
 
     fun copyClip(clipId: String) {
-        wsClient.copyClip(clipId)
+        activeLink.copyClip(clipId)
     }
 
     fun setMicrophoneVolume(volume: Double) {
         val clamped = volume.coerceIn(0.0, 1.0)
         _snapshot.update { it.copy(microphoneVolume = clamped) }
-        wsClient.setMicrophoneVolume(clamped)
+        activeLink.setVolume(CompanionVolumeTargets.MICROPHONE, clamped)
     }
 
     fun setSystemAudioVolume(volume: Double) {
         val clamped = volume.coerceIn(0.0, 1.0)
         _snapshot.update { it.copy(systemAudioVolume = clamped) }
-        wsClient.setSystemAudioVolume(clamped)
+        activeLink.setVolume(CompanionVolumeTargets.SYSTEM_AUDIO, clamped)
     }
 
     fun toggleAppMute(bundleId: String) {
-        wsClient.toggleAppMute(bundleId)
+        activeLink.toggleAppMute(bundleId)
     }
 
     fun unmuteAllApps() {
-        wsClient.unmuteAllApps()
+        activeLink.unmuteAllApps()
     }
 
     fun selectDisplay(displayId: String) {
-        wsClient.selectDisplay(displayId)
+        activeLink.selectDisplay(displayId)
     }
 
     fun applyProfile(profileId: String) {
-        wsClient.applyProfile(profileId)
+        activeLink.applyProfile(profileId)
     }
 
     fun requestThumbnail(clipId: String) {
         if (!_thumbnails.value.containsKey(clipId) && pendingThumbnailRequests.add(clipId)) {
-            wsClient.getThumbnail(clipId)
+            activeLink.getThumbnail(clipId)
         }
     }
 
@@ -363,7 +418,7 @@ class CompanionRepository(
     private fun fetchMissingThumbnails(snapshot: CompanionStateSnapshot) {
         for (clip in snapshot.recentClips) {
             if (clip.hasThumbnail && !_thumbnails.value.containsKey(clip.id) && pendingThumbnailRequests.add(clip.id)) {
-                wsClient.getThumbnail(clip.id)
+                activeLink.getThumbnail(clip.id)
             }
         }
     }

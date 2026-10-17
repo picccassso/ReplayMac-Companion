@@ -18,6 +18,7 @@ public final class CompanionRepository: @unchecked Sendable {
     public let wsClient: CompanionWebSocketClient
     public let rememberedMacStore: RememberedMacStore
     public let reconnector: AutoReconnector
+    public let demoSession: DemoCompanionSession
     private let secretStore: PairingSecretStoring
 
     private var cancellables = Set<AnyCancellable>()
@@ -57,6 +58,20 @@ public final class CompanionRepository: @unchecked Sendable {
         hasSeenOnboardingSubject.value
     }
 
+    private let isDemoActiveSubject = CurrentValueSubject<Bool, Never>(false)
+    /// Whether the in-memory demo Mac stands in for ReplayCap.
+    public var isDemoActive: AnyPublisher<Bool, Never> {
+        isDemoActiveSubject.eraseToAnyPublisher()
+    }
+    public var currentIsDemoActive: Bool {
+        isDemoActiveSubject.value
+    }
+
+    /// Where commands go: the demo Mac while it runs, otherwise the socket.
+    private var activeLink: CompanionLink {
+        isDemoActiveSubject.value ? demoSession : wsClient
+    }
+
     public var discoveredMacs: AnyPublisher<[DiscoveredMac], Never> {
         discoveryManager.discoveredMacs
     }
@@ -77,10 +92,14 @@ public final class CompanionRepository: @unchecked Sendable {
         previouslyConnectedMacsSubject.value
     }
 
-    /// The socket's state, shown as `.reconnecting` while the remembered Mac is being found.
+    /// The socket's state, shown as `.reconnecting` while the remembered Mac is
+    /// being found, or the demo Mac's while the demo runs.
     public var connectionState: AnyPublisher<ConnectionState, Never> {
-        Publishers.CombineLatest(wsClient.connectionState, reconnector.target)
-            .map { state, target in
+        Publishers.CombineLatest3(wsClient.connectionState, reconnector.target, demoSession.connectionState)
+            .map { state, target, demoState in
+                if demoState.isConnected {
+                    return demoState
+                }
                 let settled: Bool
                 switch state {
                 case .connected, .pendingApproval:
@@ -99,11 +118,13 @@ public final class CompanionRepository: @unchecked Sendable {
     public init(
         defaults: UserDefaults = .standard,
         secretStore: PairingSecretStoring = KeychainPairingSecretStore(),
-        deviceId: String = DeviceIdentity.loadOrCreate()
+        deviceId: String = DeviceIdentity.loadOrCreate(),
+        demoSession: DemoCompanionSession = DemoCompanionSession()
     ) {
         self.defaults = defaults
         self.secretStore = secretStore
         self.deviceId = deviceId
+        self.demoSession = demoSession
         // A UserDefaults copy would travel with backups to other phones.
         defaults.removeObject(forKey: Self.legacyKeyDeviceId)
 
@@ -159,6 +180,14 @@ public final class CompanionRepository: @unchecked Sendable {
             }
             .store(in: &cancellables)
 
+        // The demo Mac speaks the same events. Its state stays out of the
+        // socket handling below, so it never becomes a remembered Mac.
+        demoSession.events
+            .sink { [weak self] event in
+                self?.handleServerEvent(event)
+            }
+            .store(in: &cancellables)
+
         // Handle socket state changes
         wsClient.connectionState
             .sink { [weak self] state in
@@ -205,12 +234,36 @@ public final class CompanionRepository: @unchecked Sendable {
 
     public func connect(host: String, port: Int = CompanionWebSocketClient.defaultPort) {
         reconnector.stop()
+        stopDemo()
         openSocket(MacEndpoint(host: host, port: port))
     }
 
+    /// Ends the socket or the demo, back to the Connect screen.
     public func disconnect() {
         reconnector.stop()
         wsClient.disconnect()
+        stopDemo()
+        clearMacState()
+    }
+
+    /// Swaps any Mac for the in-memory demo one. Nothing reaches the network.
+    public func startDemo() {
+        reconnector.stop()
+        wsClient.disconnect()
+        clearMacState()
+        discoveryManager.stopDiscovery()
+        isDemoActiveSubject.send(true)
+        demoSession.start()
+    }
+
+    private func stopDemo() {
+        guard isDemoActiveSubject.value else { return }
+        demoSession.stop()
+        isDemoActiveSubject.send(false)
+        discoveryManager.startDiscovery()
+    }
+
+    private func clearMacState() {
         snapshotSubject.send(.empty)
         lock.lock()
         pendingThumbnailRequests.removeAll()
@@ -234,6 +287,11 @@ public final class CompanionRepository: @unchecked Sendable {
         lock.lock()
         isForeground = true
         lock.unlock()
+
+        if isDemoActiveSubject.value {
+            _ = demoSession.resync()
+            return
+        }
 
         // Picks discovery back up if it failed while the app was away,
         // e.g. after the user granted Local Network access in Settings.
@@ -313,67 +371,67 @@ public final class CompanionRepository: @unchecked Sendable {
     }
 
     public func saveReplay() {
-        _ = wsClient.sendAction(CompanionActions.saveReplay)
+        _ = activeLink.sendAction(CompanionActions.saveReplay)
     }
 
     public func saveExtendedReplay() {
-        _ = wsClient.sendAction(CompanionActions.saveExtendedReplay)
+        _ = activeLink.sendAction(CompanionActions.saveExtendedReplay)
     }
 
     public func toggleBuffer() {
-        _ = wsClient.sendAction(CompanionActions.toggleBuffer)
+        _ = activeLink.sendAction(CompanionActions.toggleBuffer)
     }
 
     public func toggleSession() {
-        _ = wsClient.sendAction(CompanionActions.toggleSession)
+        _ = activeLink.sendAction(CompanionActions.toggleSession)
     }
 
     public func toggleMicrophone() {
-        _ = wsClient.sendAction(CompanionActions.toggleMicrophone)
+        _ = activeLink.sendAction(CompanionActions.toggleMicrophone)
     }
 
     public func toggleSystemAudio() {
-        _ = wsClient.sendAction(CompanionActions.toggleSystemAudio)
+        _ = activeLink.sendAction(CompanionActions.toggleSystemAudio)
     }
 
     public func revealClip(_ clipId: String) {
-        _ = wsClient.revealClip(clipId)
+        _ = activeLink.revealClip(clipId)
     }
 
     public func deleteClip(_ clipId: String) {
-        _ = wsClient.deleteClip(clipId)
+        _ = activeLink.deleteClip(clipId)
     }
 
     public func trimClip(_ clipId: String) {
-        _ = wsClient.trimClip(clipId)
+        _ = activeLink.trimClip(clipId)
     }
 
     public func copyClip(_ clipId: String) {
-        _ = wsClient.copyClip(clipId)
+        _ = activeLink.copyClip(clipId)
     }
 
     public func setMicrophoneVolume(_ volume: Double) {
-        _ = wsClient.setVolume(target: "microphone", volume: volume)
+        _ = activeLink.setVolume(target: "microphone", volume: volume)
     }
 
     public func setSystemAudioVolume(_ volume: Double) {
-        _ = wsClient.setVolume(target: "systemAudio", volume: volume)
+        _ = activeLink.setVolume(target: "systemAudio", volume: volume)
     }
 
     public func toggleAppMute(_ bundleId: String) {
-        _ = wsClient.toggleAppMute(bundleId)
+        _ = activeLink.toggleAppMute(bundleId)
     }
 
     public func unmuteAllApps() {
-        _ = wsClient.unmuteAllApps()
+        _ = activeLink.unmuteAllApps()
     }
 
     public func selectDisplay(_ displayId: String) {
-        _ = wsClient.selectDisplay(displayId)
+        _ = activeLink.selectDisplay(displayId)
     }
 
     public func applyProfile(_ profileId: String) {
-        _ = wsClient.applyProfile(profileId)
+        _ = activeLink.applyProfile(profileId)
     }
 
     public func requestThumbnail(_ clipId: String) {
@@ -383,7 +441,7 @@ public final class CompanionRepository: @unchecked Sendable {
         lock.unlock()
 
         if !alreadyHas && newlyInserted {
-            _ = wsClient.getThumbnail(clipId)
+            _ = activeLink.getThumbnail(clipId)
         }
     }
 

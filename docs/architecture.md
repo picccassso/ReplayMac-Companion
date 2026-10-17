@@ -26,6 +26,7 @@ flowchart LR
 | Repository | Owns the socket, discovery, the remembered Macs and the reconnector. Holds the latest snapshot and thumbnails, and saves settings | `data/repository/CompanionRepository.kt` | `Repository/CompanionRepository.swift` |
 | Remembered Macs | Saves every Mac you've connected to, newest first | `data/repository/RememberedMacStore.kt` | `Repository/RememberedMacStore.swift` |
 | Reconnection | Works out which addresses to try and keeps trying until the Mac turns up | `data/connection/ReconnectPlan.kt`, `AutoReconnector.kt` | `Connection/ReconnectPlan.swift`, `AutoReconnector.swift` |
+| Demo mode | A pretend Mac in memory for trying the app without one. `DemoCompanionState` holds its rules; `DemoCompanionSession` runs its clock and speaks the same events as the socket | `data/demo/` | `Demo/` |
 | View model | Passes repository state to the UI, works out the online/offline list, and holds UI-only state (selected clip, quick guide, manual entry fields) | `ui/viewmodel/CompanionViewModel.kt` | `ViewModels/CompanionViewModel.swift` |
 | Screens | The connection screen, Home, the clip details sheet and the quick guide | `ui/screens/`, `ui/components/` | `UI/Screens/`, `UI/Components/` |
 
@@ -53,6 +54,14 @@ Android uses `StateFlow` and `SharedFlow` on a `SupervisorJob() + Dispatchers.IO
 A tile calls the view model (for example `saveReplay()`), the view model calls the repository, and the repository calls `sendAction` on the socket client with one of the six action names. The client encodes a `CompanionClientMessage` and sends it. The phone mirrors the Mac directly: it waits for the Mac's next `state_changed` and updates the display to match, ensuring the screen reflects what the Mac is actually doing.
 
 Clip actions (`get_thumbnail`, `reveal_clip`, `delete_clip`) take the same route.
+
+## Demo mode
+
+**Try without a Mac** on the connection screen calls `startDemo()` on the repository. The repository talks to whichever `CompanionLink` is active: the socket client, or the demo session while the demo runs. Every command goes to that link, the demo's events go through the same handler as the socket's, and the repository reports the demo's Connected state, so Home and its sheets behave exactly as with a real Mac and no screen code branches on the demo. Only Home's **Demo mode** banner reads `isDemo`, so sample data can't pass for a real connection; its **Exit Demo** button and the power button both call `disconnect()`, which stops the demo.
+
+The demo session ticks its timers once a second, plays saves out as `saving` → `saved` → `idle` with the new clip, answers thumbnail requests with drawn placeholders, and starts from the same sample data every time. Its clock and scheduler are injected, so the tests move time by hand.
+
+The demo never touches the network: starting it stops discovery and the reconnector and closes the socket, and leaving it starts discovery again. Remembered Macs, pairing secrets and the last address are handled only from the socket's state, so the demo never reads or writes them.
 
 ## Stale sockets
 

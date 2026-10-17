@@ -17,6 +17,7 @@ struct ReplayCapCompanionApp: App {
                         connectionState: viewModel.connectionState,
                         snapshot: viewModel.snapshot,
                         thumbnails: viewModel.thumbnails,
+                        isDemo: viewModel.isDemo,
                         keepScreenAwake: viewModel.keepScreenAwake,
                         onToggleKeepScreenAwake: {
                             viewModel.setKeepScreenAwake(!viewModel.keepScreenAwake)
@@ -93,6 +94,9 @@ struct ReplayCapCompanionApp: App {
                         },
                         onOpenTutorial: {
                             viewModel.openTutorial()
+                        },
+                        onTryDemo: {
+                            viewModel.startDemo()
                         }
                     )
                 }

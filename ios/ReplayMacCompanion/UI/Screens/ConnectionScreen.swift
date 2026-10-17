@@ -19,6 +19,7 @@ public struct ConnectionScreen: View {
     public var onCancelConnection: () -> Void
     public var onDismissError: () -> Void
     public var onOpenTutorial: () -> Void
+    public var onTryDemo: () -> Void
 
     @State private var macToForget: RememberedMac? = nil
 
@@ -39,7 +40,8 @@ public struct ConnectionScreen: View {
         onRefreshDiscovery: @escaping () -> Void,
         onCancelConnection: @escaping () -> Void,
         onDismissError: @escaping () -> Void = {},
-        onOpenTutorial: @escaping () -> Void = {}
+        onOpenTutorial: @escaping () -> Void = {},
+        onTryDemo: @escaping () -> Void = {}
     ) {
         self.connectionState = connectionState
         self.previouslyConnectedItems = previouslyConnectedItems
@@ -58,6 +60,7 @@ public struct ConnectionScreen: View {
         self.onCancelConnection = onCancelConnection
         self.onDismissError = onDismissError
         self.onOpenTutorial = onOpenTutorial
+        self.onTryDemo = onTryDemo
     }
 
     public var body: some View {
@@ -159,8 +162,10 @@ public struct ConnectionScreen: View {
                         }
                     }
 
-                    AppInfoFooter()
+                    TryDemoButton(onClick: onTryDemo)
                         .padding(.top, 10)
+
+                    AppInfoFooter()
                 }
                 .padding(.horizontal, isLandscape ? 24 : 16)
                 .padding(.top, 8)

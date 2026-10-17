@@ -4,6 +4,7 @@ import android.os.Build
 import android.util.Log
 import com.replaymac.companion.data.model.CompanionClientMessage
 import com.replaymac.companion.data.model.CompanionServerEvent
+import com.replaymac.companion.data.model.CompanionVolumeTargets
 import com.replaymac.companion.data.model.ConnectionState
 import com.replaymac.companion.data.repository.PairingSecretStore
 import kotlinx.coroutines.CoroutineScope
@@ -36,7 +37,7 @@ class CompanionWebSocketClient(
         .connectTimeout(5, TimeUnit.SECONDS)
         .readTimeout(0, TimeUnit.MILLISECONDS) // Indefinite for WebSocket
         .build()
-) {
+) : CompanionLink {
     companion object {
         private const val TAG = "CompanionWSClient"
         const val DEFAULT_PORT = 7375
@@ -47,7 +48,7 @@ class CompanionWebSocketClient(
 
     // No replay: a late subscriber must never receive a stale snapshot.
     private val _events = MutableSharedFlow<CompanionServerEvent>(extraBufferCapacity = 64)
-    val events: SharedFlow<CompanionServerEvent> = _events.asSharedFlow()
+    override val events: SharedFlow<CompanionServerEvent> = _events.asSharedFlow()
 
     private var currentWebSocket: WebSocket? = null
     /** Bumped on every connect and disconnect; callbacks from an older generation are ignored. */
@@ -150,7 +151,7 @@ class CompanionWebSocketClient(
      * already-paired device with its current state, so this catches up on
      * anything missed while the phone was asleep or in the background.
      */
-    fun resync(): Boolean {
+    override fun resync(): Boolean {
         if (_connectionState.value !is ConnectionState.Connected) return false
         return sendMessage(CompanionClientMessage.hello(deviceId = deviceId, deviceName = deviceName, clientVersion = "1.0.0"))
     }
@@ -170,55 +171,55 @@ class CompanionWebSocketClient(
         sendMessage(helloMsg)
     }
 
-    fun sendAction(actionName: String): Boolean {
+    override fun sendAction(actionName: String): Boolean {
         return sendMessage(CompanionClientMessage.action(actionName))
     }
 
-    fun getThumbnail(clipId: String): Boolean {
+    override fun getThumbnail(clipId: String): Boolean {
         return sendMessage(CompanionClientMessage.getThumbnail(clipId))
     }
 
-    fun revealClip(clipId: String): Boolean {
+    override fun revealClip(clipId: String): Boolean {
         return sendMessage(CompanionClientMessage.revealClip(clipId))
     }
 
-    fun deleteClip(clipId: String): Boolean {
+    override fun deleteClip(clipId: String): Boolean {
         return sendMessage(CompanionClientMessage.deleteClip(clipId))
     }
 
-    fun trimClip(clipId: String): Boolean {
+    override fun trimClip(clipId: String): Boolean {
         return sendMessage(CompanionClientMessage.trimClip(clipId))
     }
 
-    fun copyClip(clipId: String): Boolean {
+    override fun copyClip(clipId: String): Boolean {
         return sendMessage(CompanionClientMessage.copyClip(clipId))
     }
 
-    fun setVolume(target: String, volume: Double): Boolean {
+    override fun setVolume(target: String, volume: Double): Boolean {
         return sendMessage(CompanionClientMessage.setVolume(target, volume))
     }
 
     fun setMicrophoneVolume(volume: Double): Boolean {
-        return setVolume("microphone", volume)
+        return setVolume(CompanionVolumeTargets.MICROPHONE, volume)
     }
 
     fun setSystemAudioVolume(volume: Double): Boolean {
-        return setVolume("systemAudio", volume)
+        return setVolume(CompanionVolumeTargets.SYSTEM_AUDIO, volume)
     }
 
-    fun toggleAppMute(bundleId: String): Boolean {
+    override fun toggleAppMute(bundleId: String): Boolean {
         return sendMessage(CompanionClientMessage.toggleAppMute(bundleId))
     }
 
-    fun unmuteAllApps(): Boolean {
+    override fun unmuteAllApps(): Boolean {
         return sendMessage(CompanionClientMessage.unmuteAllApps())
     }
 
-    fun selectDisplay(displayId: String): Boolean {
+    override fun selectDisplay(displayId: String): Boolean {
         return sendMessage(CompanionClientMessage.selectDisplay(displayId))
     }
 
-    fun applyProfile(profileId: String): Boolean {
+    override fun applyProfile(profileId: String): Boolean {
         return sendMessage(CompanionClientMessage.applyProfile(profileId))
     }
 

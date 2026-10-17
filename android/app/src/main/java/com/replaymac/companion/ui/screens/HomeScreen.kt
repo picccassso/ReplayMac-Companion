@@ -16,6 +16,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -58,6 +63,7 @@ import com.replaymac.companion.data.model.CompanionClipSummary
 import com.replaymac.companion.data.model.CompanionStateSnapshot
 import com.replaymac.companion.data.model.ConnectionState
 import com.replaymac.companion.ui.components.ActionTile
+import com.replaymac.companion.ui.components.DemoModeBanner
 import com.replaymac.companion.ui.components.DualProgressMeters
 import com.replaymac.companion.ui.components.GlassBackground
 import com.replaymac.companion.ui.components.GlassButtonGroup
@@ -78,6 +84,8 @@ fun HomeScreen(
     connectionState: ConnectionState,
     snapshot: CompanionStateSnapshot,
     thumbnails: Map<String, String>,
+    /** Shows the demo banner: the "Mac" is sample data and [onDisconnect] leaves the demo. */
+    isDemo: Boolean = false,
     keepScreenAwake: Boolean,
     onToggleKeepScreenAwake: () -> Unit,
     onDisconnect: () -> Unit,
@@ -112,73 +120,86 @@ fun HomeScreen(
         }
     }
 
+    val horizontalMargin = if (isLandscape) 24.dp else 16.dp
+
     GlassBackground(modifier = modifier) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = safeContentPadding(
-                horizontal = if (isLandscape) 24.dp else 16.dp,
-                top = 8.dp,
-                bottom = 24.dp
-            ),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            item {
-                HomeTopBar(
-                    serverName = serverName,
-                    deviceName = deviceName,
-                    keepScreenAwake = keepScreenAwake,
-                    onToggleKeepScreenAwake = onToggleKeepScreenAwake,
-                    onOpenTutorial = onOpenTutorial,
-                    onDisconnect = onDisconnect
+        Column(Modifier.fillMaxSize()) {
+            if (isDemo) {
+                DemoModeBanner(
+                    onExitDemo = onDisconnect,
+                    modifier = Modifier
+                        .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))
+                        .padding(start = horizontalMargin, end = horizontalMargin, top = 8.dp)
                 )
             }
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth().weight(1f),
+                contentPadding = safeContentPadding(
+                    horizontal = horizontalMargin,
+                    top = if (isDemo) 12.dp else 8.dp,
+                    bottom = 24.dp,
+                    includeTopInset = !isDemo
+                ),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item {
+                    HomeTopBar(
+                        serverName = serverName,
+                        deviceName = deviceName,
+                        keepScreenAwake = keepScreenAwake,
+                        onToggleKeepScreenAwake = onToggleKeepScreenAwake,
+                        onOpenTutorial = onOpenTutorial,
+                        onDisconnect = onDisconnect
+                    )
+                }
 
-            item {
-                if (isLandscape) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        verticalAlignment = Alignment.Top
-                    ) {
-                        StatusCard(
-                            snapshot = snapshot,
-                            onToggleBuffer = onToggleBuffer,
-                            onOpenCaptureSetup = onOpenCaptureSetup,
-                            modifier = Modifier.weight(if (isCompactLandscape) 0.88f else 1f)
-                        )
-                        ControlGrid(
-                            snapshot = snapshot,
-                            columns = if (isCompactLandscape) 2 else 3,
-                            isCompact = isCompact,
-                            onControl = onControl,
-                            onOpenAudioMixer = onOpenAudioMixer,
-                            modifier = Modifier.weight(if (isCompactLandscape) 1.12f else 1.5f)
-                        )
-                    }
-                } else {
-                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        StatusCard(
-                            snapshot = snapshot,
-                            onToggleBuffer = onToggleBuffer,
-                            onOpenCaptureSetup = onOpenCaptureSetup
-                        )
-                        ControlGrid(
-                            snapshot = snapshot,
-                            columns = 2,
-                            isCompact = isCompact,
-                            onControl = onControl,
-                            onOpenAudioMixer = onOpenAudioMixer
-                        )
+                item {
+                    if (isLandscape) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            StatusCard(
+                                snapshot = snapshot,
+                                onToggleBuffer = onToggleBuffer,
+                                onOpenCaptureSetup = onOpenCaptureSetup,
+                                modifier = Modifier.weight(if (isCompactLandscape) 0.88f else 1f)
+                            )
+                            ControlGrid(
+                                snapshot = snapshot,
+                                columns = if (isCompactLandscape) 2 else 3,
+                                isCompact = isCompact,
+                                onControl = onControl,
+                                onOpenAudioMixer = onOpenAudioMixer,
+                                modifier = Modifier.weight(if (isCompactLandscape) 1.12f else 1.5f)
+                            )
+                        }
+                    } else {
+                        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                            StatusCard(
+                                snapshot = snapshot,
+                                onToggleBuffer = onToggleBuffer,
+                                onOpenCaptureSetup = onOpenCaptureSetup
+                            )
+                            ControlGrid(
+                                snapshot = snapshot,
+                                columns = 2,
+                                isCompact = isCompact,
+                                onControl = onControl,
+                                onOpenAudioMixer = onOpenAudioMixer
+                            )
+                        }
                     }
                 }
-            }
 
-            item {
-                SessionClipsSection(
-                    recentClips = snapshot.recentClips,
-                    thumbnails = thumbnails,
-                    onClipSelected = onClipSelected
-                )
+                item {
+                    SessionClipsSection(
+                        recentClips = snapshot.recentClips,
+                        thumbnails = thumbnails,
+                        onClipSelected = onClipSelected
+                    )
+                }
             }
         }
     }

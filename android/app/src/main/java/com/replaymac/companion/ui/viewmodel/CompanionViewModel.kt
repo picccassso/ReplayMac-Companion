@@ -33,6 +33,8 @@ class CompanionViewModel(
     val keepScreenAwake: StateFlow<Boolean> = repository.keepScreenAwake
     val hasSeenOnboarding: StateFlow<Boolean> = repository.hasSeenOnboarding
     val previouslyConnectedMacs: StateFlow<List<RememberedMac>> = repository.previouslyConnectedMacs
+    /** True while the app shows the demo Mac's sample data instead of a real Mac. */
+    val isDemo: StateFlow<Boolean> = repository.isDemoActive
 
     val previouslyConnectedItems: StateFlow<List<PreviouslyConnectedItem>> =
         combine(repository.previouslyConnectedMacs, repository.discoveredMacs) { saved, discovered ->
@@ -152,6 +154,11 @@ class CompanionViewModel(
         _manualHost.value = trimmedHost
         _manualPort.value = port.toString()
         repository.connect(trimmedHost, port)
+    }
+
+    /** Tries every control against a pretend Mac; leaving goes through [disconnect]. */
+    fun startDemo() {
+        repository.startDemo()
     }
 
     fun connectAdbUsb() {

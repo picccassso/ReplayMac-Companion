@@ -4,6 +4,8 @@ public struct HomeScreen: View {
     public var connectionState: ConnectionState
     public var snapshot: CompanionStateSnapshot
     public var thumbnails: [String: String]
+    /// Shows the demo banner, so sample data can't pass for a real Mac.
+    public var isDemo: Bool
     public var keepScreenAwake: Bool
     public var onToggleKeepScreenAwake: () -> Void
     public var onDisconnect: () -> Void
@@ -22,6 +24,7 @@ public struct HomeScreen: View {
         connectionState: ConnectionState,
         snapshot: CompanionStateSnapshot,
         thumbnails: [String: String],
+        isDemo: Bool = false,
         keepScreenAwake: Bool,
         onToggleKeepScreenAwake: @escaping () -> Void,
         onDisconnect: @escaping () -> Void,
@@ -39,6 +42,7 @@ public struct HomeScreen: View {
         self.connectionState = connectionState
         self.snapshot = snapshot
         self.thumbnails = thumbnails
+        self.isDemo = isDemo
         self.keepScreenAwake = keepScreenAwake
         self.onToggleKeepScreenAwake = onToggleKeepScreenAwake
         self.onDisconnect = onDisconnect
@@ -92,6 +96,14 @@ public struct HomeScreen: View {
                 let isCompactLandscape = isLandscape && (geo.size.height < 500 || geo.size.width < 960)
                 let isCompact = isLandscape ? isCompactLandscape : (geo.size.width < 430)
                 let horizontalPadding: CGFloat = isLandscape ? 24 : 16
+
+                VStack(spacing: 0) {
+                if isDemo {
+                    // Pinned above the scrolling content, so it never scrolls out of sight.
+                    DemoModeBanner(onExit: onDisconnect)
+                        .padding(.horizontal, horizontalPadding)
+                        .padding(.top, 8)
+                }
 
                 ScrollView {
                     VStack(spacing: 16) {
@@ -154,6 +166,7 @@ public struct HomeScreen: View {
                     .padding(.horizontal, horizontalPadding)
                     .padding(.top, 8)
                     .padding(.bottom, 24)
+                }
                 }
             }
         }

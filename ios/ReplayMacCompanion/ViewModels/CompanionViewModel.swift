@@ -9,6 +9,8 @@ public final class CompanionViewModel: ObservableObject {
     @Published public var connectionState: ConnectionState = .disconnected
     @Published public var snapshot: CompanionStateSnapshot = .empty
     @Published public var thumbnails: [String: String] = [:]
+    /// True while the demo Mac stands in for ReplayCap.
+    @Published public var isDemo: Bool = false
     @Published public var discoveredMacs: [DiscoveredMac] = []
     @Published public var previouslyConnectedItems: [PreviouslyConnectedItem] = []
     @Published public var filteredDiscoveredMacs: [DiscoveredMac] = []
@@ -64,6 +66,10 @@ public final class CompanionViewModel: ObservableObject {
         repository.thumbnails
             .receive(on: DispatchQueue.main)
             .assign(to: &$thumbnails)
+
+        repository.isDemoActive
+            .receive(on: DispatchQueue.main)
+            .assign(to: &$isDemo)
 
         repository.discoveredMacs
             .receive(on: DispatchQueue.main)
@@ -173,6 +179,10 @@ public final class CompanionViewModel: ObservableObject {
 
     public func disconnect() {
         repository.disconnect()
+    }
+
+    public func startDemo() {
+        repository.startDemo()
     }
 
     public func saveReplay() {

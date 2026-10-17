@@ -141,6 +141,12 @@ object CompanionActions {
     const val TOGGLE_SYSTEM_AUDIO = "toggleSystemAudio"
 }
 
+/** The `target` of a set_volume message. */
+object CompanionVolumeTargets {
+    const val MICROPHONE = "microphone"
+    const val SYSTEM_AUDIO = "systemAudio"
+}
+
 @Serializable
 data class CompanionAuthResponse(
     val type: String = "auth_response",

@@ -98,6 +98,7 @@ fun CompanionAppContent(viewModel: CompanionViewModel) {
     val manualHost by viewModel.manualHost.collectAsState()
     val manualPort by viewModel.manualPort.collectAsState()
     val showTutorialDialog by viewModel.showTutorialDialog.collectAsState()
+    val isDemo by viewModel.isDemo.collectAsState()
 
     val view = LocalView.current
     var previousSaveStatus by remember { mutableStateOf(snapshot.saveStatus) }
@@ -119,6 +120,7 @@ fun CompanionAppContent(viewModel: CompanionViewModel) {
             connectionState = connectionState,
             snapshot = snapshot,
             thumbnails = thumbnails,
+            isDemo = isDemo,
             keepScreenAwake = keepScreenAwake,
             onToggleKeepScreenAwake = { viewModel.setKeepScreenAwake(!keepScreenAwake) },
             onDisconnect = { viewModel.disconnect() },
@@ -150,7 +152,8 @@ fun CompanionAppContent(viewModel: CompanionViewModel) {
             onRefreshDiscovery = { viewModel.refreshDiscovery() },
             onCancelConnection = { viewModel.disconnect() },
             onDismissError = { viewModel.dismissError() },
-            onOpenTutorial = { viewModel.openTutorial() }
+            onOpenTutorial = { viewModel.openTutorial() },
+            onTryDemo = { viewModel.startDemo() }
         )
     }
 

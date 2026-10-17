@@ -72,6 +72,10 @@ The search only runs while the app is open on screen. Tap **Cancel** to stop it 
 
 [Connection and reconnection](connection.md) has the full details.
 
+## Trying without a Mac
+
+Tap **Try without a Mac** at the bottom of the connection screen to explore the app with sample data. Home opens connected to **Demo Mac**, and a **Demo mode** banner stays at the top so you always know it isn't a real Mac. Every control works on the sample data: saving adds a clip, the buffer and session timers run, and the audio mixer, capture setup and clip actions all respond. Nothing is sent over the network and no Mac is remembered. Tap **Exit Demo** to go back to the connection screen.
+
 ## The Home screen
 
 Once connected, the top of the screen shows your Mac's name and "Connected • *your phone's name*", using whatever names you've set in ReplayMac. Three buttons sit next to it:
