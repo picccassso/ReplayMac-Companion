@@ -11,7 +11,7 @@ import org.junit.Test
 
 class ReconnectPlanTest {
 
-    private val office = MacEndpoint("192.168.8.239", 7375)
+    private val office = MacEndpoint("10.0.0.42", 7375)
     private val usb = MacEndpoint(MacEndpoint.USB_HOST, 7375)
 
     private val mac = RememberedMac(
@@ -27,9 +27,9 @@ class ReconnectPlanTest {
 
     @Test
     fun macSeenOnTheCurrentNetworkIsTriedBeforeItsOldAddress() {
-        val home = discovered("192.168.68.74")
+        val home = discovered("192.168.0.20")
         assertEquals(
-            listOf(MacEndpoint("192.168.68.74", 7375), office, usb),
+            listOf(MacEndpoint("192.168.0.20", 7375), office, usb),
             ReconnectPlan.candidates(mac, listOf(home))
         )
     }
@@ -41,7 +41,7 @@ class ReconnectPlanTest {
 
     @Test
     fun anotherMacOnTheNetworkIsNotACandidate() {
-        val colleague = discovered("192.168.68.80", serverId = "mac-2", name = "Sam’s iMac")
+        val colleague = discovered("192.168.0.30", serverId = "mac-2", name = "Sam’s iMac")
         assertEquals(listOf(office, usb), ReconnectPlan.candidates(mac, listOf(colleague)))
     }
 

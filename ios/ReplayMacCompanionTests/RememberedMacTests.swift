@@ -3,8 +3,8 @@ import XCTest
 
 final class RememberedMacTests: XCTestCase {
 
-    private let office = MacEndpoint(host: "192.168.8.239", port: 7375)
-    private let home = MacEndpoint(host: "192.168.68.74", port: 7375)
+    private let office = MacEndpoint(host: "10.0.0.42", port: 7375)
+    private let home = MacEndpoint(host: "192.168.0.20", port: 7375)
     private let usb = MacEndpoint(host: MacEndpoint.usbHost, port: 7375)
 
     private var paired: RememberedMac {

@@ -11,10 +11,10 @@ final class AutoReconnectorTests: XCTestCase {
         case denies
     }
 
-    private let office = MacEndpoint(host: "192.168.8.239", port: 7375)
-    private let home = MacEndpoint(host: "192.168.68.74", port: 7375)
+    private let office = MacEndpoint(host: "10.0.0.42", port: 7375)
+    private let home = MacEndpoint(host: "192.168.0.20", port: 7375)
     private let usb = MacEndpoint(host: MacEndpoint.usbHost, port: 7375)
-    private let mac = RememberedMac(serverId: "mac-1", name: "Alex’s MacBook Pro", networkEndpoint: MacEndpoint(host: "192.168.8.239", port: 7375), usbPort: 7375, lastUsedUsb: false)
+    private let mac = RememberedMac(serverId: "mac-1", name: "Alex’s MacBook Pro", networkEndpoint: MacEndpoint(host: "10.0.0.42", port: 7375), usbPort: 7375, lastUsedUsb: false)
 
     private final class FakeNetwork: @unchecked Sendable {
         let mac: RememberedMac

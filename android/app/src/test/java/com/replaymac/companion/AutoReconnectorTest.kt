@@ -21,8 +21,8 @@ class AutoReconnectorTest {
 
     private enum class Reply { Approves, Refuses, Silent, Denies }
 
-    private val office = MacEndpoint("192.168.8.239", 7375)
-    private val home = MacEndpoint("192.168.68.74", 7375)
+    private val office = MacEndpoint("10.0.0.42", 7375)
+    private val home = MacEndpoint("192.168.0.20", 7375)
     private val usb = MacEndpoint(MacEndpoint.USB_HOST, 7375)
     private val mac = RememberedMac("mac-1", "Alex’s MacBook Pro", office, usbPort = 7375, lastUsedUsb = false)
 
