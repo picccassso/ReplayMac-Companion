@@ -17,7 +17,7 @@ private struct TutorialPage: Identifiable {
 private let tutorialPages: [TutorialPage] = [
     TutorialPage(
         title: "ReplayCap, from your phone",
-        subtitle: "Save clips and check on recording without leaving your game.",
+        subtitle: "A remote for ReplayCap on your Mac. Save clips and check on recording without leaving your game.",
         highlights: [
             TutorialHighlight(icon: "arrow.down.circle.fill", title: "Save replays", detail: "Tap once to save the last 30 seconds, or longer."),
             TutorialHighlight(icon: "gauge.with.needle.fill", title: "See what’s happening", detail: "Buffer progress, memory use and session time.")
@@ -96,6 +96,8 @@ public struct OnboardingDialog: View {
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
                 .frame(minHeight: 280)
+
+                AppInfoFooter(showsRequirement: false)
 
                 // Bottom dots and buttons
                 HStack(spacing: 8) {

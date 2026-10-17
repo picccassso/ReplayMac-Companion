@@ -54,7 +54,7 @@ private data class TutorialPage(val title: String, val subtitle: String, val hig
 private val tutorialPages = listOf(
     TutorialPage(
         title = "ReplayMac, from your phone",
-        subtitle = "Save clips and check on recording without leaving your game.",
+        subtitle = "A remote for ReplayMac on your Mac. Save clips and check on recording without leaving your game.",
         highlights = listOf(
             Highlight(Icons.Rounded.Download, "Save replays", "Tap once to save the last 30 seconds, or longer."),
             Highlight(Icons.Rounded.Speed, "See what’s happening", "Buffer progress, memory use and session time.")
@@ -131,7 +131,9 @@ fun OnboardingDialog(
                 TutorialPageContent(page = tutorialPages[index], isLandscape = isLandscape)
             }
 
-            Spacer(Modifier.height(if (isLandscape) 12.dp else 20.dp))
+            Spacer(Modifier.height(if (isLandscape) 4.dp else 8.dp))
+            AppInfoFooter(showsRequirement = false)
+            Spacer(Modifier.height(if (isLandscape) 4.dp else 8.dp))
 
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 PageDots(count = tutorialPages.size, current = pagerState.currentPage, modifier = Modifier.weight(1f))

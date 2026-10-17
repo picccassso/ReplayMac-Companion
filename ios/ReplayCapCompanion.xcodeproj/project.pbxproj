@@ -35,6 +35,7 @@
 		83A2B36B29B99839BF1CCE4E /* CompanionHaptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67ACCFC4AEEBC4CD2275EA93 /* CompanionHaptics.swift */; };
 		84C8072799287D251247AD72 /* ActionTile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3235CD7AA43FD64941154E12 /* ActionTile.swift */; };
 		85104B9329CF13690AB34E6F /* CompanionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8409E4AA855E9D95E2EA0C15 /* CompanionViewModel.swift */; };
+		865C774A61CA6C8100E68B4E /* AppInfoFooter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D379C13D0166F344A2DBA1F /* AppInfoFooter.swift */; };
 		871263DBED5B7B892290FBEF /* CompanionProtocolParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 169C1F9038DD2F54B36B490F /* CompanionProtocolParserTests.swift */; };
 		9E5160E9D55158C26C4FDB70 /* RememberedMacTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B41004D37785E31FCB10D3F6 /* RememberedMacTests.swift */; };
 		9FD6EE3D485AF8C52FDD70A4 /* AutoReconnector.swift in Sources */ = {isa = PBXBuildFile; fileRef = C80BE3CD0A2AD2FD352ADF1F /* AutoReconnector.swift */; };
@@ -43,6 +44,7 @@
 		B04B5DC26E9CC9E3C2874CC1 /* ReconnectPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8813AAB44E8C7EF4723EA282 /* ReconnectPlan.swift */; };
 		B4CBFBC1EE721931A5A789E0 /* ConnectionScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55345E7EEFFF288780E2EC9 /* ConnectionScreen.swift */; };
 		B6D1EA177967E0937F6F3609 /* GlassBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3289D3703066723DF0B646C6 /* GlassBackground.swift */; };
+		BB30F89B50B47602B9CF69B9 /* AppLinks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74DD5626D24F11FC12F8B3C4 /* AppLinks.swift */; };
 		C65CFE327B65996926A859B3 /* RecentClipItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F177A6DA1B650930A6A58FB /* RecentClipItem.swift */; };
 		C9F5CE58220BA5D61352A5E6 /* CompanionMessages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA6B7B6F717AF1029972BF2 /* CompanionMessages.swift */; };
 		D06BA20CC3B7C1A3435EB8A2 /* StatusDot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B0C2A8908C496CBFA77C1D0 /* StatusDot.swift */; };
@@ -89,10 +91,12 @@
 		4CA6B7B6F717AF1029972BF2 /* CompanionMessages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionMessages.swift; sourceTree = "<group>"; };
 		4F177A6DA1B650930A6A58FB /* RecentClipItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentClipItem.swift; sourceTree = "<group>"; };
 		5930C7E3AC9D0313F9ABF6CA /* CaptureSetupBottomSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureSetupBottomSheet.swift; sourceTree = "<group>"; };
+		5D379C13D0166F344A2DBA1F /* AppInfoFooter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppInfoFooter.swift; sourceTree = "<group>"; };
 		5EA3EF39A07520B10931532D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		610A6E12C4093ACE3EB3EE0B /* GlassTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassTextField.swift; sourceTree = "<group>"; };
 		6333D6D79F3FB0D826D96FF7 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
 		67ACCFC4AEEBC4CD2275EA93 /* CompanionHaptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionHaptics.swift; sourceTree = "<group>"; };
+		74DD5626D24F11FC12F8B3C4 /* AppLinks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLinks.swift; sourceTree = "<group>"; };
 		7505CBF0B664EDA101AE8144 /* AutoReconnectorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoReconnectorTests.swift; sourceTree = "<group>"; };
 		7AD60368039E7EF37A98DC52 /* ReplayMacCompanionApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplayMacCompanionApp.swift; sourceTree = "<group>"; };
 		822E83788537B1C8F64B3D82 /* RememberedMacStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RememberedMacStore.swift; sourceTree = "<group>"; };
@@ -178,6 +182,7 @@
 			isa = PBXGroup;
 			children = (
 				3235CD7AA43FD64941154E12 /* ActionTile.swift */,
+				5D379C13D0166F344A2DBA1F /* AppInfoFooter.swift */,
 				67ACCFC4AEEBC4CD2275EA93 /* CompanionHaptics.swift */,
 				1BE6F3CED20546DB18A3E233 /* DualProgressMeters.swift */,
 				3289D3703066723DF0B646C6 /* GlassBackground.swift */,
@@ -283,6 +288,7 @@
 		CFE85839DE519D059D3BB43E /* App */ = {
 			isa = PBXGroup;
 			children = (
+				74DD5626D24F11FC12F8B3C4 /* AppLinks.swift */,
 				5EA3EF39A07520B10931532D /* Info.plist */,
 				7AD60368039E7EF37A98DC52 /* ReplayMacCompanionApp.swift */,
 			);
@@ -391,6 +397,8 @@
 			files = (
 				84C8072799287D251247AD72 /* ActionTile.swift in Sources */,
 				62E3705EF0AD19F7D2E8D424 /* AppColors.swift in Sources */,
+				865C774A61CA6C8100E68B4E /* AppInfoFooter.swift in Sources */,
+				BB30F89B50B47602B9CF69B9 /* AppLinks.swift in Sources */,
 				ABEF89F5DB0EBE9F6A67C573 /* AppRadii.swift in Sources */,
 				69B1BB66C534185863DACF24 /* AudioMixerBottomSheet.swift in Sources */,
 				9FD6EE3D485AF8C52FDD70A4 /* AutoReconnector.swift in Sources */,

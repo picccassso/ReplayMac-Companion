@@ -68,6 +68,7 @@ import com.replaymac.companion.data.model.DiscoveredMac
 import com.replaymac.companion.data.model.PreviouslyConnectedItem
 import com.replaymac.companion.data.model.RememberedMac
 import com.replaymac.companion.ui.components.AccentButton
+import com.replaymac.companion.ui.components.AppInfoFooter
 import com.replaymac.companion.ui.components.GlassBackground
 import com.replaymac.companion.ui.components.GlassButton
 import com.replaymac.companion.ui.components.GlassButtonGroup
@@ -183,6 +184,7 @@ fun ConnectionScreen(
                         item { sections.Usb() }
                         item { sections.Manual() }
                     }
+                    item { AppInfoFooter(modifier = Modifier.padding(top = 10.dp)) }
                 }
 
                 macToForget?.let { targetMac ->

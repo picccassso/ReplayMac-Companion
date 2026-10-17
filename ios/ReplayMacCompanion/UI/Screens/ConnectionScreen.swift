@@ -158,6 +158,9 @@ public struct ConnectionScreen: View {
                             manualSection
                         }
                     }
+
+                    AppInfoFooter()
+                        .padding(.top, 10)
                 }
                 .padding(.horizontal, isLandscape ? 24 : 16)
                 .padding(.top, 8)
