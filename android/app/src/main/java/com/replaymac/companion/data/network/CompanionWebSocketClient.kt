@@ -9,15 +9,12 @@ import com.replaymac.companion.data.model.ConnectionState
 import com.replaymac.companion.data.repository.PairingSecretStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -32,6 +29,7 @@ class CompanionWebSocketClient(
     private val deviceName: String = "${Build.MANUFACTURER} ${Build.MODEL}",
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO),
     private val okHttpClient: OkHttpClient = OkHttpClient.Builder()
+        // Keepalive; ReplayMac answers these frames itself, so no app-level ping is needed.
         .pingInterval(15, TimeUnit.SECONDS)
         // Short, so trying a remembered Mac's old address on a new network fails fast.
         .connectTimeout(5, TimeUnit.SECONDS)
@@ -53,7 +51,6 @@ class CompanionWebSocketClient(
     private var currentWebSocket: WebSocket? = null
     /** Bumped on every connect and disconnect; callbacks from an older generation are ignored. */
     @Volatile private var generation = 0
-    private var pingJob: Job? = null
     private var currentHost: String? = null
     private var currentPort: Int = DEFAULT_PORT
 
@@ -98,13 +95,10 @@ class CompanionWebSocketClient(
                 if (!isCurrent()) return
                 Log.d(TAG, "WebSocket opened with $host:$port")
                 sendHello()
-                startPingLoop()
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
                 if (!isCurrent()) return
-                // Auth replies can carry the pairing secret, which must never reach logcat.
-                if (!text.contains("pairingSecret")) Log.v(TAG, "Received message: $text")
                 handleIncomingMessage(text, session)
             }
 
@@ -116,7 +110,6 @@ class CompanionWebSocketClient(
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
                 if (!isCurrent()) return
                 Log.d(TAG, "WebSocket closed: $code / $reason")
-                stopPingLoop()
                 if (_connectionState.value !is ConnectionState.Failed) {
                     _connectionState.value = session.closedState(wasConnected())
                 }
@@ -125,7 +118,6 @@ class CompanionWebSocketClient(
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
                 if (!isCurrent()) return
                 Log.e(TAG, "WebSocket failure: ${t.message}", t)
-                stopPingLoop()
                 if (_connectionState.value !is ConnectionState.Failed) {
                     _connectionState.value = session.failedState(t, wasConnected())
                 }
@@ -134,7 +126,6 @@ class CompanionWebSocketClient(
     }
 
     fun disconnect() {
-        stopPingLoop()
         // Retire the socket first so its closing callbacks are ignored.
         generation++
         val socket = currentWebSocket
@@ -223,15 +214,9 @@ class CompanionWebSocketClient(
         return sendMessage(CompanionClientMessage.applyProfile(profileId))
     }
 
-    fun ping(): Boolean {
-        return sendMessage(CompanionClientMessage.ping())
-    }
-
     private fun sendMessage(msg: CompanionClientMessage): Boolean {
         val ws = currentWebSocket ?: return false
-        val jsonString = CompanionProtocolParser.encodeClientMessage(msg)
-        if (msg.proof == null) Log.v(TAG, "Sending message: $jsonString")
-        return ws.send(jsonString)
+        return ws.send(CompanionProtocolParser.encodeClientMessage(msg))
     }
 
     private fun handleIncomingMessage(text: String, session: CompanionSession) {
@@ -250,20 +235,5 @@ class CompanionWebSocketClient(
                 _events.emit(event)
             }
         }
-    }
-
-    private fun startPingLoop() {
-        stopPingLoop()
-        pingJob = scope.launch {
-            while (isActive) {
-                delay(20_000)
-                ping()
-            }
-        }
-    }
-
-    private fun stopPingLoop() {
-        pingJob?.cancel()
-        pingJob = null
     }
 }

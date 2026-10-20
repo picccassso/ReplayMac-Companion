@@ -216,10 +216,6 @@ public final class CompanionRepository: @unchecked Sendable {
         defaults.set(seen, forKey: Self.keyHasSeenOnboarding)
     }
 
-    public func startDiscovery() {
-        discoveryManager.startDiscovery()
-    }
-
     public func stopDiscovery() {
         discoveryManager.stopDiscovery()
     }
@@ -251,16 +247,16 @@ public final class CompanionRepository: @unchecked Sendable {
         reconnector.stop()
         wsClient.disconnect()
         clearMacState()
-        discoveryManager.stopDiscovery()
         isDemoActiveSubject.send(true)
         demoSession.start()
+        updateDiscovery()
     }
 
     private func stopDemo() {
         guard isDemoActiveSubject.value else { return }
         demoSession.stop()
         isDemoActiveSubject.send(false)
-        discoveryManager.startDiscovery()
+        updateDiscovery()
     }
 
     private func clearMacState() {
@@ -295,7 +291,7 @@ public final class CompanionRepository: @unchecked Sendable {
 
         // Picks discovery back up if it failed while the app was away,
         // e.g. after the user granted Local Network access in Settings.
-        discoveryManager.startDiscovery()
+        updateDiscovery()
 
         switch wsClient.currentConnectionState {
         case .connected:
@@ -345,6 +341,18 @@ public final class CompanionRepository: @unchecked Sendable {
             }
         default:
             break
+        }
+        updateDiscovery()
+    }
+
+    /// Discovery only serves the Connect screen and reconnects, so it stops while connected or in the demo.
+    private func updateDiscovery() {
+        if case .connected = wsClient.currentConnectionState {
+            discoveryManager.stopDiscovery()
+        } else if isDemoActiveSubject.value {
+            discoveryManager.stopDiscovery()
+        } else {
+            discoveryManager.startDiscovery()
         }
     }
 

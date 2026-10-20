@@ -8,6 +8,9 @@ public struct StatusDot: View {
 
     @State private var isPulsing = false
 
+    /// Pulses when it goes live, then settles: an endless pulse keeps the screen redrawing for hours in deck mode.
+    private static let pulseCount = 3
+
     public init(
         isLive: Bool,
         size: CGFloat = 10,
@@ -28,7 +31,7 @@ public struct StatusDot: View {
                     .frame(width: size, height: size)
                     .scaleEffect(isPulsing ? 2.4 : 1.0)
                     .animation(
-                        .easeOut(duration: 1.2).repeatForever(autoreverses: false),
+                        .easeOut(duration: 1.2).repeatCount(Self.pulseCount, autoreverses: false),
                         value: isPulsing
                     )
 

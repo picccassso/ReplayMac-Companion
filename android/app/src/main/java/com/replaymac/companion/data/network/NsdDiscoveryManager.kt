@@ -128,6 +128,7 @@ class NsdDiscoveryManager(
 
     @Synchronized
     fun stopDiscovery() {
+        isRestartPending = false
         if (!_isDiscovering.value && discoveryListener == null) return
         val manager = nsdManager ?: return
         val listener = discoveryListener ?: return
@@ -136,6 +137,9 @@ class NsdDiscoveryManager(
         isStopping = true
 
         clearResolveQueue()
+        // A stopped search can't see Macs leave, so forget what it found.
+        discoveredMap.clear()
+        updateState()
 
         try {
             manager.stopServiceDiscovery(listener)
@@ -153,12 +157,9 @@ class NsdDiscoveryManager(
         updateState()
         clearResolveQueue()
 
-        if (_isDiscovering.value && discoveryListener != null) {
-            isRestartPending = true
-            stopDiscovery()
-        } else {
-            startDiscovery()
-        }
+        stopDiscovery()
+        // Restarts once the old search has stopped, or straight away if none was running.
+        if (isStopping) isRestartPending = true else startDiscovery()
     }
 
     @Synchronized

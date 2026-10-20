@@ -99,6 +99,9 @@ public final class BonjourDiscoveryManager: NSObject, @unchecked Sendable, NetSe
             return
         }
         browser = nil
+        // A stopped browser can't see Macs leave, so forget what it found.
+        discoveredMap.removeAll()
+        serverIdMap.removeAll()
         for (_, service) in activeResolvers {
             service.stop()
         }
@@ -106,6 +109,7 @@ public final class BonjourDiscoveryManager: NSObject, @unchecked Sendable, NetSe
         isDiscoveringSubject.send(false)
         lock.unlock()
 
+        discoveredSubject.send([])
         b.cancel()
     }
 

@@ -121,10 +121,6 @@ public data class CompanionClientMessage(
                 profileId = profileId
             )
         }
-
-        fun ping(): CompanionClientMessage {
-            return CompanionClientMessage(type = "ping")
-        }
     }
 }
 

@@ -19,7 +19,9 @@ import com.replaymac.companion.data.network.CompanionWebSocketClient
 import com.replaymac.companion.data.network.NsdDiscoveryManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -45,6 +47,8 @@ class CompanionRepository(
         private const val KEY_LAST_PORT = "last_port"
         private const val KEY_KEEP_AWAKE = "keep_awake"
         private const val KEY_HAS_SEEN_ONBOARDING = "has_seen_onboarding"
+        /** Long enough that a quick app switch keeps the connection. */
+        private const val BACKGROUND_DISCONNECT_DELAY_MS = 30_000L
     }
 
     private val prefs: SharedPreferences =
@@ -113,6 +117,7 @@ class CompanionRepository(
 
     /** Only look for the Mac while the app is on screen; it's cheap then and pointless otherwise. */
     @Volatile private var isForeground = false
+    private var backgroundDisconnectJob: Job? = null
 
     /**
      * The demo's Connected state while it runs. Otherwise the socket's, shown as
@@ -172,14 +177,6 @@ class CompanionRepository(
         prefs.edit().putBoolean(KEY_HAS_SEEN_ONBOARDING, seen).apply()
     }
 
-    fun startDiscovery() {
-        nsdManager.startDiscovery()
-    }
-
-    fun stopDiscovery() {
-        nsdManager.stopDiscovery()
-    }
-
     fun restartDiscovery() {
         nsdManager.restartDiscovery()
     }
@@ -196,13 +193,11 @@ class CompanionRepository(
 
     /** Leaves the Mac, or the demo, for the Connect screen. */
     fun disconnect() {
-        val wasDemo = demo.isRunning
         demo.stop()
         reconnector.stop()
         wsClient.disconnect()
         clearMacState()
-        // The demo paused discovery; the Connect screen needs it again.
-        if (wasDemo) nsdManager.startDiscovery()
+        updateDiscovery()
     }
 
     /** Swaps any Mac connection for the demo Mac, without touching the network. */
@@ -210,8 +205,8 @@ class CompanionRepository(
         reconnector.stop()
         wsClient.disconnect()
         clearMacState()
-        nsdManager.stopDiscovery()
         demo.start()
+        updateDiscovery()
     }
 
     private fun clearMacState() {
@@ -230,6 +225,7 @@ class CompanionRepository(
      */
     fun onAppForegrounded() {
         isForeground = true
+        backgroundDisconnectJob?.cancel()
         if (demo.isRunning) {
             demo.resync()
             return
@@ -240,15 +236,36 @@ class CompanionRepository(
             is ConnectionState.Disconnected, is ConnectionState.Failed -> reconnectToRememberedMac()
             else -> {}
         }
+        updateDiscovery()
     }
 
-    /** Stops looking for the Mac while off screen. An open connection is kept. */
+    /**
+     * Stops looking for the Mac while off screen, and closes an open connection
+     * after a grace period: the Mac's once-a-second telemetry would otherwise
+     * keep waking the phone. Coming back reconnects to the remembered Mac.
+     */
     fun onAppBackgrounded() {
         isForeground = false
         if (reconnector.target.value != null) {
             reconnector.stop()
             wsClient.disconnect()
         }
+        updateDiscovery()
+        backgroundDisconnectJob?.cancel()
+        backgroundDisconnectJob = scope.launch {
+            delay(BACKGROUND_DISCONNECT_DELAY_MS)
+            // A socket still waiting for approval is kept, or the Mac's answer would be lost.
+            if (!isForeground && wsClient.connectionState.value is ConnectionState.Connected) {
+                wsClient.disconnect()
+            }
+        }
+    }
+
+    /** Discovery only serves the Connect screen and reconnects, so it runs only while one is on screen. */
+    @Synchronized
+    private fun updateDiscovery() {
+        val needed = isForeground && !demo.isRunning && wsClient.connectionState.value !is ConnectionState.Connected
+        if (needed) nsdManager.startDiscovery() else nsdManager.stopDiscovery()
     }
 
     fun forgetMac(mac: RememberedMac) {
@@ -272,6 +289,7 @@ class CompanionRepository(
             }
             state is ConnectionState.Failed && state.wasConnected -> reconnectToRememberedMac()
         }
+        updateDiscovery()
     }
 
     private fun rememberConnectedMac(state: ConnectionState.Connected) {

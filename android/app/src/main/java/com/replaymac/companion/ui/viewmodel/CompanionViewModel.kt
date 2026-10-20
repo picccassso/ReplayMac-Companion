@@ -113,15 +113,6 @@ class CompanionViewModel(
         _showCaptureSetupSheet.value = false
     }
 
-    init {
-        repository.startDiscovery()
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        repository.stopDiscovery()
-    }
-
     fun setManualHost(host: String) {
         _manualHost.value = host
     }
