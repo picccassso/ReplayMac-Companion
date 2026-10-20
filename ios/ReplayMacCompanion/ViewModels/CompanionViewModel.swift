@@ -40,7 +40,8 @@ public final class CompanionViewModel: ObservableObject {
         bindRepository()
         bindAppLifecycle()
 
-        repository.startDiscovery()
+        // willEnterForeground doesn't fire on a cold launch, so start the way a return to the app does.
+        repository.onAppForegrounded()
     }
 
     private func bindRepository() {
