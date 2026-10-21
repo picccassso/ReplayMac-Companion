@@ -6,6 +6,12 @@ ReplayCap Companion is a remote control for [ReplayCap](https://github.com/piccc
 
 The phone finds your Mac on the local network, asks ReplayMac for permission once, and then mirrors the Mac's Home page in real time. Both an Android app (Kotlin and Jetpack Compose) and an iOS app (Swift and SwiftUI) live in this repository, and they're kept at feature parity. On iPhone and iPad the app is called **ReplayCap**; on Android it's **ReplayMac**.
 
+## Download
+
+- **iPhone and iPad:** [ReplayCap Companion on the App Store](https://apps.apple.com/us/app/replaycap-companion/id6821022359)
+- **Android:** the APK from the [latest GitHub release](https://github.com/picccassso/ReplayMac-Companion/releases/latest)
+- **Mac:** you'll also need [ReplayCap on the Mac App Store](https://apps.apple.com/app/replaycap/id6789296427) or [ReplayMac from GitHub](https://github.com/picccassso/ReplayMac)
+
 ## Features
 
 ### Controls
@@ -56,7 +62,7 @@ Shown on iPhone and iPad. The Android app has the same screens.
 
 **On your Mac**
 
-- **ReplayMac 2.0 or later.** On the Mac App Store it's called **ReplayCap**; both work. Earlier versions don't have the Companion server, and the companion won't connect to them.
+- **ReplayMac 2.0 or later.** On the [Mac App Store](https://apps.apple.com/app/replaycap/id6789296427) it's called **ReplayCap**; both work. Earlier versions don't have the Companion server, and the companion won't connect to them.
 - **The Companion server turned on.** It's off by default. Turn it on from the **Companion** page in ReplayMac's sidebar. macOS asks for Local Network access the first time.
 - macOS 15 or later, which ReplayMac itself needs.
 
@@ -74,7 +80,7 @@ Shown on iPhone and iPad. The Android app has the same screens.
 ## Getting started
 
 1. **Turn on the Companion server on your Mac.** Open ReplayMac's main window (click ReplayMac in the Dock), go to **Companion** in the sidebar and switch the server on. It's off until you do, and listens on port 7375.
-2. **Open the companion on your phone.** Your Mac should appear under **On This Network** within a few seconds. Tap **Connect**.
+2. **Install and open the companion on your phone.** Get it from the [App Store](https://apps.apple.com/us/app/replaycap-companion/id6821022359) on iPhone and iPad, or the [latest release APK](https://github.com/picccassso/ReplayMac-Companion/releases/latest) on Android. Your Mac should appear under **On This Network** within a few seconds. Tap **Connect**.
 3. **Allow the phone on your Mac.** The phone shows a 4-digit code and ReplayMac asks whether to let the device connect, showing a code too. Check they match, then click **Allow**. You only need to do this once per phone.
 
 That's it. The phone switches to the Home screen and stays in sync with the Mac. Next time you open the app, it reconnects to the last Mac you used.
@@ -122,7 +128,7 @@ Full build, test and release instructions are in [docs/building.md](docs/buildin
 
 **Stuck on "Waiting for approval"?** ReplayMac is showing an Allow prompt on your Mac with the same code as the phone. Click **Allow** there and the phone carries on by itself. The prompt closes after a minute if nobody answers; connect again to bring it back.
 
-**"Update ReplayCap Companion on this device to connect"?** The Mac is newer than the app. Update the app from the App Store or Google Play.
+**"Update ReplayCap Companion on this device to connect"?** The Mac is newer than the app. Update the app from the App Store, or install the latest APK from [GitHub releases](https://github.com/picccassso/ReplayMac-Companion/releases/latest) on Android.
 
 **The Mac doesn't answer at all?** Check the Companion page in ReplayMac. If the server couldn't start (for example because another app uses port 7375), the reason is shown under the switch.
 

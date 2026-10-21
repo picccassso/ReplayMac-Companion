@@ -2,6 +2,8 @@
 
 Copy-ready text for App Store Connect, the answers to its questionnaires, and the notes for App Review. Character limits are Apple's; every field here fits them.
 
+The app has been live on the App Store since 21 October 2026: [ReplayCap Companion](https://apps.apple.com/us/app/replaycap-companion/id6821022359) (id6821022359). Version 1.0.0 (build 4) was the first approved build, so the next upload needs a higher build number.
+
 The one thing to get across everywhere: **this app is a remote for ReplayCap on a Mac and does nothing on its own.** Apple's guidelines (2.1 App Completeness, 2.3 Accurate Metadata) expect apps that depend on other software to say so up front, and reviewers reject companion apps they can't test. The description, the review notes and the app itself all state the requirement and link to ReplayCap on the Mac App Store. For reviewers without a Mac, the Connect screen's **Try without a Mac** button opens a demo mode: a pretend Mac with sample data, clearly labelled on every screen, so every control can be tried.
 
 ## App information

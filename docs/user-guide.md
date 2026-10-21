@@ -2,6 +2,11 @@
 
 This guide walks through setting up ReplayMac Companion, connecting it to your Mac and using every control. The app is called **ReplayCap** on iPhone and iPad, matching the Mac App Store name, and **ReplayMac** on Android. Both work the same way and with either edition of the Mac app. Where they differ, it's called out.
 
+## Getting the app
+
+- **iPhone and iPad:** install [ReplayCap Companion from the App Store](https://apps.apple.com/us/app/replaycap-companion/id6821022359).
+- **Android:** download the APK from the [latest GitHub release](https://github.com/picccassso/ReplayMac-Companion/releases/latest) and open it on your phone. Android asks you to allow installs from your browser or file manager the first time.
+
 ## On your Mac
 
 The companion talks to the Companion server built into ReplayMac. To check it's running:
@@ -161,7 +166,7 @@ The quick guide opens automatically the first time you launch the app. It covers
 
 **"Pairing was declined on the Mac. Try again in a moment."** After a Deny, or a prompt nobody answered, the Mac waits 30 seconds before it will ask about the same phone again.
 
-**"Update ReplayCap Companion on this device to connect."** The app is older than the Mac. Update it from the App Store or Google Play.
+**"Update ReplayCap Companion on this device to connect."** The app is older than the Mac. Update it from the App Store, or on Android install the APK from the [latest GitHub release](https://github.com/picccassso/ReplayMac-Companion/releases/latest).
 
 **USB on Android doesn't connect.** Run `adb devices` to check the phone shows up, then run the `adb reverse` command again. It needs to be run each time the phone is plugged back in.
 

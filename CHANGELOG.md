@@ -1,8 +1,8 @@
 # Changelog
 
-## Unreleased
+## 1.0.0 (2026-10-21)
 
-The first version of the companion, 1.0.0 on both Android and iOS.
+The first version of the companion, on both Android and iOS. The iOS app is on the [App Store](https://apps.apple.com/us/app/replaycap-companion/id6821022359) as ReplayCap Companion, and the Android APK is on [GitHub releases](https://github.com/picccassso/ReplayMac-Companion/releases/latest).
 
 - Add the Android companion app: find ReplayMac on the local network over Bonjour, connect by IP address and port, or connect over a USB cable with `adb reverse tcp:7375 tcp:7375`. Pair with the Mac once by clicking Allow in ReplayMac, then control it from the phone
 - Add a Home screen with six controls in the same order as ReplayMac's Home page: save the last N seconds, save the extended replay, start or stop the replay buffer, record or stop a session, and mute the microphone or system audio. Tiles show their state ("Ready", "Buffering…", "Saving…", "Saved", "Muted", "Off") and grey out when an action isn't available
@@ -25,3 +25,12 @@ The first version of the companion, 1.0.0 on both Android and iOS.
 - Add a privacy manifest to the iOS app (no tracking, no data collected, UserDefaults used only for the app's own settings) and declare that it uses no non-exempt encryption
 - Rename the iOS app to ReplayCap to match the Mac App Store name, with the bundle identifier `com.replaycap.companion`
 - Add comprehensive documentation: user guide, building and testing guide, architecture overview, companion protocol specification, connection and reconnection mechanics, and privacy and security details
+- Sign in to the Mac with the pairing secret it hands out on Allow (companion protocol v2), and show the Mac's 4-digit pairing code while waiting for approval. The secret lives in the iOS Keychain or Android private storage and is never sent over the network again
+- Show the Mac's reason when it turns a connection away, and on iOS detect denied Local Network access with a shortcut to Settings
+- Connect over Wi-Fi only on iOS; Android keeps its `adb reverse` USB route
+- Call the Android app ReplayMac again, since Apple's rule against "Mac" in app names doesn't apply there
+- Add the Audio Mixer, with microphone and system audio volume and per-app muting, a display and capture profile switcher on the status card, Trim & Export and Copy to Clipboard for clips, and haptics in Deck mode
+- Add a privacy policy, and link it and ReplayCap for Mac from the Connect screen and the quick guide
+- Add a demo mode, "Try without a Mac", that runs every control against a pretend Mac with sample data
+- Use less battery: Android closes the connection after 30 seconds in the background and reconnects on return, Bonjour discovery only runs while it's needed, and the live status dot stops pulsing after three beats
+- Reconnect to the remembered Mac on a cold launch on iOS, not only after returning from the background
