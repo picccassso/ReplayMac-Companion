@@ -51,6 +51,8 @@ private let tutorialPages: [TutorialPage] = [
 ]
 
 public struct OnboardingDialog: View {
+    @Environment(\.themePalette) private var palette
+
     public var onDismiss: () -> Void
 
     @State private var currentPage: Int = 0
@@ -136,13 +138,15 @@ public struct OnboardingDialog: View {
             }
             .padding(22)
             .frame(maxWidth: 500)
-            .glass(cornerRadius: 24, tint: AppColors.surfaceElevated)
+            .glass(cornerRadius: 24, tint: palette.elevatedSurface)
             .padding(.horizontal, 20)
         }
     }
 }
 
 private struct TutorialPageView: View {
+    @Environment(\.themePalette) private var palette
+
     let page: TutorialPage
 
     var body: some View {
@@ -163,7 +167,7 @@ private struct TutorialPageView: View {
                     HStack(alignment: .top, spacing: 14) {
                         Image(systemName: highlight.icon)
                             .font(.system(size: 20))
-                            .foregroundColor(AppColors.accent)
+                            .foregroundColor(palette.accentColor)
                             .frame(width: 24)
 
                         VStack(alignment: .leading, spacing: 2) {

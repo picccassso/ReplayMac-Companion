@@ -148,8 +148,23 @@ The phone updates the names it shows from every `approved` response, which is ho
 | `displays` | Array | Available Mac displays (`id`, `name`, `isActive`, `isConnected`) |
 | `profiles` | Array | Saved capture profiles (`id`, `name`, `summary`, `isActive`) |
 | `recentClips` | Array | Clips saved this session (below) |
+| `theme` | Object? | The Mac's Appearance settings (below). Missing from ReplayMac builds before theming |
 
 Each clip has `id`, `filename`, `kind` (`replay`, `extended replay` or `session`), `savedAt` (Unix seconds), `duration`, `fileSize` and `hasThumbnail`. The phone asks for thumbnails of clips where `hasThumbnail` is true.
+
+The `theme` object lets the phone match the Mac's look. Every colour is `#RRGGBB` hex already resolved on the Mac, including the macOS system accent, so the phone needs no copy of the atmosphere list and a new atmosphere on the Mac works without an app update.
+
+| Key | Type | Meaning |
+| --- | --- | --- |
+| `atmosphere` | String | Atmosphere id, such as `native`, `deep_ocean` or `catppuccin_mocha` |
+| `atmosphereName` | String | Its display name, such as `"Deep Ocean"` |
+| `colorScheme` | String | `system`, `dark` or `light`. The phone is always dark and only reads this for information |
+| `accentMode` | String | `atmosphere`, `system` or `custom` |
+| `surfaceStyle` | String | `glass`, `tinted_glass` or `matte` |
+| `dualTone` | Bool | Whether the Mac draws its two-colour accent gradient |
+| `dark`, `light` | Object | `canvas`, `card`, `accent` and `accentSecondary` for each appearance |
+
+The Mac sends `state_changed` whenever an Appearance setting or the macOS accent changes, at most about once every 150 ms. A missing or malformed `theme`, or any colour that isn't valid hex, leaves the phone on its default look for that part only. The rest of the snapshot is unaffected.
 
 ### Other messages
 

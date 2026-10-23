@@ -2,6 +2,8 @@ import SwiftUI
 import UIKit
 
 public struct ClipDetailsBottomSheet: View {
+    @Environment(\.themePalette) private var palette
+
     public var clip: CompanionClipSummary
     public var thumbnailBase64: String?
     public var onRevealInFinder: (String) -> Void
@@ -58,7 +60,7 @@ public struct ClipDetailsBottomSheet: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            .background(AppColors.backgroundSecondary.ignoresSafeArea())
+            .background(palette.cardColor.ignoresSafeArea())
         }
         .alert("Delete this clip?", isPresented: $showDeleteConfirmation) {
             Button("Delete", role: .destructive) {
@@ -189,11 +191,11 @@ public struct ClipDetailsBottomSheet: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.85)
             }
-            .foregroundColor(.white)
+            .foregroundColor(palette.onAccentColor)
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
             .frame(maxWidth: fullWidth ? .infinity : nil)
-            .background(AppColors.accent, in: RoundedRectangle(cornerRadius: AppRadii.small, style: .continuous))
+            .background(palette.accentFill, in: RoundedRectangle(cornerRadius: AppRadii.small, style: .continuous))
         }
         .buttonStyle(GlassPressableStyle())
     }
@@ -216,7 +218,7 @@ public struct ClipDetailsBottomSheet: View {
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
             .frame(maxWidth: fullWidth ? .infinity : nil)
-            .glass(cornerRadius: AppRadii.small, tint: AppColors.surfaceGlass)
+            .glass(cornerRadius: AppRadii.small)
         }
         .buttonStyle(GlassPressableStyle())
     }
@@ -241,7 +243,7 @@ public struct ClipDetailsBottomSheet: View {
             .frame(maxWidth: fullWidth ? .infinity : nil)
             .glass(
                 cornerRadius: AppRadii.small,
-                tint: copiedToMac ? AppColors.success.opacity(0.14) : AppColors.surfaceGlass
+                tint: copiedToMac ? AppColors.success.opacity(0.14) : nil
             )
         }
         .buttonStyle(GlassPressableStyle())

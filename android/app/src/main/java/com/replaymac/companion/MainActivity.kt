@@ -13,22 +13,25 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import com.replaymac.companion.data.model.ConnectionState
 import com.replaymac.companion.ui.components.CompanionHaptics
 import com.replaymac.companion.ui.components.OnboardingDialog
+import com.replaymac.companion.ui.screens.AppearanceBottomSheet
 import com.replaymac.companion.ui.screens.AudioMixerBottomSheet
 import com.replaymac.companion.ui.screens.CaptureSetupBottomSheet
 import com.replaymac.companion.ui.screens.ClipDetailsBottomSheet
 import com.replaymac.companion.ui.screens.ConnectionScreen
 import com.replaymac.companion.ui.screens.HomeScreen
-import com.replaymac.companion.ui.theme.AppColors
+import com.replaymac.companion.ui.theme.AppTheme
 import com.replaymac.companion.ui.theme.ReplayMacCompanionTheme
 import com.replaymac.companion.ui.viewmodel.CompanionViewModel
 import com.replaymac.companion.ui.viewmodel.CompanionViewModelFactory
@@ -49,8 +52,17 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            ReplayMacCompanionTheme {
+            val palette by viewModel.themePalette.collectAsState()
+            ReplayMacCompanionTheme(palette = palette) {
                 val keepScreenAwake by viewModel.keepScreenAwake.collectAsState()
+                val canvas = AppTheme.palette.canvas
+
+                // The window behind Compose wears the canvas too, so resizing,
+                // rotating or opening a sheet never flashes the launch colour.
+                // The bars stay transparent and dark.
+                SideEffect {
+                    window.decorView.setBackgroundColor(canvas.toArgb())
+                }
 
                 LaunchedEffect(keepScreenAwake) {
                     if (keepScreenAwake) {
@@ -62,7 +74,7 @@ class MainActivity : ComponentActivity() {
 
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = AppColors.BackgroundPrimary
+                    color = AppTheme.palette.canvas
                 ) {
                     CompanionAppContent(viewModel = viewModel)
                 }
@@ -99,6 +111,8 @@ fun CompanionAppContent(viewModel: CompanionViewModel) {
     val manualPort by viewModel.manualPort.collectAsState()
     val showTutorialDialog by viewModel.showTutorialDialog.collectAsState()
     val isDemo by viewModel.isDemo.collectAsState()
+    val showAppearanceSheet by viewModel.showAppearanceSheet.collectAsState()
+    val matchMacTheme by viewModel.matchMacTheme.collectAsState()
 
     val view = LocalView.current
     var previousSaveStatus by remember { mutableStateOf(snapshot.saveStatus) }
@@ -110,7 +124,7 @@ fun CompanionAppContent(viewModel: CompanionViewModel) {
         }
     }
 
-    val anySheetOpen = selectedClip != null || showAudioMixerSheet || showCaptureSetupSheet
+    val anySheetOpen = selectedClip != null || showAudioMixerSheet || showCaptureSetupSheet || showAppearanceSheet
     BackHandler(enabled = connectionState is ConnectionState.Connected && !anySheetOpen) {
         viewModel.disconnect()
     }
@@ -133,7 +147,8 @@ fun CompanionAppContent(viewModel: CompanionViewModel) {
             onClipSelected = { clip -> viewModel.selectClip(clip) },
             onOpenTutorial = { viewModel.openTutorial() },
             onOpenAudioMixer = { viewModel.openAudioMixer() },
-            onOpenCaptureSetup = { viewModel.openCaptureSetup() }
+            onOpenCaptureSetup = { viewModel.openCaptureSetup() },
+            onOpenAppearance = { viewModel.openAppearance() }
         )
     } else {
         ConnectionScreen(
@@ -185,6 +200,17 @@ fun CompanionAppContent(viewModel: CompanionViewModel) {
             onToggleAppMute = { bundleId -> viewModel.toggleAppMute(bundleId) },
             onUnmuteAllApps = { viewModel.unmuteAllApps() },
             onDismiss = { viewModel.dismissAudioMixer() }
+        )
+    }
+
+    if (showAppearanceSheet && connectionState is ConnectionState.Connected) {
+        AppearanceBottomSheet(
+            macTheme = snapshot.theme,
+            matchMac = matchMacTheme,
+            isDemo = isDemo,
+            onMatchMacChange = { enabled -> viewModel.setMatchMacTheme(enabled) },
+            onSelectDemoAtmosphere = { id -> viewModel.selectDemoAtmosphere(id) },
+            onDismiss = { viewModel.dismissAppearance() }
         )
     }
 

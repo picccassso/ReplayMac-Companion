@@ -84,6 +84,7 @@ import com.replaymac.companion.ui.components.glass
 import com.replaymac.companion.ui.components.glassPressable
 import com.replaymac.companion.ui.components.safeContentPadding
 import com.replaymac.companion.ui.theme.AppColors
+import com.replaymac.companion.ui.theme.AppTheme
 import com.replaymac.companion.ui.theme.AppRadii
 
 private const val ADB_REVERSE_COMMAND = "adb reverse tcp:7375 tcp:7375"
@@ -196,7 +197,7 @@ fun ConnectionScreen(
                             modifier = Modifier
                                 .fillMaxWidth(if (isLandscape) 0.55f else 0.88f)
                                 .widthIn(max = 420.dp)
-                                .glass(RoundedCornerShape(AppRadii.Large.dp), AppColors.SurfaceElevated)
+                                .glass(RoundedCornerShape(AppRadii.Large.dp), AppTheme.palette.surfaceElevated)
                                 .padding(22.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
@@ -355,7 +356,7 @@ private fun ConnectionHeader(
                 icon = Icons.Rounded.Refresh,
                 contentDescription = "Search again",
                 onClick = onRefresh,
-                tint = if (isDiscovering) AppColors.Accent else AppColors.TextSecondary
+                tint = if (isDiscovering) AppTheme.palette.accent else AppColors.TextSecondary
             )
         }
     }
@@ -539,7 +540,7 @@ private fun UsbConnectionRows(onConnect: () -> Unit) {
             Icon(
                 Icons.Rounded.Info,
                 contentDescription = if (showHelp) "Hide USB setup" else "Show USB setup",
-                tint = if (showHelp) AppColors.Accent else AppColors.TextTertiary,
+                tint = if (showHelp) AppTheme.palette.accent else AppColors.TextTertiary,
                 modifier = Modifier.size(20.dp)
             )
         }
@@ -558,14 +559,14 @@ private fun UsbConnectionRows(onConnect: () -> Unit) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(AppColors.BackgroundPrimary.copy(alpha = 0.5f), RoundedCornerShape(AppRadii.Small.dp))
+                        .background(AppTheme.palette.canvas.copy(alpha = 0.5f), RoundedCornerShape(AppRadii.Small.dp))
                         .padding(start = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = ADB_REVERSE_COMMAND,
                         style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-                        color = AppColors.AccentVariant,
+                        color = AppTheme.palette.accent,
                         modifier = Modifier.weight(1f)
                     )
                     Box(

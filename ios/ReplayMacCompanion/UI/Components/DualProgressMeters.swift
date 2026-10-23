@@ -23,6 +23,8 @@ public func meterFillSuffix(availableSeconds: Double, capSeconds: Int) -> String
 }
 
 public struct ProgressMeter: View {
+    @Environment(\.themePalette) private var palette
+
     public var title: String
     public var availableSeconds: Double
     public var capSeconds: Int
@@ -45,7 +47,7 @@ public struct ProgressMeter: View {
         let fraction = CGFloat(min(1.0, max(0.0, availableSeconds / Double(safeCap))))
         let suffix = meterFillSuffix(availableSeconds: availableSeconds, capSeconds: safeCap)
         let isReady = suffix == "Ready"
-        let barColor = isReady ? AppColors.success : AppColors.accent
+        let barColor = isReady ? AppColors.success : palette.accentColor
 
         VStack(alignment: .leading, spacing: 7) {
             HStack {

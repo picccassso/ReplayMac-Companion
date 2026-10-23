@@ -45,6 +45,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import com.replaymac.companion.ui.theme.AppColors
+import com.replaymac.companion.ui.theme.AppTheme
 import kotlinx.coroutines.launch
 
 private data class Highlight(val icon: ImageVector, val title: String, val detail: String)
@@ -103,7 +104,7 @@ fun OnboardingDialog(
             modifier = modifier
                 .fillMaxWidth(if (isLandscape) 0.8f else 0.92f)
                 .widthIn(max = 520.dp)
-                .glass(shape, AppColors.SurfaceElevated)
+                .glass(shape, AppTheme.palette.surfaceElevated)
                 .padding(if (isLandscape) 18.dp else 22.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -193,7 +194,7 @@ private fun TutorialPageContent(page: TutorialPage, isLandscape: Boolean) {
                     Icon(
                         highlight.icon,
                         contentDescription = null,
-                        tint = AppColors.Accent,
+                        tint = AppTheme.palette.accent,
                         modifier = Modifier.padding(top = 1.dp).size(20.dp)
                     )
                     Column(Modifier.weight(1f)) {

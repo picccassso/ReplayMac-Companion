@@ -12,6 +12,7 @@ import com.replaymac.companion.data.model.PreviouslyConnectedItem
 import com.replaymac.companion.data.model.RememberedMac
 import com.replaymac.companion.data.network.CompanionWebSocketClient
 import com.replaymac.companion.data.repository.CompanionRepository
+import com.replaymac.companion.ui.theme.ThemePalette
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -35,6 +36,9 @@ class CompanionViewModel(
     val previouslyConnectedMacs: StateFlow<List<RememberedMac>> = repository.previouslyConnectedMacs
     /** True while the app shows the demo Mac's sample data instead of a real Mac. */
     val isDemo: StateFlow<Boolean> = repository.isDemoActive
+    /** The colours the whole app is drawn with, following the Mac unless "Match my Mac" is off. */
+    val themePalette: StateFlow<ThemePalette> = repository.themePalette
+    val matchMacTheme: StateFlow<Boolean> = repository.matchMacTheme
 
     val previouslyConnectedItems: StateFlow<List<PreviouslyConnectedItem>> =
         combine(repository.previouslyConnectedMacs, repository.discoveredMacs) { saved, discovered ->
@@ -82,6 +86,9 @@ class CompanionViewModel(
     private val _showCaptureSetupSheet = MutableStateFlow(false)
     val showCaptureSetupSheet: StateFlow<Boolean> = _showCaptureSetupSheet.asStateFlow()
 
+    private val _showAppearanceSheet = MutableStateFlow(false)
+    val showAppearanceSheet: StateFlow<Boolean> = _showAppearanceSheet.asStateFlow()
+
     private val _manualHost = MutableStateFlow(repository.getLastConnectedHost() ?: "")
     val manualHost: StateFlow<String> = _manualHost.asStateFlow()
 
@@ -111,6 +118,22 @@ class CompanionViewModel(
 
     fun dismissCaptureSetup() {
         _showCaptureSetupSheet.value = false
+    }
+
+    fun openAppearance() {
+        _showAppearanceSheet.value = true
+    }
+
+    fun dismissAppearance() {
+        _showAppearanceSheet.value = false
+    }
+
+    fun setMatchMacTheme(enabled: Boolean) {
+        repository.setMatchMacTheme(enabled)
+    }
+
+    fun selectDemoAtmosphere(id: String) {
+        repository.selectDemoAtmosphere(id)
     }
 
     fun setManualHost(host: String) {
@@ -175,6 +198,7 @@ class CompanionViewModel(
         _selectedClip.value = null
         _showAudioMixerSheet.value = false
         _showCaptureSetupSheet.value = false
+        _showAppearanceSheet.value = false
         repository.disconnect()
     }
 

@@ -19,6 +19,7 @@ public struct HomeScreen: View {
     public var onOpenCaptureSetup: () -> Void
     public var onClipSelected: (CompanionClipSummary) -> Void
     public var onOpenTutorial: () -> Void
+    public var onOpenAppearance: () -> Void
 
     public init(
         connectionState: ConnectionState,
@@ -37,7 +38,8 @@ public struct HomeScreen: View {
         onOpenAudioMixer: @escaping () -> Void = {},
         onOpenCaptureSetup: @escaping () -> Void = {},
         onClipSelected: @escaping (CompanionClipSummary) -> Void,
-        onOpenTutorial: @escaping () -> Void = {}
+        onOpenTutorial: @escaping () -> Void = {},
+        onOpenAppearance: @escaping () -> Void = {}
     ) {
         self.connectionState = connectionState
         self.snapshot = snapshot
@@ -56,6 +58,7 @@ public struct HomeScreen: View {
         self.onOpenCaptureSetup = onOpenCaptureSetup
         self.onClipSelected = onClipSelected
         self.onOpenTutorial = onOpenTutorial
+        self.onOpenAppearance = onOpenAppearance
     }
 
     private var serverName: String {
@@ -113,6 +116,7 @@ public struct HomeScreen: View {
                             keepScreenAwake: keepScreenAwake,
                             onToggleKeepScreenAwake: onToggleKeepScreenAwake,
                             onOpenTutorial: onOpenTutorial,
+                            onOpenAppearance: onOpenAppearance,
                             onDisconnect: onDisconnect
                         )
 
@@ -181,6 +185,7 @@ private struct HomeTopBar: View {
     let keepScreenAwake: Bool
     let onToggleKeepScreenAwake: () -> Void
     let onOpenTutorial: () -> Void
+    let onOpenAppearance: () -> Void
     let onDisconnect: () -> Void
 
     private var deviceStatusText: String {
@@ -214,6 +219,14 @@ private struct HomeTopBar: View {
 
             GlassButtonGroup {
                 GroupIconButton(
+                    systemImage: "paintbrush.fill",
+                    contentDescription: "Appearance",
+                    tint: AppColors.textSecondary,
+                    selected: false,
+                    onClick: onOpenAppearance
+                )
+
+                GroupIconButton(
                     systemImage: "lightbulb.fill",
                     contentDescription: keepScreenAwake ? "Deck mode on" : "Deck mode off",
                     tint: AppColors.textSecondary,
@@ -244,6 +257,8 @@ private struct HomeTopBar: View {
 // MARK: - Status Card
 
 private struct StatusCard: View {
+    @Environment(\.themePalette) private var palette
+
     let snapshot: CompanionStateSnapshot
     let onToggleBuffer: () -> Void
     let onOpenCaptureSetup: () -> Void
@@ -299,7 +314,7 @@ private struct StatusCard: View {
                         HStack(spacing: 6) {
                             Image(systemName: "display")
                                 .font(.system(size: 12, weight: .semibold))
-                                .foregroundColor(AppColors.accent)
+                                .foregroundColor(palette.accentColor)
 
                             Text(setupLabel)
                                 .font(.system(size: 12, weight: .medium))

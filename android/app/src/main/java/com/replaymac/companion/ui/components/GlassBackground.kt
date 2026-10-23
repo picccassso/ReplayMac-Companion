@@ -13,11 +13,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import com.replaymac.companion.ui.theme.AppColors
+import com.replaymac.companion.ui.theme.AppTheme
 
 /**
- * The window background every screen sits on: the neutral dark grey of a
- * macOS window, lifted slightly at the top so glass panels read as layered.
+ * The window background every screen sits on: the theme's canvas (the
+ * neutral dark grey of a macOS window by default), lifted slightly at the
+ * top so glass panels read as layered.
  */
 @Composable
 fun GlassBackground(
@@ -27,7 +28,7 @@ fun GlassBackground(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(AppColors.BackgroundPrimary)
+            .background(AppTheme.palette.canvas)
             .background(Brush.verticalGradient(0f to Color.White.copy(alpha = 0.05f), 0.5f to Color.Transparent))
     ) {
         content()
@@ -42,6 +43,6 @@ private fun StatusBarScrim(modifier: Modifier = Modifier) {
         modifier = modifier
             .fillMaxWidth()
             .windowInsetsTopHeight(WindowInsets.statusBars)
-            .background(AppColors.BackgroundPrimary.copy(alpha = 0.94f))
+            .background(AppTheme.palette.canvas.copy(alpha = 0.94f))
     )
 }

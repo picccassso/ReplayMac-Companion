@@ -51,7 +51,9 @@ data class DemoCompanionState(
     /** The real Mac reveals the clip in Finder; the demo only remembers which one. */
     val lastRevealedClipId: String? = null,
     /** Where new clips' filenames get their local time from. */
-    val zone: ZoneId
+    val zone: ZoneId,
+    /** The atmosphere picked in the Appearance sheet; demo only, so it starts over with each demo. */
+    val atmosphereId: String = DemoAtmospheres.DEFAULT_ID
 ) {
     companion object {
         /** Roughly what a 1080p60 buffer holds in memory per second. */
@@ -246,6 +248,12 @@ data class DemoCompanionState(
         )
     }
 
+    // ==================== Appearance ====================
+
+    /** Wears another of ReplayMac's atmospheres; an unknown id changes nothing. */
+    fun selectAtmosphere(id: String): DemoCompanionState =
+        if (DemoAtmospheres.find(id) == null) this else copy(atmosphereId = id)
+
     // ==================== Snapshot ====================
 
     /** The state as the Mac would send it. */
@@ -274,6 +282,7 @@ data class DemoCompanionState(
         audioApps = audioApps,
         displays = displays,
         profiles = profiles,
-        recentClips = recentClips
+        recentClips = recentClips,
+        theme = DemoAtmospheres.find(atmosphereId)?.theme
     )
 }

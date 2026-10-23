@@ -125,6 +125,9 @@ class DemoCompanionSession(
     override fun selectDisplay(displayId: String) = mutate { it.selectDisplay(displayId) }
     override fun applyProfile(profileId: String) = mutate { it.applyProfile(profileId) }
 
+    /** Demo only: re-themes the pretend Mac, which then sends its new look like a real one would. */
+    fun selectAtmosphere(id: String) = mutate { it.selectAtmosphere(id) }
+
     /** Applies a rule, telling the app if the snapshot changed. False while the demo is stopped. */
     private fun mutate(rule: (DemoCompanionState) -> DemoCompanionState): Boolean = synchronized(lock) {
         val before = state ?: return false

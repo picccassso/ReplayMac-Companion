@@ -83,8 +83,9 @@ Tap **Try without a Mac** at the bottom of the connection screen to explore the 
 
 ## The Home screen
 
-Once connected, the top of the screen shows your Mac's name and "Connected • *your phone's name*", using whatever names you've set in ReplayMac. Three buttons sit next to it:
+Once connected, the top of the screen shows your Mac's name and "Connected • *your phone's name*", using whatever names you've set in ReplayMac. Four buttons sit next to it:
 
+- **Paintbrush**: opens Appearance (see below).
 - **Bulb**: turns Deck mode on or off (see below).
 - **Question mark**: opens the quick guide.
 - **Power**: disconnects from the Mac. On Android, the system Back gesture disconnects too.
@@ -137,6 +138,14 @@ Tap a clip to open its details:
 ### Deck mode
 
 Deck mode keeps your phone's screen on so the controls are always ready, which is the whole point when the phone is propped up beside your keyboard. Tap the bulb at the top of Home to turn it on or off. The app remembers your choice.
+
+### Appearance
+
+The app takes on your Mac's look: the atmosphere chosen in ReplayMac's Appearance settings, its accent colour (including the two-colour gradient), and Liquid Glass, Tinted Glass or Solid Matte panels. Change any of them on the Mac and the phone follows within a moment. The app stays dark even when the Mac uses Light, and red, green and orange keep their meaning in every atmosphere.
+
+Tap the paintbrush on Home to see your Mac's theme. Turn off **Match my Mac** to keep the app's own blue look. The phone remembers each Mac's theme, so it opens looking like the Mac it's about to reconnect to. If the sheet says to update ReplayCap, your Mac's version doesn't share its theme yet.
+
+In demo mode, the paintbrush lists every atmosphere instead. Tap one to try it.
 
 ## Quick guide
 

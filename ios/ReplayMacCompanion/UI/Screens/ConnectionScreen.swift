@@ -300,6 +300,8 @@ public struct ConnectionScreen: View {
 // MARK: - Header & Banner
 
 private struct ConnectionHeader: View {
+    @Environment(\.themePalette) private var palette
+
     let isDiscovering: Bool
     let onRefresh: () -> Void
     let onOpenTutorial: () -> Void
@@ -331,7 +333,7 @@ private struct ConnectionHeader: View {
                 GroupIconButton(
                     systemImage: "arrow.clockwise",
                     contentDescription: "Search again",
-                    tint: isDiscovering ? AppColors.accent : AppColors.textSecondary,
+                    tint: isDiscovering ? palette.accentColor : AppColors.textSecondary,
                     selected: false,
                     onClick: onRefresh
                 )
@@ -447,6 +449,8 @@ private struct DiscoveredMacRow: View {
 }
 
 private struct PreviouslyConnectedRow: View {
+    @Environment(\.themePalette) private var palette
+
     let item: PreviouslyConnectedItem
     let onConnect: () -> Void
     let onForget: () -> Void
@@ -455,7 +459,7 @@ private struct PreviouslyConnectedRow: View {
         HStack(spacing: 14) {
             Image(systemName: "laptopcomputer")
                 .font(.system(size: 24))
-                .foregroundColor(item.isOnline ? AppColors.accent : AppColors.textSecondary)
+                .foregroundColor(item.isOnline ? palette.accentColor : AppColors.textSecondary)
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(item.mac.name)

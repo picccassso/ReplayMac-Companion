@@ -54,6 +54,9 @@ struct ReplayCapCompanionApp: App {
                         },
                         onOpenTutorial: {
                             viewModel.openTutorial()
+                        },
+                        onOpenAppearance: {
+                            viewModel.openAppearance()
                         }
                     )
                 } else {
@@ -108,7 +111,7 @@ struct ReplayCapCompanionApp: App {
                     .transition(.opacity)
                 }
             }
-            .preferredColorScheme(.dark)
+            .themed(viewModel.palette)
             .sheet(item: $viewModel.selectedClip) { clip in
                 ClipDetailsBottomSheet(
                     clip: clip,
@@ -129,7 +132,7 @@ struct ReplayCapCompanionApp: App {
                         viewModel.selectClip(nil)
                     }
                 )
-                .preferredColorScheme(.dark)
+                .themed(viewModel.palette)
             }
             .sheet(isPresented: $viewModel.showAudioMixerSheet) {
                 AudioMixerBottomSheet(
@@ -156,7 +159,7 @@ struct ReplayCapCompanionApp: App {
                         viewModel.dismissAudioMixer()
                     }
                 )
-                .preferredColorScheme(.dark)
+                .themed(viewModel.palette)
             }
             .sheet(isPresented: $viewModel.showCaptureSetupSheet) {
                 CaptureSetupBottomSheet(
@@ -171,7 +174,24 @@ struct ReplayCapCompanionApp: App {
                         viewModel.dismissCaptureSetup()
                     }
                 )
-                .preferredColorScheme(.dark)
+                .themed(viewModel.palette)
+            }
+            .sheet(isPresented: $viewModel.showAppearanceSheet) {
+                AppearanceBottomSheet(
+                    macTheme: viewModel.macTheme,
+                    matchMac: viewModel.matchMacTheme,
+                    isDemo: viewModel.isDemo,
+                    onSetMatchMac: { match in
+                        viewModel.setMatchMacTheme(match)
+                    },
+                    onSelectAtmosphere: { atmosphereId in
+                        viewModel.selectDemoAtmosphere(atmosphereId)
+                    },
+                    onDismiss: {
+                        viewModel.dismissAppearance()
+                    }
+                )
+                .themed(viewModel.palette)
             }
         }
     }

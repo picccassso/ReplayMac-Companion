@@ -1,6 +1,5 @@
 package com.replaymac.companion.ui.components
 
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -33,6 +32,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.Role
@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.replaymac.companion.ui.theme.AppColors
 import com.replaymac.companion.ui.theme.AppRadii
+import com.replaymac.companion.ui.theme.AppTheme
 
 /**
  * Click handling shared by every glass control: a light haptic tick, a
@@ -103,7 +104,11 @@ fun Modifier.glassPressable(
 
 private val ButtonShape = RoundedCornerShape(AppRadii.Small.dp)
 
-/** Filled accent button, the equivalent of the desktop's `.glassProminent` style. */
+/**
+ * Filled accent button, the equivalent of the desktop's `.glassProminent`
+ * style: the theme's accent (or its gradient) with a label that reads on it.
+ * A specified [color] (a red Forget) fills it solid instead, with a white label.
+ */
 @Composable
 fun AccentButton(
     text: String,
@@ -111,18 +116,18 @@ fun AccentButton(
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
     enabled: Boolean = true,
-    color: Color = AppColors.Accent,
+    color: Color = Color.Unspecified,
     shape: Shape = ButtonShape,
     contentPadding: PaddingValues = PaddingValues(horizontal = 18.dp, vertical = 12.dp)
 ) {
     ButtonContent(
         text = text,
         icon = icon,
-        contentColor = Color.White,
+        contentColor = if (color.isSpecified) Color.White else AppTheme.palette.onAccent,
         contentPadding = contentPadding,
         modifier = modifier
             .glassPressable(onClick = onClick, enabled = enabled, shape = shape)
-            .background(color, shape)
+            .then(if (color.isSpecified) Modifier.background(color, shape) else Modifier.accentFill(shape))
     )
 }
 
@@ -135,7 +140,8 @@ fun GlassButton(
     icon: ImageVector? = null,
     enabled: Boolean = true,
     contentColor: Color = AppColors.TextPrimary,
-    tint: Color = AppColors.SurfaceGlass,
+    /** Unspecified for the theme's default panel. */
+    tint: Color = Color.Unspecified,
     shape: Shape = ButtonShape,
     contentPadding: PaddingValues = PaddingValues(horizontal = 18.dp, vertical = 12.dp)
 ) {
@@ -188,10 +194,7 @@ fun GlassIconButton(
     selected: Boolean = false,
     size: Dp = 40.dp
 ) {
-    val fill by animateColorAsState(
-        if (selected) AppColors.Accent else AppColors.SurfaceGlass,
-        label = "iconButtonFill"
-    )
+    val selection by animateFloatAsState(if (selected) 1f else 0f, label = "iconButtonFill")
     Box(
         modifier = modifier
             .defaultMinSize(48.dp, 48.dp),
@@ -201,13 +204,14 @@ fun GlassIconButton(
             modifier = Modifier
                 .size(size)
                 .glassPressable(onClick = onClick, shape = CircleShape)
-                .glass(CircleShape, fill),
+                .glass(CircleShape)
+                .accentFill(CircleShape, alpha = selection),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = contentDescription,
-                tint = if (selected) Color.White else tint,
+                tint = if (selected) AppTheme.palette.onAccent else tint,
                 modifier = Modifier.size(size * 0.48f)
             )
         }
@@ -242,21 +246,18 @@ fun GroupIconButton(
     tint: Color = AppColors.TextPrimary,
     selected: Boolean = false
 ) {
-    val fill by animateColorAsState(
-        if (selected) AppColors.Accent else Color.Transparent,
-        label = "groupButtonFill"
-    )
+    val selection by animateFloatAsState(if (selected) 1f else 0f, label = "groupButtonFill")
     Box(
         modifier = modifier
             .size(40.dp)
             .glassPressable(onClick = onClick, shape = CircleShape)
-            .background(fill, CircleShape),
+            .accentFill(CircleShape, alpha = selection),
         contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
-            tint = if (selected) Color.White else tint,
+            tint = if (selected) AppTheme.palette.onAccent else tint,
             modifier = Modifier.size(20.dp)
         )
     }

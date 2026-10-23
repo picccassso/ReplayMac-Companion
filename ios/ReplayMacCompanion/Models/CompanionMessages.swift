@@ -418,6 +418,8 @@ public struct CompanionStateSnapshot: Codable, Sendable, Equatable {
     public let displays: [CompanionDisplayInfo]
     public let profiles: [CompanionProfileSummary]
     public let recentClips: [CompanionClipSummary]
+    /// The Mac's Appearance settings; nil from ReplayCap builds without theming.
+    public let theme: CompanionTheme?
 
     public init(
         type: String = "state_snapshot",
@@ -445,7 +447,8 @@ public struct CompanionStateSnapshot: Codable, Sendable, Equatable {
         audioApps: [CompanionAudioApp] = [],
         displays: [CompanionDisplayInfo] = [],
         profiles: [CompanionProfileSummary] = [],
-        recentClips: [CompanionClipSummary] = []
+        recentClips: [CompanionClipSummary] = [],
+        theme: CompanionTheme? = nil
     ) {
         self.type = type
         self.isRecording = isRecording
@@ -473,6 +476,7 @@ public struct CompanionStateSnapshot: Codable, Sendable, Equatable {
         self.displays = displays
         self.profiles = profiles
         self.recentClips = recentClips
+        self.theme = theme
     }
 
     public static var empty: CompanionStateSnapshot {
@@ -524,7 +528,7 @@ public struct CompanionStateSnapshot: Codable, Sendable, Equatable {
         case longBufferEnabled, longBufferDurationSeconds, capturedDisplayName, isUsingFallbackDisplay
         case isMicrophoneEnabled, isMicrophoneMuted, isSystemAudioEnabled, isSystemAudioMuted
         case microphoneVolume, systemAudioVolume, perAppAudioEnabled
-        case audioApps, displays, profiles, recentClips
+        case audioApps, displays, profiles, recentClips, theme
     }
 
     public init(from decoder: Decoder) throws {
@@ -555,6 +559,8 @@ public struct CompanionStateSnapshot: Codable, Sendable, Equatable {
         self.displays = try container.decodeIfPresent([CompanionDisplayInfo].self, forKey: .displays) ?? []
         self.profiles = try container.decodeIfPresent([CompanionProfileSummary].self, forKey: .profiles) ?? []
         self.recentClips = try container.decodeIfPresent([CompanionClipSummary].self, forKey: .recentClips) ?? []
+        // A malformed theme must not cost the rest of the snapshot.
+        self.theme = try? container.decodeIfPresent(CompanionTheme.self, forKey: .theme)
     }
 }
 

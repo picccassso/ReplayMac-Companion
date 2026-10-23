@@ -41,13 +41,21 @@ Android paths are relative to `android/app/src/main/java/com/replaymac/companion
 3. If it's an `auth_response`, the client updates its connection state straight away: `approved` becomes Connected, `pending` becomes Pending Approval, and `denied` becomes a failure flagged as a pairing denial.
 4. Every message is then sent on as an event. The repository listens for these and:
    - replaces the snapshot on `state_snapshot` and `state_changed`, then asks for any missing thumbnails and drops ones for clips that have gone;
-   - copies the timer and memory fields from `telemetry_tick` into the current snapshot;
+   - copies the timer and memory fields from `telemetry_tick` into the current snapshot, keeping its `theme`;
    - stores the base64 image from `thumbnail_response`.
 5. The repository also watches the connection state. A new connection gets saved to the remembered Macs. A pairing denial clears them. A connection that drops after working starts the reconnector.
 6. The repository publishes a combined connection state. While the reconnector is searching and the socket hasn't settled, it reports **Reconnecting** with the Mac's name in place of the raw Connecting or Failed state.
 6. The view model forwards everything to the UI. The app shows Home only when the state is Connected and the connection screen for everything else. Navigation stays flat, so the app simply swaps between the two.
 
 Android uses `StateFlow` and `SharedFlow` on a `SupervisorJob() + Dispatchers.IO` scope in the repository, and Compose collects them with `collectAsState()`. iOS uses Combine subjects inside `@unchecked Sendable` classes protected by `NSLock`, and the `@MainActor` view model receives them on the main queue into `@Published` properties.
+
+## Theme
+
+Each snapshot's `theme` decides the colours. The repository shows it and, when it comes from a real Mac, saves it for that Mac in the theme store, keyed by the Mac's server id (or its name if the Mac sends no id). A snapshot without a theme shows the default look and leaves the saved one alone. Before a Mac has sent anything (a cold launch, the connection screen, reconnecting, or after leaving the demo), the repository shows the saved theme of the Mac it would reconnect to. Forgetting a Mac, or a pairing denial, deletes its saved theme.
+
+`ThemeResolver` turns the theme and the **Match my Mac** setting into a `ThemePalette`: canvas, card, accent, second accent, label colour on accent fills, whether to draw the gradient, and the surface style. It only uses the theme's `dark` colours. The `native` atmosphere keeps the companion's own canvas and card but takes the Mac's accent, and a colour that won't parse falls back on its own. Labels on accent fills are white unless white falls below a WCAG contrast of 3:1 on either end of the fill, in which case they turn near-black. The demo always shows its own theme.
+
+The palette reaches the screens through `EnvironmentValues.themePalette` on iOS and `LocalThemePalette` on Android. Text and status colours stay in `AppColors`. Glass panels with no explicit tint follow the surface style: translucent white glass, card-and-accent tinted glass with an accent rim, or an opaque card. Changes crossfade over 0.35 s, or apply instantly with Reduce Motion on iOS or animations off on Android.
 
 ## From a tap to the Mac
 
@@ -94,6 +102,8 @@ Android keeps everything in one `SharedPreferences` file, `replaymac_companion_p
 | `keep_awake` | Deck mode on or off |
 | `has_seen_onboarding` | Whether the quick guide has been dismissed |
 | `remembered_macs_list` | The remembered Macs as a JSON array, newest first |
+| `theme.matchMac` | Whether the app matches the Mac's theme (on unless turned off) |
+| `theme.byMac.`*id* | Each remembered Mac's last theme as JSON, keyed by server id or name |
 | `remembered_server_id`, `remembered_name`, `remembered_network_host`, `remembered_network_port`, `remembered_usb_port`, `remembered_last_used_usb` | The older single-Mac format. It's migrated into the list on first read and still mirrors the most recent Mac |
 
 [Connection and reconnection](connection.md) explains how the remembered Macs are used.

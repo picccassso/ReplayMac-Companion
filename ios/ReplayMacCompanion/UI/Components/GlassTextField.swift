@@ -1,6 +1,8 @@
 import SwiftUI
 
 public struct GlassTextField: View {
+    @Environment(\.themePalette) private var palette
+
     @Binding public var value: String
     public var label: String
     public var placeholder: String
@@ -32,10 +34,10 @@ public struct GlassTextField: View {
 
             ZStack(alignment: .leading) {
                 RoundedRectangle(cornerRadius: AppRadii.small, style: .continuous)
-                    .fill(AppColors.backgroundPrimary.opacity(0.55))
+                    .fill(palette.canvasColor.opacity(0.55))
 
                 RoundedRectangle(cornerRadius: AppRadii.small, style: .continuous)
-                    .strokeBorder(isFocused ? AppColors.accent : AppColors.glassBorder, lineWidth: 1)
+                    .strokeBorder(isFocused ? palette.accentColor : AppColors.glassBorder, lineWidth: 1)
 
                 if value.isEmpty && !placeholder.isEmpty {
                     Text(placeholder)

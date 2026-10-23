@@ -138,6 +138,38 @@ final class CompanionProtocolParserTests: XCTestCase {
         XCTAssertFalse(snapshot.isUsingFallbackDisplay)
     }
 
+    func testParseSnapshotTheme() {
+        let json = """
+        {"type":"state_changed","isRecording":true,"theme":{"atmosphere":"deep_ocean","atmosphereName":"Deep Ocean","colorScheme":"system","accentMode":"custom","surfaceStyle":"matte","dualTone":true,"dark":{"canvas":"#0A101D","card":"#121C30","accent":"#38BDF8","accentSecondary":"#6366F1"},"light":{"canvas":"#EEF4FA","card":"#E1ECF7","accent":"#38BDF8","accentSecondary":"#6366F1"}}}
+        """
+        guard case .stateChanged(let snapshot) = CompanionProtocolParser.parse(json) else {
+            XCTFail("Expected .stateChanged event")
+            return
+        }
+        let theme = snapshot.theme
+        XCTAssertEqual(theme?.atmosphere, "deep_ocean")
+        XCTAssertEqual(theme?.atmosphereName, "Deep Ocean")
+        XCTAssertEqual(theme?.colorScheme, "system")
+        XCTAssertEqual(theme?.accentMode, "custom")
+        XCTAssertEqual(theme?.surfaceStyle, "matte")
+        XCTAssertEqual(theme?.dualTone, true)
+        XCTAssertEqual(theme?.dark, CompanionThemePalette(canvas: "#0A101D", card: "#121C30", accent: "#38BDF8", accentSecondary: "#6366F1"))
+        XCTAssertEqual(theme?.light?.canvas, "#EEF4FA")
+    }
+
+    func testMalformedOrMissingThemeLeavesTheSnapshotIntact() {
+        for themeJSON in [#""theme":"deep_ocean","#, #""theme":42,"#, ""] {
+            let json = #"{"type":"state_snapshot",\#(themeJSON)"isRecording":true,"bufferedSeconds":7}"#
+            guard case .snapshot(let snapshot) = CompanionProtocolParser.parse(json) else {
+                XCTFail("Expected .snapshot event for \(themeJSON)")
+                continue
+            }
+            XCTAssertNil(snapshot.theme)
+            XCTAssertTrue(snapshot.isRecording)
+            XCTAssertEqual(snapshot.bufferedSeconds, 7)
+        }
+    }
+
     func testParseTelemetryTick() {
         let tickJson = """
         {

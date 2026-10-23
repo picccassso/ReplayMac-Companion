@@ -1,6 +1,8 @@
 import SwiftUI
 
 public struct CaptureSetupBottomSheet: View {
+    @Environment(\.themePalette) private var palette
+
     public var snapshot: CompanionStateSnapshot
     public var onSelectDisplay: (String) -> Void
     public var onApplyProfile: (String) -> Void
@@ -37,7 +39,7 @@ public struct CaptureSetupBottomSheet: View {
                     onDismiss()
                 }
                 .font(.system(size: 15, weight: .semibold))
-                .foregroundColor(AppColors.accent)
+                .foregroundColor(palette.accentColor)
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 12)
@@ -52,7 +54,7 @@ public struct CaptureSetupBottomSheet: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .background(AppColors.backgroundSecondary.ignoresSafeArea())
+        .background(palette.cardColor.ignoresSafeArea())
     }
 
     private var displaysSection: some View {
@@ -84,7 +86,7 @@ public struct CaptureSetupBottomSheet: View {
             HStack(spacing: 12) {
                 Image(systemName: "display")
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(display.isActive ? AppColors.accent : AppColors.textSecondary)
+                    .foregroundColor(display.isActive ? palette.accentColor : AppColors.textSecondary)
                     .frame(width: 22)
 
                 VStack(alignment: .leading, spacing: 2) {
@@ -109,10 +111,10 @@ public struct CaptureSetupBottomSheet: View {
                         Text("Active")
                             .font(.system(size: 12, weight: .semibold))
                     }
-                    .foregroundColor(AppColors.accent)
+                    .foregroundColor(palette.accentColor)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
-                    .background(AppColors.accent.opacity(0.16), in: Capsule())
+                    .background(palette.accentColor.opacity(0.16), in: Capsule())
                 }
             }
             .padding(.horizontal, 16)
@@ -151,7 +153,7 @@ public struct CaptureSetupBottomSheet: View {
             HStack(spacing: 12) {
                 Image(systemName: "rectangle.stack.badge.play")
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(profile.isActive ? AppColors.accent : AppColors.textSecondary)
+                    .foregroundColor(profile.isActive ? palette.accentColor : AppColors.textSecondary)
                     .frame(width: 22)
 
                 VStack(alignment: .leading, spacing: 3) {
@@ -178,10 +180,10 @@ public struct CaptureSetupBottomSheet: View {
                         Text("Active")
                             .font(.system(size: 12, weight: .semibold))
                     }
-                    .foregroundColor(AppColors.accent)
+                    .foregroundColor(palette.accentColor)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
-                    .background(AppColors.accent.opacity(0.16), in: Capsule())
+                    .background(palette.accentColor.opacity(0.16), in: Capsule())
                 }
             }
             .padding(.horizontal, 16)

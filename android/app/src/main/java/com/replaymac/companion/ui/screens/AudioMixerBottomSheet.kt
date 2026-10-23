@@ -56,6 +56,7 @@ import com.replaymac.companion.ui.components.SectionHeader
 import com.replaymac.companion.ui.components.glass
 import com.replaymac.companion.ui.components.glassPressable
 import com.replaymac.companion.ui.theme.AppColors
+import com.replaymac.companion.ui.theme.AppTheme
 import com.replaymac.companion.ui.theme.AppRadii
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -78,7 +79,7 @@ fun AudioMixerBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         sheetMaxWidth = if (isLandscape) 760.dp else 640.dp,
-        containerColor = AppColors.BackgroundSecondary,
+        containerColor = AppTheme.palette.card,
         contentColor = AppColors.TextPrimary,
         shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
         dragHandle = {
@@ -159,13 +160,13 @@ fun AudioMixerBottomSheet(
                         Box(
                             modifier = Modifier
                                 .glassPressable(onClick = onUnmuteAllApps, shape = CircleShape)
-                                .background(AppColors.Accent.copy(alpha = 0.16f), CircleShape)
+                                .background(AppTheme.palette.accent.copy(alpha = 0.16f), CircleShape)
                                 .padding(horizontal = 10.dp, vertical = 4.dp)
                         ) {
                             Text(
                                 text = "Unmute All",
                                 style = MaterialTheme.typography.labelMedium,
-                                color = AppColors.Accent
+                                color = AppTheme.palette.accent
                             )
                         }
                     }
@@ -231,7 +232,7 @@ private fun VolumeChannelRow(
     val iconTint = when {
         !isEnabled -> AppColors.TextSecondary
         isMuted -> AppColors.Warning
-        else -> AppColors.Accent
+        else -> AppTheme.palette.accent
     }
 
     Column(
@@ -284,7 +285,7 @@ private fun VolumeChannelRow(
             enabled = isEnabled,
             colors = SliderDefaults.colors(
                 thumbColor = if (isActive) Color.White else AppColors.TextSecondary,
-                activeTrackColor = if (isActive) AppColors.Accent else AppColors.TextTertiary,
+                activeTrackColor = if (isActive) AppTheme.palette.accent else AppColors.TextTertiary,
                 inactiveTrackColor = AppColors.SurfaceGlass
             )
         )
@@ -336,7 +337,7 @@ private fun AudioAppRow(
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
                             .size(15.dp)
-                            .background(AppColors.BackgroundSecondary, CircleShape)
+                            .background(AppTheme.palette.card, CircleShape)
                             .padding(1.5.dp)
                             .background(AppColors.Warning, CircleShape),
                         contentAlignment = Alignment.Center
@@ -404,7 +405,7 @@ private fun MuteTogglePill(
     isHighlighted: Boolean,
     onClick: () -> Unit
 ) {
-    val bg = if (isHighlighted) AppColors.Warning.copy(alpha = 0.18f) else AppColors.SurfaceGlass
+    val bg = if (isHighlighted) AppColors.Warning.copy(alpha = 0.18f) else Color.Unspecified
     val fg = if (isHighlighted) AppColors.Warning else AppColors.TextPrimary
     Box(
         modifier = Modifier

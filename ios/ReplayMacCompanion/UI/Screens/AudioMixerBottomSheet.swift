@@ -1,6 +1,8 @@
 import SwiftUI
 
 public struct AudioMixerBottomSheet: View {
+    @Environment(\.themePalette) private var palette
+
     public var snapshot: CompanionStateSnapshot
     public var onToggleMicrophone: () -> Void
     public var onToggleSystemAudio: () -> Void
@@ -58,7 +60,7 @@ public struct AudioMixerBottomSheet: View {
                     onDismiss()
                 }
                 .font(.system(size: 15, weight: .semibold))
-                .foregroundColor(AppColors.accent)
+                .foregroundColor(palette.accentColor)
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 12)
@@ -73,7 +75,7 @@ public struct AudioMixerBottomSheet: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .background(AppColors.backgroundSecondary.ignoresSafeArea())
+        .background(palette.cardColor.ignoresSafeArea())
         .onAppear {
             micSliderValue = snapshot.microphoneVolume
             systemSliderValue = snapshot.systemAudioVolume
@@ -159,7 +161,7 @@ public struct AudioMixerBottomSheet: View {
             HStack(spacing: 10) {
                 Image(systemName: icon)
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(!isEnabled ? AppColors.textSecondary : (isMuted ? AppColors.warning : AppColors.accent))
+                    .foregroundColor(!isEnabled ? AppColors.textSecondary : (isMuted ? AppColors.warning : palette.accentColor))
                     .frame(width: 22)
 
                 Text(title)
@@ -200,7 +202,7 @@ public struct AudioMixerBottomSheet: View {
                 step: 0.01,
                 onEditingChanged: onEditingChanged
             )
-            .tint(isMuted ? AppColors.warning : AppColors.accent)
+            .tint(isMuted ? AppColors.warning : palette.accentColor)
             .disabled(!isEnabled)
             .opacity(isEnabled ? 1.0 : 0.45)
         }
@@ -216,7 +218,7 @@ public struct AudioMixerBottomSheet: View {
                     }) {
                         Text("Unmute All")
                             .font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(AppColors.accent)
+                            .foregroundColor(palette.accentColor)
                     }
                 }
             }
@@ -301,7 +303,7 @@ public struct AudioMixerBottomSheet: View {
                         .font(.system(size: 9, weight: .bold))
                         .foregroundColor(AppColors.warning)
                         .padding(3)
-                        .background(AppColors.backgroundSecondary, in: Circle())
+                        .background(palette.cardColor, in: Circle())
                         .offset(x: 4, y: 4)
                 }
             }
@@ -309,7 +311,7 @@ public struct AudioMixerBottomSheet: View {
         } else {
             Image(systemName: app.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
                 .font(.system(size: 15, weight: .semibold))
-                .foregroundColor(app.isMuted ? AppColors.warning : AppColors.accent)
+                .foregroundColor(app.isMuted ? AppColors.warning : palette.accentColor)
                 .frame(width: 32, height: 32)
                 .background(
                     (app.isMuted ? AppColors.warning.opacity(0.16) : Color.white.opacity(0.06)),

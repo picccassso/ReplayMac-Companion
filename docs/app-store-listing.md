@@ -128,6 +128,8 @@ Generate the code in App Store Connect under ReplayCap (the Mac app), as a promo
 | iPhone 6.3 | 1206 × 2622 | Optional, Apple scales 6.9 down otherwise |
 | iPad 13 | 2752 × 2064 | Required, because the app runs on iPad |
 
+`store-ready-themed/iPhone 6.9` shows the 1.1.0 theming from demo mode, one atmosphere per shot: Home in Deep Ocean, Appearance in Catppuccin Mocha, the audio mixer in Carbon Studio, capture setup in Arena Boost and clip details in Pitch Black.
+
 `review_clip_details_private_thumbnail.png` is for your own reference, not the store. Screenshots must show the app in use (2.3.3), and they do. Keep Android, other platforms and prices out of them (2.3.10).
 
 ## Guideline checklist

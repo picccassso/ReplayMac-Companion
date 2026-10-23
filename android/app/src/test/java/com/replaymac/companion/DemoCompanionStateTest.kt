@@ -305,4 +305,20 @@ class DemoCompanionStateTest {
         assertEquals("demo-clip-4", state.recentClips.first().id)
         assertEquals(DemoClipKind.REPLAY.wireName, state.recentClips.first().kind)
     }
+
+    @Test
+    fun theDemoMacWearsTheChosenAtmosphereAndIgnoresUnknownOnes() {
+        assertEquals("native", initial.toSnapshot().theme?.atmosphere)
+        assertEquals("glass", initial.toSnapshot().theme?.surfaceStyle)
+        assertFalse(initial.toSnapshot().theme!!.dualTone)
+
+        val mocha = initial.selectAtmosphere("catppuccin_mocha").toSnapshot().theme!!
+        assertEquals("Catppuccin Mocha", mocha.atmosphereName)
+        assertEquals("tinted_glass", mocha.surfaceStyle)
+        assertTrue(mocha.dualTone)
+        assertEquals("#CBA6F7", mocha.dark?.accent)
+        assertEquals("#B4BEFE", mocha.dark?.accentSecondary)
+
+        assertSame(initial, initial.selectAtmosphere("solarized"))
+    }
 }

@@ -1,6 +1,8 @@
 import SwiftUI
 
 public struct GlassBackground<Content: View>: View {
+    @Environment(\.themePalette) private var palette
+
     public let content: () -> Content
 
     public init(@ViewBuilder content: @escaping () -> Content) {
@@ -9,7 +11,7 @@ public struct GlassBackground<Content: View>: View {
 
     public var body: some View {
         ZStack {
-            AppColors.backgroundPrimary
+            palette.canvasColor
                 .ignoresSafeArea()
 
             LinearGradient(

@@ -177,6 +177,12 @@ public final class DemoCompanionSession: CompanionLink, @unchecked Sendable {
         update { $0.applyProfile(profileId) }
     }
 
+    /// Switches the demo Mac's atmosphere, as changing Appearance on a real Mac would.
+    @discardableResult
+    public func selectAtmosphere(_ atmosphereId: String) -> Bool {
+        update { $0.selectAtmosphere(atmosphereId) }
+    }
+
     // MARK: - State changes
 
     /// Applies a change and sends the new state if the phone would see it.

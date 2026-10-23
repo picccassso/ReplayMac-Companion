@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.replaymac.companion.ui.theme.AppColors
+import com.replaymac.companion.ui.theme.AppTheme
 import java.util.Locale
 import kotlin.math.min
 
@@ -60,7 +61,7 @@ fun ProgressMeter(
     )
     val suffix = meterFillSuffix(availableSeconds, safeCap)
     val isReady = suffix == "Ready"
-    val barColor by animateColorAsState(if (isReady) AppColors.Success else AppColors.Accent, label = "meterColor")
+    val barColor by animateColorAsState(if (isReady) AppColors.Success else AppTheme.palette.accent, label = "meterColor")
     val digits = MaterialTheme.typography.labelMedium.copy(fontFeatureSettings = "tnum")
 
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(7.dp)) {

@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.replaymac.companion.ui.theme.AppColors
+import com.replaymac.companion.ui.theme.AppTheme
 import com.replaymac.companion.ui.theme.AppRadii
 
 /** The Connect screen's way into demo mode, for trying the app without a Mac. */
@@ -37,7 +38,7 @@ fun TryDemoEntry(onTryDemo: () -> Unit, modifier: Modifier = Modifier) {
             text = "Try without a Mac",
             icon = Icons.Rounded.PlayCircleOutline,
             onClick = onTryDemo,
-            contentColor = AppColors.Accent
+            contentColor = AppTheme.palette.accent
         )
         Text(
             text = "Explore every control with sample data. Nothing is sent anywhere.",

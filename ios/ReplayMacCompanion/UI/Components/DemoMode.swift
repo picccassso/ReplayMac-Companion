@@ -2,6 +2,8 @@ import SwiftUI
 
 /// The Connect screen's way into demo mode, for trying the app without a Mac.
 public struct TryDemoButton: View {
+    @Environment(\.themePalette) private var palette
+
     public var onClick: () -> Void
 
     public init(onClick: @escaping () -> Void) {
@@ -13,7 +15,7 @@ public struct TryDemoButton: View {
             GlassButton(
                 text: "Try without a Mac",
                 icon: "play.rectangle.on.rectangle",
-                contentColor: AppColors.accent,
+                contentColor: palette.accentColor,
                 onClick: onClick
             )
 

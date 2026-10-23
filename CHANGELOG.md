@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.0 (2026-10-23)
+
+- Match the Mac's look. The app takes on the atmosphere, accent colour, two-colour accent gradient and surface style (Liquid Glass, Tinted Glass or Solid Matte) chosen in ReplayMac's Appearance settings, and follows changes on the Mac live with a short crossfade. It stays dark, and red, green and orange keep their meaning in every atmosphere. Needs a ReplayMac build that shares its theme; older builds keep the default look
+- Add an Appearance sheet, opened with the paintbrush at the top of Home. It shows the Mac's theme and a **Match my Mac** switch for keeping the app's own blue look
+- Remember each Mac's theme, so the app opens looking like the Mac it's about to reconnect to. Forgetting a Mac forgets its theme
+- Pick a label colour for buttons filled with the accent by contrast, so light accents such as Catppuccin's get dark labels
+- Let demo mode try every atmosphere from the Appearance sheet
+
 ## 1.0.0 (2026-10-21)
 
 The first version of the companion, on both Android and iOS. The iOS app is on the [App Store](https://apps.apple.com/us/app/replaycap-companion/id6821022359) as ReplayCap Companion, and the Android APK is on [GitHub releases](https://github.com/picccassso/ReplayMac-Companion/releases/latest).

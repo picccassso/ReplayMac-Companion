@@ -39,6 +39,7 @@ import com.replaymac.companion.ui.components.SectionHeader
 import com.replaymac.companion.ui.components.glass
 import com.replaymac.companion.ui.components.glassPressable
 import com.replaymac.companion.ui.theme.AppColors
+import com.replaymac.companion.ui.theme.AppTheme
 import com.replaymac.companion.ui.theme.AppRadii
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,7 +58,7 @@ fun CaptureSetupBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         sheetMaxWidth = if (isLandscape) 760.dp else 640.dp,
-        containerColor = AppColors.BackgroundSecondary,
+        containerColor = AppTheme.palette.card,
         contentColor = AppColors.TextPrimary,
         shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
         dragHandle = {
@@ -172,7 +173,7 @@ private fun DisplayOptionRow(
             modifier = Modifier
                 .size(32.dp)
                 .background(
-                    if (display.isActive) AppColors.Accent.copy(alpha = 0.18f) else AppColors.SurfaceGlass,
+                    if (display.isActive) AppTheme.palette.accent.copy(alpha = 0.18f) else AppColors.SurfaceGlass,
                     RoundedCornerShape(8.dp)
                 ),
             contentAlignment = Alignment.Center
@@ -180,7 +181,7 @@ private fun DisplayOptionRow(
             Icon(
                 imageVector = Icons.Rounded.DesktopMac,
                 contentDescription = null,
-                tint = if (display.isActive) AppColors.Accent else AppColors.TextSecondary,
+                tint = if (display.isActive) AppTheme.palette.accent else AppColors.TextSecondary,
                 modifier = Modifier.size(18.dp)
             )
         }
@@ -202,7 +203,7 @@ private fun DisplayOptionRow(
             Text(
                 text = statusSubtitle,
                 style = MaterialTheme.typography.labelSmall,
-                color = if (display.isActive) AppColors.Accent else AppColors.TextSecondary
+                color = if (display.isActive) AppTheme.palette.accent else AppColors.TextSecondary
             )
         }
 
@@ -229,7 +230,7 @@ private fun ProfileOptionRow(
             modifier = Modifier
                 .size(32.dp)
                 .background(
-                    if (profile.isActive) AppColors.Accent.copy(alpha = 0.18f) else AppColors.SurfaceGlass,
+                    if (profile.isActive) AppTheme.palette.accent.copy(alpha = 0.18f) else AppColors.SurfaceGlass,
                     RoundedCornerShape(8.dp)
                 ),
             contentAlignment = Alignment.Center
@@ -237,7 +238,7 @@ private fun ProfileOptionRow(
             Icon(
                 imageVector = Icons.Rounded.Tune,
                 contentDescription = null,
-                tint = if (profile.isActive) AppColors.Accent else AppColors.TextSecondary,
+                tint = if (profile.isActive) AppTheme.palette.accent else AppColors.TextSecondary,
                 modifier = Modifier.size(18.dp)
             )
         }
@@ -271,7 +272,7 @@ private fun ProfileOptionRow(
 private fun ActiveBadge() {
     Row(
         modifier = Modifier
-            .background(AppColors.Accent.copy(alpha = 0.18f), CircleShape)
+            .background(AppTheme.palette.accent.copy(alpha = 0.18f), CircleShape)
             .padding(horizontal = 10.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -279,13 +280,13 @@ private fun ActiveBadge() {
         Icon(
             imageVector = Icons.Rounded.Check,
             contentDescription = "Active",
-            tint = AppColors.Accent,
+            tint = AppTheme.palette.accent,
             modifier = Modifier.size(14.dp)
         )
         Text(
             text = "Active",
             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-            color = AppColors.Accent
+            color = AppTheme.palette.accent
         )
     }
 }

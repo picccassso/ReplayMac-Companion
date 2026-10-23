@@ -13,20 +13,21 @@ public enum TileTone: Sendable, Equatable {
 }
 
 private struct TilePalette {
-    let fill: Color
+    /// Nil follows the theme: its surface, or its accent fill for `.prominent`.
+    let fill: Color?
     let icon: Color
     let title: Color
     let subtitle: Color
 }
 
-private func paletteFor(_ tone: TileTone) -> TilePalette {
+private func paletteFor(_ tone: TileTone, theme: ThemePalette) -> TilePalette {
     switch tone {
     case .prominent:
         return TilePalette(
-            fill: AppColors.accent,
-            icon: .white,
-            title: .white,
-            subtitle: Color.white.opacity(0.75)
+            fill: nil,
+            icon: theme.onAccentColor,
+            title: theme.onAccentColor,
+            subtitle: theme.onAccentColor.opacity(0.75)
         )
     case .live:
         return TilePalette(
@@ -37,22 +38,22 @@ private func paletteFor(_ tone: TileTone) -> TilePalette {
         )
     case .muted:
         return TilePalette(
-            fill: AppColors.surfaceGlass,
+            fill: nil,
             icon: AppColors.warning,
             title: AppColors.textPrimary,
             subtitle: AppColors.textSecondary
         )
     case .off:
         return TilePalette(
-            fill: AppColors.surfaceGlass,
+            fill: nil,
             icon: AppColors.textSecondary,
             title: AppColors.textPrimary,
             subtitle: AppColors.textSecondary
         )
     case .normal:
         return TilePalette(
-            fill: AppColors.surfaceGlass,
-            icon: AppColors.accent,
+            fill: nil,
+            icon: theme.accentColor,
             title: AppColors.textPrimary,
             subtitle: AppColors.textSecondary
         )
@@ -60,6 +61,8 @@ private func paletteFor(_ tone: TileTone) -> TilePalette {
 }
 
 public struct ActionTile: View {
+    @Environment(\.themePalette) private var theme
+
     public var title: String
     public var subtitle: String
     public var systemImage: String
@@ -99,7 +102,7 @@ public struct ActionTile: View {
     }
 
     public var body: some View {
-        let palette = paletteFor(tone)
+        let palette = paletteFor(tone, theme: theme)
         let resolvedTitle = (isCompact ? compactTitle : nil) ?? title
         let resolvedMinHeight = isCompact && minHeight == 64 ? 54 : minHeight
         let iconSize: CGFloat = isCompact ? 17 : 20
@@ -171,10 +174,19 @@ public struct ActionTile: View {
                 .accessibilityLabel("\(title) mixer and app audio")
             }
         }
-        .glass(
-            cornerRadius: AppRadii.medium,
-            tint: palette.fill,
-            rimAlpha: palette.fill == AppColors.surfaceGlass ? 1.0 : 0.4
-        )
+        .modifier(TileBackground(tone: tone, fill: palette.fill))
+    }
+}
+
+private struct TileBackground: ViewModifier {
+    let tone: TileTone
+    let fill: Color?
+
+    func body(content: Content) -> some View {
+        if tone == .prominent {
+            content.accentPanel(cornerRadius: AppRadii.medium)
+        } else {
+            content.glass(cornerRadius: AppRadii.medium, tint: fill, rimAlpha: fill == nil ? 1.0 : 0.4)
+        }
     }
 }

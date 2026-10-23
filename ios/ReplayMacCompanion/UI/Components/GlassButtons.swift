@@ -24,18 +24,21 @@ public struct GlassPressableStyle: ButtonStyle {
 }
 
 public struct AccentButton: View {
+    @Environment(\.themePalette) private var palette
+
     public var text: String
     public var icon: String?
     public var onClick: () -> Void
     public var enabled: Bool
-    public var color: Color
+    /// An explicit fill such as danger red. Nil uses the theme's accent.
+    public var color: Color?
     public var cornerRadius: CGFloat
 
     public init(
         text: String,
         icon: String? = nil,
         enabled: Bool = true,
-        color: Color = AppColors.accent,
+        color: Color? = nil,
         cornerRadius: CGFloat = AppRadii.small,
         onClick: @escaping () -> Void
     ) {
@@ -57,13 +60,17 @@ public struct AccentButton: View {
                 Text(text)
                     .font(.system(size: 15, weight: .semibold))
             }
-            .foregroundColor(.white)
+            .foregroundColor(color == nil ? palette.onAccentColor : .white)
             .padding(.horizontal, 18)
             .padding(.vertical, 12)
-            .background(color, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            .background(fill, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
         }
         .disabled(!enabled)
         .buttonStyle(GlassPressableStyle(enabled: enabled))
+    }
+
+    private var fill: AnyShapeStyle {
+        color.map { AnyShapeStyle($0) } ?? AnyShapeStyle(palette.accentFill)
     }
 }
 
@@ -73,7 +80,7 @@ public struct GlassButton: View {
     public var onClick: () -> Void
     public var enabled: Bool
     public var contentColor: Color
-    public var tint: Color
+    public var tint: Color?
     public var cornerRadius: CGFloat
 
     public init(
@@ -81,7 +88,7 @@ public struct GlassButton: View {
         icon: String? = nil,
         enabled: Bool = true,
         contentColor: Color = AppColors.textPrimary,
-        tint: Color = AppColors.surfaceGlass,
+        tint: Color? = nil,
         cornerRadius: CGFloat = AppRadii.small,
         onClick: @escaping () -> Void
     ) {
@@ -115,6 +122,8 @@ public struct GlassButton: View {
 }
 
 public struct GlassIconButton: View {
+    @Environment(\.themePalette) private var palette
+
     public var systemImage: String
     public var contentDescription: String
     public var onClick: () -> Void
@@ -142,7 +151,7 @@ public struct GlassIconButton: View {
         Button(action: onClick) {
             ZStack {
                 Circle()
-                    .fill(selected ? AppColors.accent : AppColors.surfaceGlass)
+                    .fill(selected ? AnyShapeStyle(palette.accentFill) : AnyShapeStyle(AppColors.surfaceGlass))
                     .frame(width: size, height: size)
                     .overlay(
                         Circle()
@@ -151,7 +160,7 @@ public struct GlassIconButton: View {
 
                 Image(systemName: systemImage)
                     .font(.system(size: size * 0.44, weight: .medium))
-                    .foregroundColor(selected ? .white : tint)
+                    .foregroundColor(selected ? palette.onAccentColor : tint)
             }
             .frame(width: max(size, 44), height: max(size, 44))
         }
@@ -173,14 +182,13 @@ public struct GlassButtonGroup<Content: View>: View {
         }
         .padding(.horizontal, 4)
         .padding(.vertical, 4)
-        .background(Capsule().fill(AppColors.surfaceGlass))
-        .overlay(
-            Capsule().strokeBorder(Color.white.opacity(0.12), lineWidth: 0.75)
-        )
+        .glass(cornerRadius: 100)
     }
 }
 
 public struct GroupIconButton: View {
+    @Environment(\.themePalette) private var palette
+
     public var systemImage: String
     public var contentDescription: String
     public var onClick: () -> Void
@@ -205,12 +213,12 @@ public struct GroupIconButton: View {
         Button(action: onClick) {
             ZStack {
                 Circle()
-                    .fill(selected ? AppColors.accent : Color.clear)
+                    .fill(selected ? AnyShapeStyle(palette.accentFill) : AnyShapeStyle(Color.clear))
                     .frame(width: 36, height: 36)
 
                 Image(systemName: systemImage)
                     .font(.system(size: 17, weight: .medium))
-                    .foregroundColor(selected ? .white : tint)
+                    .foregroundColor(selected ? palette.onAccentColor : tint)
             }
         }
         .buttonStyle(GlassPressableStyle())

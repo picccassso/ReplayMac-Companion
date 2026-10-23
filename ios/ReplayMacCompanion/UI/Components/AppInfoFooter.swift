@@ -4,6 +4,8 @@ import SwiftUI
 /// privacy policy. Shown under the connection options and in the quick guide,
 /// so both are reachable whether or not a Mac is connected.
 public struct AppInfoFooter: View {
+    @Environment(\.themePalette) private var palette
+
     public var showsRequirement: Bool
 
     public init(showsRequirement: Bool = true) {
@@ -28,7 +30,7 @@ public struct AppInfoFooter: View {
                 Link("Privacy Policy", destination: AppLinks.privacyPolicy)
             }
             .font(.system(size: 12, weight: .medium))
-            .foregroundColor(AppColors.accent)
+            .foregroundColor(palette.accentColor)
         }
         .frame(maxWidth: .infinity)
     }

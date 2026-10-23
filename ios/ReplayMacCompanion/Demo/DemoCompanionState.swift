@@ -42,6 +42,8 @@ public struct DemoCompanionState: Equatable, Sendable {
     public var displays: [CompanionDisplayInfo]
     public var profiles: [CompanionProfileSummary]
     public var clips: [CompanionClipSummary]
+    /// The demo Mac's Appearance, which the demo lets people switch.
+    public var atmosphere = DemoAtmospheres.native
 
     public private(set) var lastCopiedClipId: String?
     public private(set) var lastRevealedClipId: String?
@@ -115,7 +117,8 @@ public struct DemoCompanionState: Equatable, Sendable {
             audioApps: audioApps,
             displays: displays,
             profiles: profiles,
-            recentClips: clips
+            recentClips: clips,
+            theme: atmosphere.theme
         )
     }
 
@@ -242,6 +245,11 @@ public struct DemoCompanionState: Equatable, Sendable {
         profiles = profiles.map {
             CompanionProfileSummary(id: $0.id, name: $0.name, summary: $0.summary, isActive: $0.id == profileId)
         }
+    }
+
+    public mutating func selectAtmosphere(_ atmosphereId: String) {
+        guard let chosen = DemoAtmospheres.atmosphere(id: atmosphereId) else { return }
+        atmosphere = chosen
     }
 
     // MARK: - Clips

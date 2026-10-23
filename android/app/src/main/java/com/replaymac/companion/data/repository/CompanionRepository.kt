@@ -17,6 +17,7 @@ import com.replaymac.companion.data.model.RememberedMac
 import com.replaymac.companion.data.network.CompanionLink
 import com.replaymac.companion.data.network.CompanionWebSocketClient
 import com.replaymac.companion.data.network.NsdDiscoveryManager
+import com.replaymac.companion.ui.theme.ThemePalette
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -104,15 +105,22 @@ class CompanionRepository(
     private val _previouslyConnectedMacs = MutableStateFlow<List<RememberedMac>>(rememberedMacStore.loadAll())
     val previouslyConnectedMacs: StateFlow<List<RememberedMac>> = _previouslyConnectedMacs.asStateFlow()
 
+    /** Starts out in the theme of the Mac the app will reconnect to. */
+    private val themes = ThemeController(ThemeStore(prefs)).apply {
+        showRemembered(rememberedMacStore.load())
+    }
+
+    /** The colours the UI draws with. */
+    val themePalette: StateFlow<ThemePalette> = themes.palette
+    /** "Match my Mac" in the Appearance sheet. */
+    val matchMacTheme: StateFlow<Boolean> = themes.matchMac
+
     private val reconnector = AutoReconnector(
         scope = scope,
         connectionState = wsClient.connectionState,
         discoveredMacs = nsdManager.discoveredMacs,
         connect = ::openSocket,
-        onPairingDenied = {
-            rememberedMacStore.clear()
-            _previouslyConnectedMacs.value = emptyList()
-        }
+        onPairingDenied = ::forgetAllMacs
     )
 
     /** Only look for the Mac while the app is on screen; it's cheap then and pointless otherwise. */
@@ -150,13 +158,13 @@ class CompanionRepository(
     init {
         scope.launch {
             wsClient.events.collect { event ->
-                handleServerEvent(event)
+                handleServerEvent(event, fromDemo = false)
             }
         }
         scope.launch {
             // Events still queued when the demo stops must not refill the cleared state.
             demo.events.collect { event ->
-                if (demo.isRunning) handleServerEvent(event)
+                if (demo.isRunning) handleServerEvent(event, fromDemo = true)
             }
         }
         scope.launch {
@@ -170,6 +178,15 @@ class CompanionRepository(
     fun setKeepScreenAwake(enabled: Boolean) {
         _keepScreenAwake.value = enabled
         prefs.edit().putBoolean(KEY_KEEP_AWAKE, enabled).apply()
+    }
+
+    fun setMatchMacTheme(enabled: Boolean) {
+        themes.setMatchMac(enabled)
+    }
+
+    /** Demo only: wears another atmosphere, which comes back through the demo's snapshots. */
+    fun selectDemoAtmosphere(id: String) {
+        if (demo.isRunning) demo.selectAtmosphere(id)
     }
 
     fun setHasSeenOnboarding(seen: Boolean) {
@@ -197,6 +214,7 @@ class CompanionRepository(
         reconnector.stop()
         wsClient.disconnect()
         clearMacState()
+        themes.showRemembered(rememberedMacStore.load())
         updateDiscovery()
     }
 
@@ -271,7 +289,20 @@ class CompanionRepository(
     fun forgetMac(mac: RememberedMac) {
         rememberedMacStore.remove(mac)
         mac.serverId?.let(pairingSecrets::remove)
+        themes.forget(mac)
         _previouslyConnectedMacs.value = rememberedMacStore.loadAll()
+        // On the Connect screen the app wears the remembered Mac's theme, which may just have changed.
+        if (!demo.isRunning && wsClient.connectionState.value !is ConnectionState.Connected) {
+            themes.showRemembered(rememberedMacStore.load())
+        }
+    }
+
+    /** The Mac refused this phone: nothing about any Mac is worth keeping. */
+    private fun forgetAllMacs() {
+        rememberedMacStore.loadAll().forEach(themes::forget)
+        rememberedMacStore.clear()
+        _previouslyConnectedMacs.value = emptyList()
+        if (!demo.isRunning) themes.showRemembered(null)
     }
 
     private fun reconnectToRememberedMac() {
@@ -283,10 +314,7 @@ class CompanionRepository(
     private fun onSocketStateChanged(state: ConnectionState) {
         when {
             state is ConnectionState.Connected -> rememberConnectedMac(state)
-            state is ConnectionState.Failed && state.pairingDenied -> {
-                rememberedMacStore.clear()
-                _previouslyConnectedMacs.value = emptyList()
-            }
+            state is ConnectionState.Failed && state.pairingDenied -> forgetAllMacs()
             state is ConnectionState.Failed && state.wasConnected -> reconnectToRememberedMac()
         }
         updateDiscovery()
@@ -390,29 +418,12 @@ class CompanionRepository(
         }
     }
 
-    private fun handleServerEvent(event: CompanionServerEvent) {
+    private fun handleServerEvent(event: CompanionServerEvent, fromDemo: Boolean) {
         when (event) {
-            is CompanionServerEvent.Snapshot -> {
-                _snapshot.value = event.snapshot
-                pruneThumbnails(event.snapshot)
-                fetchMissingThumbnails(event.snapshot)
-            }
-            is CompanionServerEvent.StateChanged -> {
-                _snapshot.value = event.snapshot
-                pruneThumbnails(event.snapshot)
-                fetchMissingThumbnails(event.snapshot)
-            }
+            is CompanionServerEvent.Snapshot -> applySnapshot(event.snapshot, fromDemo)
+            is CompanionServerEvent.StateChanged -> applySnapshot(event.snapshot, fromDemo)
             is CompanionServerEvent.Telemetry -> {
-                _snapshot.update { current ->
-                    current.copy(
-                        recordingElapsedSeconds = event.tick.recordingElapsedSeconds,
-                        extendedBufferElapsedSeconds = event.tick.extendedBufferElapsedSeconds,
-                        sessionElapsedSeconds = event.tick.sessionElapsedSeconds,
-                        bufferedSeconds = event.tick.bufferedSeconds,
-                        bufferMemoryBytes = event.tick.bufferMemoryBytes,
-                        bufferMemoryFormatted = event.tick.bufferMemoryFormatted
-                    )
-                }
+                _snapshot.update { it.applying(event.tick) }
             }
             is CompanionServerEvent.Thumbnail -> {
                 pendingThumbnailRequests.remove(event.clipId)
@@ -424,6 +435,18 @@ class CompanionRepository(
             }
             else -> {}
         }
+    }
+
+    private fun applySnapshot(snapshot: CompanionStateSnapshot, fromDemo: Boolean) {
+        _snapshot.value = snapshot
+        if (fromDemo) {
+            themes.onDemoSnapshot(snapshot.theme)
+        } else {
+            val mac = wsClient.connectionState.value as? ConnectionState.Connected
+            themes.onMacSnapshot(snapshot.theme, mac?.let { ThemeStore.macKey(it.serverId, it.serverName) })
+        }
+        pruneThumbnails(snapshot)
+        fetchMissingThumbnails(snapshot)
     }
 
     private fun pruneThumbnails(snapshot: CompanionStateSnapshot) {

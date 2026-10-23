@@ -17,6 +17,7 @@ public final class CompanionRepository: @unchecked Sendable {
     public let discoveryManager: BonjourDiscoveryManager
     public let wsClient: CompanionWebSocketClient
     public let rememberedMacStore: RememberedMacStore
+    public let themeStore: ThemeStore
     public let reconnector: AutoReconnector
     public let demoSession: DemoCompanionSession
     private let secretStore: PairingSecretStoring
@@ -65,6 +66,34 @@ public final class CompanionRepository: @unchecked Sendable {
     }
     public var currentIsDemoActive: Bool {
         isDemoActiveSubject.value
+    }
+
+    private let macThemeSubject: CurrentValueSubject<CompanionTheme?, Never>
+    /// The theme of the Mac on screen, or of the remembered Mac before one connects.
+    /// Nil when that Mac doesn't send one.
+    public var macTheme: AnyPublisher<CompanionTheme?, Never> {
+        macThemeSubject.eraseToAnyPublisher()
+    }
+    public var currentMacTheme: CompanionTheme? {
+        macThemeSubject.value
+    }
+
+    private let matchMacThemeSubject: CurrentValueSubject<Bool, Never>
+    public var matchMacTheme: AnyPublisher<Bool, Never> {
+        matchMacThemeSubject.eraseToAnyPublisher()
+    }
+    public var currentMatchMacTheme: Bool {
+        matchMacThemeSubject.value
+    }
+
+    /// The colours to draw with. The demo always shows its own theme.
+    public var palette: AnyPublisher<ThemePalette, Never> {
+        Publishers.CombineLatest3(macThemeSubject, matchMacThemeSubject, isDemoActiveSubject)
+            .map { theme, matchMac, isDemo in
+                ThemeResolver.resolve(theme: theme, matchMac: matchMac || isDemo)
+            }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }
 
     /// Where commands go: the demo Mac while it runs, otherwise the socket.
@@ -141,6 +170,11 @@ public final class CompanionRepository: @unchecked Sendable {
         self.rememberedMacStore = store
         self.previouslyConnectedMacsSubject = CurrentValueSubject<[RememberedMac], Never>(store.loadAll())
 
+        let themes = ThemeStore(defaults: defaults)
+        self.themeStore = themes
+        self.macThemeSubject = CurrentValueSubject<CompanionTheme?, Never>(store.loadLatest().flatMap(themes.load(for:)))
+        self.matchMacThemeSubject = CurrentValueSubject<Bool, Never>(themes.matchMac)
+
         let savedAwake = defaults.bool(forKey: Self.keyKeepAwake)
         self.keepScreenAwakeSubject = CurrentValueSubject<Bool, Never>(savedAwake)
 
@@ -149,6 +183,7 @@ public final class CompanionRepository: @unchecked Sendable {
 
         let snapSubject = self.snapshotSubject
         let prevSubject = self.previouslyConnectedMacsSubject
+        let themeSubject = self.macThemeSubject
         let recon = AutoReconnector(
             connectionState: ws.connectionState,
             discoveredMacs: disc.discoveredMacs,
@@ -161,9 +196,11 @@ public final class CompanionRepository: @unchecked Sendable {
                 snapSubject?.send(.empty)
                 ws?.connect(host: endpoint.host, port: endpoint.port)
             },
-            onPairingDenied: { [store, weak prevSubject] in
+            onPairingDenied: { [store, themes, weak prevSubject, weak themeSubject] in
+                store.loadAll().forEach(themes.clear(for:))
                 store.clear()
                 prevSubject?.send([])
+                themeSubject?.send(nil)
             }
         )
         self.reconnector = recon
@@ -216,6 +253,17 @@ public final class CompanionRepository: @unchecked Sendable {
         defaults.set(seen, forKey: Self.keyHasSeenOnboarding)
     }
 
+    public func setMatchMacTheme(_ match: Bool) {
+        themeStore.matchMac = match
+        matchMacThemeSubject.send(match)
+    }
+
+    /// Re-themes the demo Mac. Does nothing outside the demo.
+    public func selectDemoAtmosphere(_ atmosphereId: String) {
+        guard isDemoActiveSubject.value else { return }
+        demoSession.selectAtmosphere(atmosphereId)
+    }
+
     public func stopDiscovery() {
         discoveryManager.stopDiscovery()
     }
@@ -240,6 +288,7 @@ public final class CompanionRepository: @unchecked Sendable {
         wsClient.disconnect()
         stopDemo()
         clearMacState()
+        showRememberedMacTheme()
     }
 
     /// Swaps any Mac for the in-memory demo one. Nothing reaches the network.
@@ -256,7 +305,24 @@ public final class CompanionRepository: @unchecked Sendable {
         guard isDemoActiveSubject.value else { return }
         demoSession.stop()
         isDemoActiveSubject.send(false)
+        showRememberedMacTheme()
         updateDiscovery()
+    }
+
+    /// Back to the look of the Mac the app would reconnect to.
+    private func showRememberedMacTheme() {
+        macThemeSubject.send(rememberedMacStore.loadLatest().flatMap(themeStore.load(for:)))
+    }
+
+    /// Shows the theme a snapshot carries and, from a real Mac, remembers it.
+    private func adoptTheme(from snapshot: CompanionStateSnapshot) {
+        macThemeSubject.send(snapshot.theme)
+        guard !isDemoActiveSubject.value,
+              let theme = snapshot.theme,
+              case .connected(let serverName, _, _, _, let serverId, _) = wsClient.currentConnectionState else {
+            return
+        }
+        themeStore.save(theme, serverId: serverId, name: serverName)
     }
 
     private func clearMacState() {
@@ -272,7 +338,11 @@ public final class CompanionRepository: @unchecked Sendable {
             secretStore.remove(forServerId: serverId)
         }
         rememberedMacStore.remove(mac)
+        themeStore.clear(for: mac)
         previouslyConnectedMacsSubject.send(rememberedMacStore.loadAll())
+        if !isDemoActiveSubject.value, !wsClient.currentConnectionState.isConnected {
+            showRememberedMacTheme()
+        }
     }
 
     public func clearError() {
@@ -332,10 +402,13 @@ public final class CompanionRepository: @unchecked Sendable {
             if pairingDenied {
                 if let target = reconnector.currentTarget {
                     rememberedMacStore.remove(target)
+                    themeStore.clear(for: target)
                 } else {
+                    rememberedMacStore.loadAll().forEach(themeStore.clear(for:))
                     rememberedMacStore.clear()
                 }
                 previouslyConnectedMacsSubject.send(rememberedMacStore.loadAll())
+                showRememberedMacTheme()
             } else if wasConnected {
                 reconnectToRememberedMac()
             }
@@ -456,6 +529,7 @@ public final class CompanionRepository: @unchecked Sendable {
     private func handleServerEvent(_ event: CompanionServerEvent) {
         switch event {
         case .snapshot(let snap), .stateChanged(let snap):
+            adoptTheme(from: snap)
             snapshotSubject.send(snap)
             pruneThumbnails(snap)
             fetchMissingThumbnails(snap)
@@ -488,7 +562,8 @@ public final class CompanionRepository: @unchecked Sendable {
                 audioApps: current.audioApps,
                 displays: current.displays,
                 profiles: current.profiles,
-                recentClips: current.recentClips
+                recentClips: current.recentClips,
+                theme: current.theme
             )
             snapshotSubject.send(current)
 

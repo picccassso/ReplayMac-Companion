@@ -53,6 +53,7 @@ import com.replaymac.companion.ui.components.AccentButton
 import com.replaymac.companion.ui.components.GlassButton
 import com.replaymac.companion.ui.components.clipDetailLine
 import com.replaymac.companion.ui.theme.AppColors
+import com.replaymac.companion.ui.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -88,7 +89,7 @@ fun ClipDetailsBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         sheetMaxWidth = if (isLandscape) 840.dp else 640.dp,
-        containerColor = AppColors.BackgroundSecondary,
+        containerColor = AppTheme.palette.card,
         contentColor = AppColors.TextPrimary,
         shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
         dragHandle = {
@@ -192,10 +193,10 @@ fun ClipDetailsBottomSheet(
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirmation = false }) {
-                    Text("Cancel", color = AppColors.Accent, style = MaterialTheme.typography.labelLarge)
+                    Text("Cancel", color = AppTheme.palette.accent, style = MaterialTheme.typography.labelLarge)
                 }
             },
-            containerColor = AppColors.BackgroundSecondary,
+            containerColor = AppTheme.palette.card,
             shape = RoundedCornerShape(28.dp),
             titleContentColor = AppColors.TextPrimary,
             textContentColor = AppColors.TextSecondary
@@ -305,7 +306,7 @@ private fun ClipActions(
                 text = if (copiedToMac) "Copied to Mac" else "Copy to Mac",
                 icon = if (copiedToMac) Icons.Rounded.Check else Icons.Rounded.ContentCopy,
                 contentColor = if (copiedToMac) AppColors.Success else AppColors.TextPrimary,
-                tint = if (copiedToMac) AppColors.SuccessContainer else AppColors.SurfaceGlass,
+                tint = if (copiedToMac) AppColors.SuccessContainer else Color.Unspecified,
                 onClick = { onCopyClip(clip.id) },
                 modifier = Modifier.weight(1f)
             )

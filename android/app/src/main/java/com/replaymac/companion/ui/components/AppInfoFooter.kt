@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.replaymac.companion.AppLinks
 import com.replaymac.companion.ui.theme.AppColors
+import com.replaymac.companion.ui.theme.AppTheme
 
 /**
  * States that the app needs ReplayMac on a Mac, and links to it and to the
@@ -66,7 +67,7 @@ private fun FooterLink(text: String, url: String) {
         text = text,
         fontSize = 12.sp,
         fontWeight = FontWeight.Medium,
-        color = AppColors.Accent,
+        color = AppTheme.palette.accent,
         modifier = Modifier
             .clip(RoundedCornerShape(8.dp))
             .clickable(onClickLabel = "Open in browser") { uriHandler.openUri(url) }

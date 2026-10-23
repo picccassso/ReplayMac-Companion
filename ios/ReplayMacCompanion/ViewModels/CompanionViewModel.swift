@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import SwiftUI
 import UIKit
 
 @MainActor
@@ -21,6 +22,10 @@ public final class CompanionViewModel: ObservableObject {
     @Published public var showTutorialDialog: Bool = false
     @Published public var showAudioMixerSheet: Bool = false
     @Published public var showCaptureSetupSheet: Bool = false
+    @Published public var showAppearanceSheet: Bool = false
+    @Published public var palette: ThemePalette = .default
+    @Published public var macTheme: CompanionTheme? = nil
+    @Published public var matchMacTheme: Bool = true
     @Published public var selectedClip: CompanionClipSummary? = nil
     @Published public var manualHost: String = ""
     @Published public var manualPort: String = "7375"
@@ -36,6 +41,10 @@ public final class CompanionViewModel: ObservableObject {
         self.keepScreenAwake = repository.currentKeepScreenAwake
         self.hasSeenOnboarding = repository.currentHasSeenOnboarding
         self.showTutorialDialog = !repository.currentHasSeenOnboarding
+        // Set before the first frame, so a cold launch never flashes the default look.
+        self.macTheme = repository.currentMacTheme
+        self.matchMacTheme = repository.currentMatchMacTheme
+        self.palette = ThemeResolver.resolve(theme: repository.currentMacTheme, matchMac: repository.currentMatchMacTheme)
 
         bindRepository()
         bindAppLifecycle()
@@ -112,6 +121,26 @@ public final class CompanionViewModel: ObservableObject {
         repository.hasSeenOnboarding
             .receive(on: DispatchQueue.main)
             .assign(to: &$hasSeenOnboarding)
+
+        repository.palette
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] newPalette in
+                guard let self = self, newPalette != self.palette else { return }
+                // A quick crossfade when the Mac's theme changes live; instant with Reduce Motion.
+                let animation: Animation? = UIAccessibility.isReduceMotionEnabled ? nil : .easeInOut(duration: 0.35)
+                withAnimation(animation) {
+                    self.palette = newPalette
+                }
+            }
+            .store(in: &cancellables)
+
+        repository.macTheme
+            .receive(on: DispatchQueue.main)
+            .assign(to: &$macTheme)
+
+        repository.matchMacTheme
+            .receive(on: DispatchQueue.main)
+            .assign(to: &$matchMacTheme)
     }
 
     private func bindAppLifecycle() {
@@ -126,6 +155,14 @@ public final class CompanionViewModel: ObservableObject {
                 self?.repository.onAppBackgrounded()
             }
             .store(in: &cancellables)
+    }
+
+    public func setMatchMacTheme(_ match: Bool) {
+        repository.setMatchMacTheme(match)
+    }
+
+    public func selectDemoAtmosphere(_ atmosphereId: String) {
+        repository.selectDemoAtmosphere(atmosphereId)
     }
 
     public func openTutorial() {
@@ -266,6 +303,14 @@ public final class CompanionViewModel: ObservableObject {
 
     public func dismissAudioMixer() {
         showAudioMixerSheet = false
+    }
+
+    public func openAppearance() {
+        showAppearanceSheet = true
+    }
+
+    public func dismissAppearance() {
+        showAppearanceSheet = false
     }
 
     public func openCaptureSetup() {

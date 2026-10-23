@@ -1,6 +1,7 @@
 package com.replaymac.companion.ui.components
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,7 +25,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -33,6 +36,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.replaymac.companion.ui.theme.AppColors
 import com.replaymac.companion.ui.theme.AppRadii
+import com.replaymac.companion.ui.theme.AppTheme
+import com.replaymac.companion.ui.theme.ThemePalette
 
 /** How a tile is coloured, independent of how it is drawn. */
 enum class TileTone {
@@ -47,14 +52,18 @@ enum class TileTone {
     Off
 }
 
-private data class TilePalette(val fill: Color, val icon: Color, val title: Color, val subtitle: Color)
+/** Remembers a brush across recompositions without being state itself. */
+private class LastFill(var brush: Brush = SolidColor(Color.Transparent))
 
-private fun paletteFor(tone: TileTone): TilePalette = when (tone) {
-    TileTone.Prominent -> TilePalette(AppColors.Accent, Color.White, Color.White, Color.White.copy(alpha = 0.75f))
-    TileTone.Live -> TilePalette(AppColors.Danger, Color.White, Color.White, Color.White.copy(alpha = 0.8f))
-    TileTone.Muted -> TilePalette(AppColors.SurfaceGlass, AppColors.Warning, AppColors.TextPrimary, AppColors.TextSecondary)
-    TileTone.Off -> TilePalette(AppColors.SurfaceGlass, AppColors.TextSecondary, AppColors.TextPrimary, AppColors.TextSecondary)
-    TileTone.Normal -> TilePalette(AppColors.SurfaceGlass, AppColors.Accent, AppColors.TextPrimary, AppColors.TextSecondary)
+/** A tile's colours; a null [fill] is the theme's default glass panel. */
+private data class TilePalette(val fill: Brush?, val icon: Color, val title: Color, val subtitle: Color)
+
+private fun paletteFor(tone: TileTone, theme: ThemePalette): TilePalette = when (tone) {
+    TileTone.Prominent -> TilePalette(theme.accentFill, theme.onAccent, theme.onAccent, theme.onAccent.copy(alpha = 0.75f))
+    TileTone.Live -> TilePalette(SolidColor(AppColors.Danger), Color.White, Color.White, Color.White.copy(alpha = 0.8f))
+    TileTone.Muted -> TilePalette(null, AppColors.Warning, AppColors.TextPrimary, AppColors.TextSecondary)
+    TileTone.Off -> TilePalette(null, AppColors.TextSecondary, AppColors.TextPrimary, AppColors.TextSecondary)
+    TileTone.Normal -> TilePalette(null, theme.accent, AppColors.TextPrimary, AppColors.TextSecondary)
 }
 
 /**
@@ -77,8 +86,12 @@ fun ActionTile(
     compactTitle: String? = null,
     onSecondaryClick: (() -> Unit)? = null
 ) {
-    val palette = paletteFor(tone)
-    val fill by animateColorAsState(palette.fill, label = "tileFill")
+    val palette = paletteFor(tone, AppTheme.palette)
+    // A strong fill (accent or red) fades in over the default panel, and keeps
+    // its last brush while fading out.
+    val lastStrongFill = remember { LastFill() }
+    palette.fill?.let { lastStrongFill.brush = it }
+    val strength by animateFloatAsState(if (palette.fill != null) 1f else 0f, label = "tileFill")
     val iconTint by animateColorAsState(palette.icon, label = "tileIcon")
     val titleColor by animateColorAsState(palette.title, label = "tileTitle")
     val subtitleColor by animateColorAsState(palette.subtitle, label = "tileSubtitle")
@@ -123,7 +136,8 @@ fun ActionTile(
                 shape = shape,
                 onLongClick = onSecondaryClick
             )
-            .glass(shape, fill, rimAlpha = if (fill.alpha > 0.5f) 0.5f else 1f)
+            .glass(shape, rimAlpha = if (strength > 0.5f) 0.5f else 1f)
+            .background(lastStrongFill.brush, shape, alpha = strength)
             .padding(horizontal = horizontalPadding, vertical = verticalPadding),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(contentSpacing)

@@ -35,6 +35,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.HelpOutline
 import androidx.compose.material.icons.automirrored.rounded.VolumeOff
 import androidx.compose.material.icons.automirrored.rounded.VolumeUp
+import androidx.compose.material.icons.rounded.Brush
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.DesktopMac
 import androidx.compose.material.icons.rounded.Download
@@ -77,6 +78,7 @@ import com.replaymac.companion.ui.components.glass
 import com.replaymac.companion.ui.components.glassPressable
 import com.replaymac.companion.ui.components.safeContentPadding
 import com.replaymac.companion.ui.theme.AppColors
+import com.replaymac.companion.ui.theme.AppTheme
 import com.replaymac.companion.ui.theme.AppRadii
 
 @Composable
@@ -99,6 +101,7 @@ fun HomeScreen(
     onOpenTutorial: () -> Unit = {},
     onOpenAudioMixer: () -> Unit = {},
     onOpenCaptureSetup: () -> Unit = {},
+    onOpenAppearance: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val configuration = LocalConfiguration.current
@@ -149,6 +152,7 @@ fun HomeScreen(
                         keepScreenAwake = keepScreenAwake,
                         onToggleKeepScreenAwake = onToggleKeepScreenAwake,
                         onOpenTutorial = onOpenTutorial,
+                        onOpenAppearance = onOpenAppearance,
                         onDisconnect = onDisconnect
                     )
                 }
@@ -222,6 +226,7 @@ private fun HomeTopBar(
     keepScreenAwake: Boolean,
     onToggleKeepScreenAwake: () -> Unit,
     onOpenTutorial: () -> Unit,
+    onOpenAppearance: () -> Unit,
     onDisconnect: () -> Unit
 ) {
     val statusLabel = formatConnectedStatus(deviceName)
@@ -246,6 +251,12 @@ private fun HomeTopBar(
         }
 
         GlassButtonGroup {
+            GroupIconButton(
+                icon = Icons.Rounded.Brush,
+                contentDescription = "Appearance",
+                onClick = onOpenAppearance,
+                tint = AppColors.TextSecondary
+            )
             GroupIconButton(
                 icon = Icons.Rounded.Lightbulb,
                 contentDescription = if (keepScreenAwake) "Deck mode on, screen stays awake" else "Deck mode off",
@@ -276,6 +287,7 @@ private fun StatusCard(
     snapshot: CompanionStateSnapshot,
     onToggleBuffer: () -> Unit,
     onOpenCaptureSetup: () -> Unit = {},
+    onOpenAppearance: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val setupPillLabel = HomeControlLabels.setupPillLabel(snapshot)
@@ -320,7 +332,7 @@ private fun StatusCard(
                     Icon(
                         imageVector = Icons.Rounded.DesktopMac,
                         contentDescription = null,
-                        tint = AppColors.Accent,
+                        tint = AppTheme.palette.accent,
                         modifier = Modifier.size(14.dp)
                     )
                     Text(

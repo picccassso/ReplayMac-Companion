@@ -235,7 +235,9 @@ data class CompanionStateSnapshot(
     val audioApps: List<CompanionAudioApp> = emptyList(),
     val displays: List<CompanionDisplayInfo> = emptyList(),
     val profiles: List<CompanionProfileSummary> = emptyList(),
-    val recentClips: List<CompanionClipSummary> = emptyList()
+    val recentClips: List<CompanionClipSummary> = emptyList(),
+    /** The Mac's look; null from a ReplayMac build that doesn't share it. */
+    val theme: CompanionTheme? = null
 ) {
     val isSaveInProgress: Boolean
         get() = saveStatus.equals("saving", ignoreCase = true) || saveStatus.equals("busy", ignoreCase = true)
@@ -263,6 +265,16 @@ data class CompanionStateSnapshot(
 
     val hasCaptureSetupOptions: Boolean
         get() = displays.isNotEmpty() || profiles.isNotEmpty()
+
+    /** This state with a telemetry tick's timers and buffer figures; everything else, the theme included, is kept. */
+    fun applying(tick: CompanionTelemetryTick): CompanionStateSnapshot = copy(
+        recordingElapsedSeconds = tick.recordingElapsedSeconds,
+        extendedBufferElapsedSeconds = tick.extendedBufferElapsedSeconds,
+        sessionElapsedSeconds = tick.sessionElapsedSeconds,
+        bufferedSeconds = tick.bufferedSeconds,
+        bufferMemoryBytes = tick.bufferMemoryBytes,
+        bufferMemoryFormatted = tick.bufferMemoryFormatted
+    )
 }
 
 @Serializable
