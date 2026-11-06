@@ -360,5 +360,28 @@ final class CompanionProtocolParserTests: XCTestCase {
         XCTAssertEqual(snapshot.activeDisplayName, "Built-in Retina Display")
         XCTAssertEqual(snapshot.activeProfileName, "Gaming")
         XCTAssertTrue(snapshot.hasCaptureSetupOptions)
+        // This Mac predates the camera overlay, so it has no camera fields.
+        XCTAssertFalse(snapshot.isCameraOverlayEnabled)
+        XCTAssertFalse(snapshot.isCameraOverlayAvailable)
+    }
+
+    func testParseCameraOverlayState() {
+        let json = """
+        {
+            "type": "state_snapshot",
+            "isRecording": true,
+            "isSessionRecording": false,
+            "saveStatus": "idle",
+            "isCameraOverlayEnabled": true,
+            "isCameraOverlayAvailable": true,
+            "recentClips": []
+        }
+        """
+
+        guard case .snapshot(let snapshot) = CompanionProtocolParser.parse(json) else {
+            return XCTFail("Expected .snapshot event")
+        }
+        XCTAssertTrue(snapshot.isCameraOverlayEnabled)
+        XCTAssertTrue(snapshot.isCameraOverlayAvailable)
     }
 }

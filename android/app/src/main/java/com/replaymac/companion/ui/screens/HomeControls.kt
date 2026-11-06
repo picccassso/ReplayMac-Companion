@@ -5,8 +5,11 @@ import com.replaymac.companion.ui.components.TileTone
 import com.replaymac.companion.ui.components.formatDurationSeconds
 import kotlin.math.roundToInt
 
-/** The six actions on the Home grid, in the desktop Home page's order. */
-enum class HomeControl { SaveReplay, SaveExtendedReplay, ReplayBuffer, Session, Microphone, SystemAudio }
+/**
+ * The actions on the Home grid, in the desktop Home page's order. Camera only
+ * appears when the Mac has Camera Overlay switched on in Customise Features.
+ */
+enum class HomeControl { SaveReplay, SaveExtendedReplay, ReplayBuffer, Session, Microphone, SystemAudio, Camera }
 
 data class ControlTileSpec(
     val control: HomeControl,
@@ -73,13 +76,14 @@ object HomeControlLabels {
     fun extendedReplayCompactTitle(seconds: Int): String =
         if (seconds >= 60 && seconds % 60 == 0) "Save ${seconds / 60}m" else "Save ${seconds}s"
 
-    fun tiles(snapshot: CompanionStateSnapshot): List<ControlTileSpec> = listOf(
+    fun tiles(snapshot: CompanionStateSnapshot): List<ControlTileSpec> = listOfNotNull(
         saveReplay(snapshot),
         saveExtendedReplay(snapshot),
         replayBuffer(snapshot),
         session(snapshot),
         microphone(snapshot),
-        systemAudio(snapshot)
+        systemAudio(snapshot),
+        if (snapshot.isCameraOverlayAvailable) camera(snapshot) else null
     )
 
     private fun saveReplay(snapshot: CompanionStateSnapshot) = ControlTileSpec(
@@ -171,5 +175,15 @@ object HomeControlLabels {
         },
         isEnabled = true,
         hasSecondaryAction = true
+    )
+
+    /** Mirrors the desktop's Show/Hide Camera Overlay control. */
+    private fun camera(snapshot: CompanionStateSnapshot) = ControlTileSpec(
+        control = HomeControl.Camera,
+        title = "Camera Overlay",
+        subtitle = if (snapshot.isCameraOverlayEnabled) "On" else "Off",
+        tone = if (snapshot.isCameraOverlayEnabled) TileTone.Normal else TileTone.Off,
+        isEnabled = true,
+        compactTitle = "Camera"
     )
 }

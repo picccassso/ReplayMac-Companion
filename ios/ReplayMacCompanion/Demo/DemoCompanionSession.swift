@@ -118,6 +118,8 @@ public final class DemoCompanionSession: CompanionLink, @unchecked Sendable {
             return update { $0.toggleMicrophone() }
         case CompanionActions.toggleSystemAudio:
             return update { $0.toggleSystemAudio() }
+        case CompanionActions.toggleCamera:
+            return update { $0.toggleCamera() }
         default:
             return false
         }

@@ -41,6 +41,34 @@ class HomeControlLabelsTest {
     }
 
     @Test
+    fun cameraTileIsHiddenUntilTheMacHasCameraOverlaySwitchedOn() {
+        // The Mac ignores toggleCamera while the feature is off, even if the overlay flag says on.
+        val unavailable = idle.copy(isCameraOverlayAvailable = false, isCameraOverlayEnabled = true)
+        assertTrue(HomeControlLabels.tiles(unavailable).none { it.control == HomeControl.Camera })
+    }
+
+    @Test
+    fun cameraTileComesLastAndShowsWhetherTheOverlayIsOn() {
+        val off = idle.copy(isCameraOverlayAvailable = true, isCameraOverlayEnabled = false)
+        val tiles = HomeControlLabels.tiles(off)
+        assertEquals(7, tiles.size)
+        assertEquals(HomeControl.Camera, tiles.last().control)
+
+        val offTile = off.tile(HomeControl.Camera)
+        assertEquals("Camera Overlay", offTile.title)
+        assertEquals("Camera", offTile.compactTitle)
+        assertEquals("Off", offTile.subtitle)
+        assertEquals(TileTone.Off, offTile.tone)
+        assertTrue(offTile.isEnabled)
+        assertFalse(offTile.hasSecondaryAction)
+
+        val onTile = off.copy(isCameraOverlayEnabled = true).tile(HomeControl.Camera)
+        assertEquals("On", onTile.subtitle)
+        assertEquals(TileTone.Normal, onTile.tone)
+        assertTrue(onTile.isEnabled)
+    }
+
+    @Test
     fun saveTileIsOnlyTappableOnceTheBufferHasFootage() {
         assertFalse(idle.tile(HomeControl.SaveReplay).isEnabled)
         assertEquals("Buffer stopped", idle.tile(HomeControl.SaveReplay).subtitle)

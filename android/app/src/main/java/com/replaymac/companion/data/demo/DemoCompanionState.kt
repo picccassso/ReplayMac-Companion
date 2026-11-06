@@ -41,6 +41,7 @@ data class DemoCompanionState(
     val microphoneVolume: Double,
     val isSystemAudioMuted: Boolean,
     val systemAudioVolume: Double,
+    val isCameraOverlayEnabled: Boolean = false,
     val audioApps: List<CompanionAudioApp>,
     val displays: List<CompanionDisplayInfo>,
     val profiles: List<CompanionProfileSummary>,
@@ -167,6 +168,10 @@ data class DemoCompanionState(
 
     fun toggleSystemAudio(): DemoCompanionState = copy(isSystemAudioMuted = !isSystemAudioMuted)
 
+    // ==================== Camera ====================
+
+    fun toggleCamera(): DemoCompanionState = copy(isCameraOverlayEnabled = !isCameraOverlayEnabled)
+
     fun setVolume(target: String, volume: Double): DemoCompanionState {
         val clamped = volume.coerceIn(0.0, 1.0)
         return when (target) {
@@ -279,6 +284,9 @@ data class DemoCompanionState(
         microphoneVolume = microphoneVolume,
         systemAudioVolume = systemAudioVolume,
         perAppAudioEnabled = false,
+        isCameraOverlayEnabled = isCameraOverlayEnabled,
+        // The demo Mac has Camera Overlay switched on, so the tile is there to try.
+        isCameraOverlayAvailable = true,
         audioApps = audioApps,
         displays = displays,
         profiles = profiles,

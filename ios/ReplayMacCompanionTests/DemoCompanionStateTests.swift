@@ -188,6 +188,17 @@ final class DemoCompanionStateTests: XCTestCase {
         XCTAssertFalse(state.isMicrophoneMuted)
     }
 
+    func testCameraToggleFlipsTheOverlayTheDemoMacOffers() {
+        var state = makeState()
+        XCTAssertTrue(state.snapshot.isCameraOverlayAvailable)
+        XCTAssertFalse(state.snapshot.isCameraOverlayEnabled)
+
+        state.toggleCamera()
+        XCTAssertTrue(state.snapshot.isCameraOverlayEnabled)
+        state.toggleCamera()
+        XCTAssertFalse(state.snapshot.isCameraOverlayEnabled)
+    }
+
     func testVolumeIsClampedAndUnknownTargetsIgnored() {
         var state = makeState()
         state.setVolume(target: "microphone", volume: 1.7)

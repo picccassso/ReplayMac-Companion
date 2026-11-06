@@ -368,6 +368,10 @@ class CompanionRepository(
         activeLink.sendAction(CompanionActions.TOGGLE_SYSTEM_AUDIO)
     }
 
+    fun toggleCamera() {
+        activeLink.sendAction(CompanionActions.TOGGLE_CAMERA)
+    }
+
     fun revealClip(clipId: String) {
         activeLink.revealClip(clipId)
     }

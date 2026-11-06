@@ -43,6 +43,9 @@ struct ReplayCapCompanionApp: App {
                         onToggleSystemAudio: {
                             viewModel.toggleSystemAudio()
                         },
+                        onToggleCamera: {
+                            viewModel.toggleCamera()
+                        },
                         onOpenAudioMixer: {
                             viewModel.openAudioMixer()
                         },

@@ -247,6 +247,10 @@ public final class CompanionViewModel: ObservableObject {
         repository.toggleSystemAudio()
     }
 
+    public func toggleCamera() {
+        repository.toggleCamera()
+    }
+
     public func selectClip(_ clip: CompanionClipSummary?) {
         selectedClip = clip
         if let clip = clip {

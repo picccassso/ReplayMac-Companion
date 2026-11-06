@@ -135,6 +135,7 @@ object CompanionActions {
     const val TOGGLE_SESSION = "toggleSession"
     const val TOGGLE_MICROPHONE = "toggleMicrophone"
     const val TOGGLE_SYSTEM_AUDIO = "toggleSystemAudio"
+    const val TOGGLE_CAMERA = "toggleCamera"
 }
 
 /** The `target` of a set_volume message. */
@@ -232,6 +233,14 @@ data class CompanionStateSnapshot(
     val microphoneVolume: Double = 1.0,
     val systemAudioVolume: Double = 1.0,
     val perAppAudioEnabled: Boolean = false,
+    /** Whether the Mac is adding the camera to recordings. Absent from Macs that predate the camera overlay; read as off. */
+    val isCameraOverlayEnabled: Boolean = false,
+    /**
+     * Whether Camera Overlay is switched on in the Mac's Customise Features.
+     * The Mac ignores the camera toggle otherwise, so the camera control is
+     * only shown when this is true. Absent from older Macs; read as false.
+     */
+    val isCameraOverlayAvailable: Boolean = false,
     val audioApps: List<CompanionAudioApp> = emptyList(),
     val displays: List<CompanionDisplayInfo> = emptyList(),
     val profiles: List<CompanionProfileSummary> = emptyList(),

@@ -226,6 +226,10 @@ class CompanionViewModel(
         repository.toggleSystemAudio()
     }
 
+    fun toggleCamera() {
+        repository.toggleCamera()
+    }
+
     fun selectClip(clip: CompanionClipSummary?) {
         _selectedClip.value = clip
         if (clip != null) {

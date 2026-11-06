@@ -101,6 +101,7 @@ class DemoCompanionSession(
         CompanionActions.TOGGLE_SESSION -> mutate { it.toggleSession(clock()) }
         CompanionActions.TOGGLE_MICROPHONE -> mutate { it.toggleMicrophone() }
         CompanionActions.TOGGLE_SYSTEM_AUDIO -> mutate { it.toggleSystemAudio() }
+        CompanionActions.TOGGLE_CAMERA -> mutate { it.toggleCamera() }
         else -> false
     }
 

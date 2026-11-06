@@ -475,6 +475,10 @@ public final class CompanionRepository: @unchecked Sendable {
         _ = activeLink.sendAction(CompanionActions.toggleSystemAudio)
     }
 
+    public func toggleCamera() {
+        _ = activeLink.sendAction(CompanionActions.toggleCamera)
+    }
+
     public func revealClip(_ clipId: String) {
         _ = activeLink.revealClip(clipId)
     }

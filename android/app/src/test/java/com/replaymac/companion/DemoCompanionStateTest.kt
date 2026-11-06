@@ -193,6 +193,26 @@ class DemoCompanionStateTest {
         assertFalse(muted.toggleMicrophone().isMicrophoneMuted)
     }
 
+    // ==================== Camera ====================
+
+    @Test
+    fun cameraOverlayStartsOffAndToggles() {
+        assertFalse(initial.isCameraOverlayEnabled)
+        assertFalse(initial.toSnapshot().isCameraOverlayEnabled)
+
+        val on = initial.toggleCamera()
+        assertTrue(on.isCameraOverlayEnabled)
+        assertTrue(on.toSnapshot().isCameraOverlayEnabled)
+        assertFalse(on.toggleCamera().isCameraOverlayEnabled)
+    }
+
+    @Test
+    fun demoMacReportsCameraOverlayAvailable() {
+        // Otherwise the demo would never show the camera tile.
+        assertTrue(initial.toSnapshot().isCameraOverlayAvailable)
+        assertTrue(initial.toggleCamera().toSnapshot().isCameraOverlayAvailable)
+    }
+
     @Test
     fun volumeIsClampedAndUnknownTargetsAreIgnored() {
         assertEquals(1.0, initial.setVolume(CompanionVolumeTargets.MICROPHONE, 1.7).microphoneVolume, 0.0)

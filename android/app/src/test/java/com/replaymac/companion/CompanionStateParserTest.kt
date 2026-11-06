@@ -322,6 +322,8 @@ class CompanionStateParserTest {
                 "microphoneVolume": 0.85,
                 "systemAudioVolume": 0.6,
                 "perAppAudioEnabled": false,
+                "isCameraOverlayEnabled": true,
+                "isCameraOverlayAvailable": true,
                 "audioApps": [
                     {
                         "bundleId": "com.spotify.client",
@@ -376,6 +378,8 @@ class CompanionStateParserTest {
         assertEquals(0.85, snapshot.microphoneVolume, 0.001)
         assertEquals(0.6, snapshot.systemAudioVolume, 0.001)
         assertFalse(snapshot.perAppAudioEnabled)
+        assertTrue(snapshot.isCameraOverlayEnabled)
+        assertTrue(snapshot.isCameraOverlayAvailable)
 
         assertEquals(2, snapshot.audioApps.size)
         assertEquals("com.spotify.client", snapshot.audioApps[0].bundleId)
@@ -415,6 +419,9 @@ class CompanionStateParserTest {
         assertEquals(1.0, snapshot.microphoneVolume, 0.001)
         assertEquals(1.0, snapshot.systemAudioVolume, 0.001)
         assertFalse(snapshot.perAppAudioEnabled)
+        // Macs from before the camera overlay send neither camera field.
+        assertFalse(snapshot.isCameraOverlayEnabled)
+        assertFalse(snapshot.isCameraOverlayAvailable)
         assertTrue(snapshot.audioApps.isEmpty())
         assertTrue(snapshot.displays.isEmpty())
         assertTrue(snapshot.profiles.isEmpty())

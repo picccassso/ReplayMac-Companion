@@ -1,6 +1,10 @@
 # Changelog
 
-## 1.1.0 (2026-10-23)
+## 1.2.0 (2026-11-06)
+
+- Add a Camera Overlay button to Home for turning ReplayMac's webcam overlay on and off, like the Show/Hide Camera Overlay control on the Mac. It shows On or Off and only appears while Camera Overlay is switched on in the Mac's Customise Features, so it never shows a button the Mac would ignore. Needs ReplayMac 2.3.0 or later
+- When Home has an odd tile left over on its last row, that tile now spans the row instead of filling half of it
+- Try the camera button in demo mode too
 
 - Match the Mac's look. The app takes on the atmosphere, accent colour, two-colour accent gradient and surface style (Liquid Glass, Tinted Glass or Solid Matte) chosen in ReplayMac's Appearance settings, and follows changes on the Mac live with a short crossfade. It stays dark, and red, green and orange keep their meaning in every atmosphere. Needs a ReplayMac build that shares its theme; older builds keep the default look
 - Add an Appearance sheet, opened with the paintbrush at the top of Home. It shows the Mac's theme and a **Match my Mac** switch for keeping the app's own blue look

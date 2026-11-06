@@ -38,6 +38,7 @@ public struct DemoCompanionState: Equatable, Sendable {
     public var isSystemAudioEnabled = true
     public var isSystemAudioMuted = false
     public var systemAudioVolume = 1.0
+    public var isCameraOverlayEnabled = false
     public var audioApps: [CompanionAudioApp]
     public var displays: [CompanionDisplayInfo]
     public var profiles: [CompanionProfileSummary]
@@ -114,6 +115,8 @@ public struct DemoCompanionState: Equatable, Sendable {
             microphoneVolume: microphoneVolume,
             systemAudioVolume: systemAudioVolume,
             perAppAudioEnabled: false,
+            isCameraOverlayEnabled: isCameraOverlayEnabled,
+            isCameraOverlayAvailable: true,
             audioApps: audioApps,
             displays: displays,
             profiles: profiles,
@@ -210,6 +213,12 @@ public struct DemoCompanionState: Equatable, Sendable {
 
     public mutating func toggleSystemAudio() {
         isSystemAudioMuted.toggle()
+    }
+
+    // MARK: - Camera
+
+    public mutating func toggleCamera() {
+        isCameraOverlayEnabled.toggle()
     }
 
     public mutating func setVolume(target: String, volume: Double) {

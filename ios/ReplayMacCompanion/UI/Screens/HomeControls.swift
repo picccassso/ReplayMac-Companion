@@ -1,6 +1,7 @@
 import Foundation
 
-/// The six actions on the Home grid, in the desktop Home page's order.
+/// The actions on the Home grid, in the desktop Home page's order. Camera only
+/// appears when the Mac has Camera Overlay switched on in Customise Features.
 public enum HomeControl: Sendable, Equatable, CaseIterable {
     case saveReplay
     case saveExtendedReplay
@@ -8,6 +9,7 @@ public enum HomeControl: Sendable, Equatable, CaseIterable {
     case session
     case microphone
     case systemAudio
+    case camera
 }
 
 public struct ControlTileSpec: Sendable, Equatable {
@@ -103,7 +105,7 @@ public enum HomeControlLabels {
     }
 
     public static func tiles(_ snapshot: CompanionStateSnapshot) -> [ControlTileSpec] {
-        [
+        var tiles = [
             saveReplay(snapshot),
             saveExtendedReplay(snapshot),
             replayBuffer(snapshot),
@@ -116,6 +118,10 @@ public enum HomeControlLabels {
             ),
             systemAudioSource(snapshot)
         ]
+        if snapshot.isCameraOverlayAvailable {
+            tiles.append(camera(snapshot))
+        }
+        return tiles
     }
 
     public static func setupPillLabel(_ snapshot: CompanionStateSnapshot) -> String? {
@@ -145,6 +151,8 @@ public enum HomeControlLabels {
             return (snapshot.isMicrophoneEnabled && !snapshot.isMicrophoneMuted) ? "mic.fill" : "mic.slash.fill"
         case .systemAudio:
             return (snapshot.isSystemAudioEnabled && !snapshot.isSystemAudioMuted) ? "speaker.wave.2.fill" : "speaker.slash.fill"
+        case .camera:
+            return snapshot.isCameraOverlayEnabled ? "video.fill" : "video.slash.fill"
         }
     }
 
@@ -245,6 +253,18 @@ public enum HomeControlLabels {
             tone: tone,
             isEnabled: true,
             hasSecondaryAction: true
+        )
+    }
+
+    /// Mirrors the desktop's Show/Hide Camera Overlay control.
+    private static func camera(_ snapshot: CompanionStateSnapshot) -> ControlTileSpec {
+        ControlTileSpec(
+            control: .camera,
+            title: "Camera Overlay",
+            subtitle: snapshot.isCameraOverlayEnabled ? "On" : "Off",
+            tone: snapshot.isCameraOverlayEnabled ? .normal : .off,
+            isEnabled: true,
+            compactTitle: "Camera"
         )
     }
 

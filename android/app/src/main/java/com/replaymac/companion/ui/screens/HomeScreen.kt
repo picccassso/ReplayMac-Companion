@@ -48,6 +48,8 @@ import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.PowerSettingsNew
 import androidx.compose.material.icons.rounded.Stop
+import androidx.compose.material.icons.rounded.Videocam
+import androidx.compose.material.icons.rounded.VideocamOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -97,6 +99,7 @@ fun HomeScreen(
     onToggleSession: () -> Unit,
     onToggleMicrophone: () -> Unit,
     onToggleSystemAudio: () -> Unit,
+    onToggleCamera: () -> Unit,
     onClipSelected: (CompanionClipSummary) -> Unit,
     onOpenTutorial: () -> Unit = {},
     onOpenAudioMixer: () -> Unit = {},
@@ -120,6 +123,7 @@ fun HomeScreen(
             HomeControl.Session -> onToggleSession()
             HomeControl.Microphone -> onToggleMicrophone()
             HomeControl.SystemAudio -> onToggleSystemAudio()
+            HomeControl.Camera -> onToggleCamera()
         }
     }
 
@@ -445,7 +449,9 @@ private fun ControlGrid(
                         modifier = Modifier.weight(1f).fillMaxHeight()
                     )
                 }
-                repeat(columns - row.size) { Spacer(Modifier.weight(1f)) }
+                // A tile left alone on the last row spans it, rather than
+                // sitting in half of it (the camera tile makes seven).
+                if (row.size > 1) repeat(columns - row.size) { Spacer(Modifier.weight(1f)) }
             }
         }
     }
@@ -465,6 +471,8 @@ private fun iconFor(control: HomeControl, snapshot: CompanionStateSnapshot): Ima
         } else {
             Icons.AutoMirrored.Rounded.VolumeOff
         }
+    HomeControl.Camera ->
+        if (snapshot.isCameraOverlayEnabled) Icons.Rounded.Videocam else Icons.Rounded.VideocamOff
 }
 
 // ==================== Session history ====================

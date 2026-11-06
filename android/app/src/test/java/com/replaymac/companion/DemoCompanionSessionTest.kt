@@ -168,6 +168,7 @@ class DemoCompanionSessionTest {
         h.session.start()
 
         assertTrue(h.session.sendAction(CompanionActions.TOGGLE_MICROPHONE))
+        assertTrue(h.session.sendAction(CompanionActions.TOGGLE_CAMERA))
         assertTrue(h.session.setVolume(CompanionVolumeTargets.SYSTEM_AUDIO, 0.4))
         assertTrue(h.session.toggleAppMute("com.hnc.Discord"))
         assertTrue(h.session.selectDisplay("demo-display-builtin"))
@@ -178,6 +179,7 @@ class DemoCompanionSessionTest {
 
         val snapshot = h.latest
         assertTrue(snapshot.isMicrophoneMuted)
+        assertTrue(snapshot.isCameraOverlayEnabled)
         assertEquals(0.4, snapshot.systemAudioVolume, 0.0)
         assertEquals(0, snapshot.mutedAudioAppsCount)
         assertEquals("Built-in Retina Display", snapshot.capturedDisplayName)

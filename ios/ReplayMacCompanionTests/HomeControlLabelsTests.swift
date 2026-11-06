@@ -115,6 +115,28 @@ final class HomeControlLabelsTests: XCTestCase {
         XCTAssertEqual(sessionTile.subtitle, "01:15")
     }
 
+    func testCameraTileOnlyAppearsWhenTheMacCanUseIt() {
+        // An older Mac, or Camera Overlay switched off in Customise Features:
+        // the Mac would ignore the toggle, so there is no tile.
+        let unavailable = CompanionStateSnapshot(isCameraOverlayEnabled: true, isCameraOverlayAvailable: false)
+        XCTAssertFalse(HomeControlLabels.tiles(unavailable).contains { $0.control == .camera })
+
+        let off = CompanionStateSnapshot(isCameraOverlayEnabled: false, isCameraOverlayAvailable: true)
+        let offTiles = HomeControlLabels.tiles(off)
+        XCTAssertEqual(offTiles.last?.control, .camera)
+        XCTAssertEqual(offTiles.count, 7)
+        XCTAssertEqual(offTiles.last?.subtitle, "Off")
+        XCTAssertEqual(offTiles.last?.tone, .off)
+        XCTAssertTrue(offTiles.last?.isEnabled ?? false)
+        XCTAssertEqual(HomeControlLabels.iconFor(.camera, snapshot: off), "video.slash.fill")
+
+        let on = CompanionStateSnapshot(isCameraOverlayEnabled: true, isCameraOverlayAvailable: true)
+        let onTile = tile(for: .camera, in: on)
+        XCTAssertEqual(onTile.subtitle, "On")
+        XCTAssertEqual(onTile.tone, .normal)
+        XCTAssertEqual(HomeControlLabels.iconFor(.camera, snapshot: on), "video.fill")
+    }
+
     func testSwitchedOffAudioSourceStaysTappableBecauseTheMacEnablesIt() {
         let micOff = CompanionStateSnapshot(
             isMicrophoneEnabled: false

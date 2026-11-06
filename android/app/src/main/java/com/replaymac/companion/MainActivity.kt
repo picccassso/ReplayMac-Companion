@@ -144,6 +144,7 @@ fun CompanionAppContent(viewModel: CompanionViewModel) {
             onToggleSession = { viewModel.toggleSession() },
             onToggleMicrophone = { viewModel.toggleMicrophone() },
             onToggleSystemAudio = { viewModel.toggleSystemAudio() },
+            onToggleCamera = { viewModel.toggleCamera() },
             onClipSelected = { clip -> viewModel.selectClip(clip) },
             onOpenTutorial = { viewModel.openTutorial() },
             onOpenAudioMixer = { viewModel.openAudioMixer() },

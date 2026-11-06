@@ -15,6 +15,7 @@ public struct HomeScreen: View {
     public var onToggleSession: () -> Void
     public var onToggleMicrophone: () -> Void
     public var onToggleSystemAudio: () -> Void
+    public var onToggleCamera: () -> Void
     public var onOpenAudioMixer: () -> Void
     public var onOpenCaptureSetup: () -> Void
     public var onClipSelected: (CompanionClipSummary) -> Void
@@ -35,6 +36,7 @@ public struct HomeScreen: View {
         onToggleSession: @escaping () -> Void,
         onToggleMicrophone: @escaping () -> Void,
         onToggleSystemAudio: @escaping () -> Void,
+        onToggleCamera: @escaping () -> Void,
         onOpenAudioMixer: @escaping () -> Void = {},
         onOpenCaptureSetup: @escaping () -> Void = {},
         onClipSelected: @escaping (CompanionClipSummary) -> Void,
@@ -54,6 +56,7 @@ public struct HomeScreen: View {
         self.onToggleSession = onToggleSession
         self.onToggleMicrophone = onToggleMicrophone
         self.onToggleSystemAudio = onToggleSystemAudio
+        self.onToggleCamera = onToggleCamera
         self.onOpenAudioMixer = onOpenAudioMixer
         self.onOpenCaptureSetup = onOpenCaptureSetup
         self.onClipSelected = onClipSelected
@@ -89,6 +92,8 @@ public struct HomeScreen: View {
             onToggleMicrophone()
         case .systemAudio:
             onToggleSystemAudio()
+        case .camera:
+            onToggleCamera()
         }
     }
 
@@ -383,24 +388,37 @@ private struct ControlGrid: View {
             count: columns
         )
 
-        LazyVGrid(columns: gridColumns, spacing: spacing) {
-            ForEach(0..<tiles.count, id: \.self) { index in
-                let spec = tiles[index]
-                ActionTile(
-                    title: spec.title,
-                    subtitle: spec.subtitle,
-                    systemImage: HomeControlLabels.iconFor(spec.control, snapshot: snapshot),
-                    tone: spec.tone,
-                    isEnabled: spec.isEnabled,
-                    isLoading: spec.isLoading,
-                    minHeight: isCompact ? 54 : 64,
-                    isCompact: isCompact,
-                    compactTitle: spec.compactTitle,
-                    onSecondaryClick: spec.hasSecondaryAction ? onOpenAudioMixer : nil,
-                    onClick: { onControl(spec.control) }
-                )
+        // A tile left alone on the last row spans it, rather than sitting in
+        // half of it (the camera tile makes seven).
+        let trailing = tiles.count % columns == 1 ? tiles.last : nil
+        let gridTiles = trailing == nil ? tiles : Array(tiles.dropLast())
+
+        VStack(spacing: spacing) {
+            LazyVGrid(columns: gridColumns, spacing: spacing) {
+                ForEach(0..<gridTiles.count, id: \.self) { index in
+                    tile(gridTiles[index])
+                }
+            }
+            if let trailing {
+                tile(trailing)
             }
         }
+    }
+
+    private func tile(_ spec: ControlTileSpec) -> some View {
+        ActionTile(
+            title: spec.title,
+            subtitle: spec.subtitle,
+            systemImage: HomeControlLabels.iconFor(spec.control, snapshot: snapshot),
+            tone: spec.tone,
+            isEnabled: spec.isEnabled,
+            isLoading: spec.isLoading,
+            minHeight: isCompact ? 54 : 64,
+            isCompact: isCompact,
+            compactTitle: spec.compactTitle,
+            onSecondaryClick: spec.hasSecondaryAction ? onOpenAudioMixer : nil,
+            onClick: { onControl(spec.control) }
+        )
     }
 }
 
